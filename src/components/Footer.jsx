@@ -18,6 +18,7 @@ export default function Footer() {
           <div>
             <h6 className="uppercase font-semibold mb-3">Liên kết</h6>
             <ul className="space-y-2 text-sm">
+              
               <li>
                 <a href="/" className="hover:text-red-400 transition">
                   Trang chủ

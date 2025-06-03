@@ -24,7 +24,7 @@ const handleLoginSuccess = async (credentialResponse) => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ token: idToken }),
+        body: JSON.stringify({ idToken }),
       });
   
       const result = await res.json();
