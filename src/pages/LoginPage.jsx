@@ -23,12 +23,34 @@ export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword
     e.preventDefault();
     setError(null);
     try {
-      const res = await axios.post("http://localhost:8080/api/auth/login", {
-        login: formData.login,
-        password: formData.password,
+      //=========================CODE CŨ =======================
+      // const res = await axios.post("http://localhost:8080/api/auth/login", {
+      //   login: formData.login,
+      //   password: formData.password,
+      // });
+      // alert(res.data.message);
+
+      //=========================CODE MỚI =======================
+      const res = await axios.get(`https://683fa15a5b39a8039a552588.mockapi.io/api/login/user`, {
+        params: {
+          username: formData.login,
+          password: formData.password,
+        }
       });
-      alert(res.data.message);
-      // Có thể thêm lưu token hoặc chuyển trang sau đăng nhập thành công
+
+      //============================ CODE THÊM====================
+      // ❗ Sửa lại đoạn này vì res.data là MẢNG chứ không phải object có thuộc tính 'user'
+      // ➤ Kiểm tra nếu có ít nhất 1 user phù hợp thì login thành công
+      if (res.data.length > 0) {
+        const user = res.data[0]; // lấy user đầu tiên trong kết quả tìm được
+        localStorage.setItem("user", JSON.stringify(user)); // lưu user vào localStorage
+        alert("Đăng nhập thành công!");
+        window.location.href = "/"; // chuyển hướng về trang chủ
+      } else {
+        setError("Sai tên đăng nhập hoặc mật khẩu!"); // nếu không tìm thấy user
+      }
+      //=========================================================
+
     } catch (err) {
       setError(err.response?.data?.message || "Login failed");
     }
@@ -76,12 +98,15 @@ export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword
           Đăng ký
         </span> */}
         <Link to="/register" style={styles.switchLink}>
-  Đăng ký
-</Link>
+          Đăng ký
+        </Link>
       </p>
-      <button onClick={onSwitchToForgotPassword} style={{ marginTop: 10, cursor: "pointer", background: "none", border: "none", color: "#d32f2f" }}>
+      {/* <button onClick={onSwitchToForgotPassword} style={{ marginTop: 10, cursor: "pointer", background: "none", border: "none", color: "#d32f2f" }}>
         Quên mật khẩu?
-      </button>
+      </button> */}
+      <Link to="/forgotPassword" style={{ marginTop: 10, cursor: "pointer", background: "none", border: "none", color: "#d32f2f" }}>
+        Quên mật khẩu?
+      </Link>
     </div>
   );
 }

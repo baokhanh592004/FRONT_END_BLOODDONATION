@@ -1,19 +1,35 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // ✅ Đã gộp import đúng cách
 import { FaFacebookF, FaTwitter, FaInstagram, FaEnvelope, FaPhone } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
 
+  //===================== chỗ chĩnh sửa phần loginheader để hiện tên người dùng
+  const [user, setUser] = useState(null);
+
+  useEffect(() => {
+    const storedUser = localStorage.getItem("user");
+    if (storedUser) {
+      setUser(JSON.parse(storedUser));
+    }
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    window.location.href = "/login";
+  };
+  //=====================
+
   return (
     <>
       {/* Thanh thông tin liên hệ */}
       <div className="bg-red-600 text-white text-sm py-1">
         <div className="container mx-auto px-4 flex justify-between items-center">
-        <div className="flex items-center gap-1 sm:flex">
+          <div className="flex items-center gap-1 sm:flex">
             <FaEnvelope />
             <span>info@bloodcare.com</span>
-        </div>
+          </div>
           <div className="flex items-center gap-3 text-lg">
             <a href="#" aria-label="Facebook" className="hover:text-gray-200">
               <FaFacebookF />
@@ -65,7 +81,7 @@ export default function Header() {
               Đăng ký hiến máu
             </Link>
             <Link to="/Thông_tin_nhóm_máu" className="block text-gray-800 hover:text-red-600">
-              Thông tin nhóm máu 
+              Thông tin nhóm máu
             </Link>
             <Link to="/Yêu_cầu_máu_khẩn_cấp" className="block text-gray-800 hover:text-red-600">
               Yêu cầu máu khẩn cấp
@@ -73,9 +89,26 @@ export default function Header() {
             <Link to="/blog" className="block text-gray-800 hover:text-red-600">
               Tin tức
             </Link>
-            <Link to="/login" className="block text-red-600 font-bold hover:underline">
+            {/* <Link to="/login" className="block text-red-600 font-bold hover:underline">
               Đăng nhập
-            </Link>
+            </Link> */}
+            {user ? (
+              <>
+                <span className="text-red-600 font-bold">
+                  Xin chào, {user?.name || user?.username || "Người dùng"}
+                </span>
+                <button
+                  onClick={handleLogout}
+                  className="text-sm text-gray-600 hover:text-red-600 ml-2"
+                >
+                  Đăng xuất
+                </button>
+              </>
+            ) : (
+              <Link to="/login" className="block text-red-600 font-bold hover:underline">
+                Đăng nhập
+              </Link>
+            )}
           </nav>
         </div>
       </header>
