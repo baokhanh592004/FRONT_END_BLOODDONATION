@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+
+import { useNavigate } from 'react-router-dom';
+
 
 const HomePages = () => {
-
+ 
+  const navigate = useNavigate(); 
+    const handleRegisterClick = () => {
+    navigate("/register"); // Điều hướng sang trang /register
+  };
 
  
 
@@ -44,6 +50,9 @@ const HomePages = () => {
   ];
 
   return (
+
+      
+
     <div className="min-h-screen bg-gray-50">
       {/* Participating Hospitals */}
       <section className="p-6">
@@ -86,6 +95,12 @@ const HomePages = () => {
           ))}
         </div>
       </section>
+
+
+      <div>
+      <button onClick={handleRegisterClick}>Đăng ký ngay</button>
+      {/* Các phần còn lại của trang */}
+    </div>
     </div>
   );
 };

@@ -1,11 +1,25 @@
 import React, { useState } from "react";
+import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword }) {
+export default function LoginPage() {
+
+   const navigate = useNavigate(); 
   const [formData, setFormData] = useState({
-    email: "",
+    login: "",  // username hoặc email
     password: "",
     remember: true,
   });
+
+  const [error, setError] = useState(null);
+
+    const handleSwitchToRegister = () => {
+    navigate("/register"); // ✅ Chuyển sang trang đăng ký
+  };
+    
+    const handleSwitchToLoginGoogle = () => {
+    navigate("/register"); // ✅ Chuyển sang trang đăng ký
+  };
 
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
@@ -15,82 +29,68 @@ export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword
     }));
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = async e => {
     e.preventDefault();
-    // Xử lý logic đăng nhập ở đây (validate, call API...)
-    console.log("Login form submitted:", formData);
-  };
-
-  const handleGoogleLogin = () => {
-    // Logic đăng nhập với Google (nếu có)
-    alert("Đăng nhập bằng Google");
+    setError(null);
+    try {
+      const res = await axios.post("http://localhost:8080/api/auth/login", {
+        login: formData.login,
+        password: formData.password,
+      });
+      alert(res.data.message);
+      // Có thể thêm lưu token hoặc chuyển trang sau đăng nhập thành công
+    } catch (err) {
+      setError(err.response?.data?.message || "Login failed");
+    }
   };
 
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>Đăng nhập</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
-        <label style={styles.label}>Email</label>
+        
         <input
-          name="email"
-          type="email"
-          placeholder="Nhập email"
-          value={formData.email}
+          name="login"
+          type="text"
+          placeholder="Tên đăng nhập hoặc email"
+          value={formData.login}
           onChange={handleChange}
           style={styles.input}
+          required
         />
-
-        <label style={styles.label}>Mật khẩu</label>
-        <div style={{ position: "relative", width: "100%" }}>
+        <input
+          name="password"
+          type="password"
+          placeholder="Mật khẩu"
+          value={formData.password}
+          onChange={handleChange}
+          style={styles.input}
+          required
+        />
+        <label style={styles.label}>
           <input
-            name="password"
-            type="password"
-            placeholder="Nhập mật khẩu"
-            value={formData.password}
+            name="remember"
+            type="checkbox"
+            checked={formData.remember}
             onChange={handleChange}
-            style={styles.input}
-          />
-          {/* Icon mắt có thể thêm sau */}
-        </div>
-
-        <div style={styles.optionsRow}>
-          <label>
-            <input
-              name="remember"
-              type="checkbox"
-              checked={formData.remember}
-              onChange={handleChange}
-            />{" "}
-            Ghi nhớ đăng nhập
-          </label>
-
-      
-
-        <button
-          style={{ ...styles.forgotLink, background: "none", border: "none", padding: 0, cursor: "pointer" }}
-          onClick={onSwitchToForgotPassword}
-          type="button"
-        >
-          Quên mật khẩu?
-        </button>
-      
-
-  
-        </div>
-
+          />{" "}
+          Ghi nhớ đăng nhập
+        </label>
         <button type="submit" style={styles.submitBtn}>Đăng nhập</button>
       </form>
-
-      <button onClick={handleGoogleLogin} style={styles.googleBtn}>
+            <button onClick={handleSwitchToLoginGoogle} style={styles.googleBtn}>
         <span style={{ marginRight: 8, fontWeight: "bold" }}>G</span> Đăng nhập bằng Google
       </button>
 
+      {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
+
       <p style={styles.switchText}>
         Chưa có tài khoản?{" "}
-        <span style={styles.switchLink} onClick={onSwitchToRegister}>
+        <span style={styles.switchLink} onClick={handleSwitchToRegister}>
           Đăng ký
         </span>
       </p>
+
     </div>
   );
 }
@@ -108,7 +108,8 @@ const styles = {
   },
   title: { marginBottom: 20, fontWeight: "bold", fontSize: 22, textAlign: "center", color: "#121212" },
   form: { display: "flex", flexDirection: "column", gap: 10 },
-  label: { fontWeight: "600", fontSize: 14, marginBottom: 4, color: "#121212" },
+    label: { fontWeight: "600", fontSize: 14, marginBottom: 4, color: "#121212" },
+
   input: {
     padding: 10,
     fontSize: 14,
@@ -117,14 +118,7 @@ const styles = {
     width: "100%",
     boxSizing: "border-box",
   },
-  optionsRow: {
-    display: "flex",
-    justifyContent: "space-between",
-    alignItems: "center",
-    fontSize: 13,
-    marginTop: 4,
-  },
-  forgotLink: { color: "#d32f2f", cursor: "pointer", textDecoration: "none" },
+  
   submitBtn: {
     marginTop: 10,
     backgroundColor: "#d32f2f",
@@ -135,7 +129,7 @@ const styles = {
     border: "none",
     cursor: "pointer",
   },
-  googleBtn: {
+    googleBtn: {
     marginTop: 15,
     width: "100%",
     borderRadius: 5,
@@ -149,6 +143,7 @@ const styles = {
     fontSize: 14,
     color: "#333",
   },
+
   switchText: { marginTop: 20, color: "#d32f2f", textAlign: "center" },
   switchLink: { fontWeight: "bold", cursor: "pointer" },
 };
