@@ -6,6 +6,7 @@ import AppLayout from '../layouts/AppLayout';
 import Dashboard from '../pages/Dashboard';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
+import Profile from '../pages/Profile';
 export default function AppRouters() {
   return (
     <Routes>
@@ -15,6 +16,7 @@ export default function AppRouters() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+        <Route path="/profile" element={<Profile/>}></Route>
       </Route>
       
     </Routes>
