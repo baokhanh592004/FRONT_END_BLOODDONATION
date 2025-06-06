@@ -11,15 +11,16 @@ export default function LoginPage() {
     remember: true,
   });
 
+
+
+
   const [error, setError] = useState(null);
 
     const handleSwitchToRegister = () => {
     navigate("/register"); // ✅ Chuyển sang trang đăng ký
   };
     
-    const handleSwitchToLoginGoogle = () => {
-    navigate("/register"); // ✅ Chuyển sang trang đăng ký
-  };
+
 
   const handleChange = e => {
     const { name, value, type, checked } = e.target;
@@ -30,19 +31,35 @@ export default function LoginPage() {
   };
 
   const handleSubmit = async e => {
-    e.preventDefault();
-    setError(null);
-    try {
-      const res = await axios.post("http://localhost:8080/api/auth/login", {
-        login: formData.login,
-        password: formData.password,
-      });
-      alert(res.data.message);
-      // Có thể thêm lưu token hoặc chuyển trang sau đăng nhập thành công
-    } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
-    }
-  };
+  e.preventDefault();
+  setError(null);
+
+  try {
+    const res = await axios.post("http://localhost:8080/api/auth/login", {
+      login: formData.login,
+      password: formData.password,
+    });
+
+const { token, user } = res.data;
+
+if (!token || !user) {
+  setError("Dữ liệu đăng nhập không hợp lệ.");
+  return;
+}
+
+localStorage.setItem("token", token);
+localStorage.setItem("user", JSON.stringify(user));
+
+// 🔥 Tạo sự kiện tùy chỉnh để thông báo Header cập nhật
+const loginEvent = new CustomEvent("userUpdated", { detail: user });
+window.dispatchEvent(loginEvent);
+
+navigate("/");
+  } catch (err) {
+    setError(err.response?.data?.message || "Đăng nhập thất bại");
+  }
+};
+
 
   return (
     <div style={styles.container}>
@@ -78,9 +95,7 @@ export default function LoginPage() {
         </label>
         <button type="submit" style={styles.submitBtn}>Đăng nhập</button>
       </form>
-            <button onClick={handleSwitchToLoginGoogle} style={styles.googleBtn}>
-        <span style={{ marginRight: 8, fontWeight: "bold" }}>G</span> Đăng nhập bằng Google
-      </button>
+
 
       {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
 

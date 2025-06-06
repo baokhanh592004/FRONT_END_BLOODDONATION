@@ -67,9 +67,8 @@ const DashboardPage = () => {
                 <div className="flex justify-between items-center">
                   <span className="font-bold text-red-600">{request.bloodType}</span>
                   <span
-                    className={`px-3 py-1 rounded ${
-                      request.urgency === "Cao" ? "bg-red-100 text-red-600" : "bg-yellow-100 text-yellow-600"
-                    }`}
+                    className={`px-3 py-1 rounded ${request.urgency === "Cao" ? "bg-red-100 text-red-600" : "bg-yellow-100 text-yellow-600"
+                      }`}
                   >
                     {request.urgency}
                   </span>
@@ -100,9 +99,8 @@ const DashboardPage = () => {
                   <td className="p-4">{donor.name}</td>
                   <td className="p-4">
                     <span
-                      className={`px-3 py-1 rounded ${
-                        donor.status === "Đang hiến máu" ? "bg-green-100 text-green-600" : "bg-blue-100 text-blue-600"
-                      }`}
+                      className={`px-3 py-1 rounded ${donor.status === "Đang hiến máu" ? "bg-green-100 text-green-600" : "bg-blue-100 text-blue-600"
+                        }`}
                     >
                       {donor.status}
                     </span>
@@ -146,9 +144,8 @@ const UrgentRequestsPage = () => {
                 <td className="p-3 font-semibold text-red-600">{bloodType}</td>
                 <td className="p-3">{hospital}</td>
                 <td
-                  className={`p-3 font-semibold ${
-                    urgency === "Cao" ? "text-red-600" : "text-yellow-600"
-                  }`}
+                  className={`p-3 font-semibold ${urgency === "Cao" ? "text-red-600" : "text-yellow-600"
+                    }`}
                 >
                   {urgency}
                 </td>
@@ -216,16 +213,14 @@ const BloodStoragePage = () => {
             {bloodStocks.map(({ bloodType, quantity, status }, idx) => (
               <tr
                 key={idx}
-                className={`border-b hover:bg-gray-100 ${
-                  status === "Thiếu" ? "bg-red-50" : ""
-                }`}
+                className={`border-b hover:bg-gray-100 ${status === "Thiếu" ? "bg-red-50" : ""
+                  }`}
               >
                 <td className="p-3 font-semibold">{bloodType}</td>
                 <td className="p-3">{quantity}</td>
                 <td
-                  className={`p-3 font-semibold ${
-                    status === "Thiếu" ? "text-red-600" : "text-green-600"
-                  }`}
+                  className={`p-3 font-semibold ${status === "Thiếu" ? "text-red-600" : "text-green-600"
+                    }`}
                 >
                   {status}
                 </td>
@@ -264,9 +259,8 @@ const DonorsPage = () => {
               <tr key={id} className="border-b hover:bg-gray-100">
                 <td className="p-3">{name}</td>
                 <td
-                  className={`p-3 font-semibold ${
-                    status === "Đang hiến máu" ? "text-green-600" : "text-blue-600"
-                  }`}
+                  className={`p-3 font-semibold ${status === "Đang hiến máu" ? "text-green-600" : "text-blue-600"
+                    }`}
                 >
                   {status}
                 </td>
@@ -363,7 +357,7 @@ const Sidebar = ({ isSidebarOpen, toggleSidebar }) => {
             key={index}
             className="w-full flex items-center p-4 hover:bg-red-50 hover:text-red-600 transition-colors"
           >
-            <Icon className="w-6 h-6" />
+            {Icon && <Icon className="w-6 h-6" />}
             {isSidebarOpen && <span className="ml-4">{label}</span>}
           </Link>
         ))}
