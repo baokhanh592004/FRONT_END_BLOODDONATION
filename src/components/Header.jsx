@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react"; // ✅ Đã gộp import đúng cách
-import { FaFacebookF, FaTwitter, FaInstagram, FaEnvelope, FaPhone } from "react-icons/fa";
+import { FaFacebookF, FaTwitter, FaInstagram, FaEnvelope } from "react-icons/fa";
 import { Link } from "react-router-dom";
 
 export default function Header() {
@@ -45,7 +45,7 @@ export default function Header() {
       </div>
 
       {/* Navbar chính */}
-      <header className="bg-white shadow-sm">
+      <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           {/* Logo và brand */}
           <Link to="/" className="flex items-center text-red-600 font-semibold text-xl">
@@ -60,7 +60,7 @@ export default function Header() {
           {/* Toggle mobile menu */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="lg:hidden text-red-600 focus:outline-none"
+            className="lg:hidden text-red-600 focus:outline-none text-2xl"
           >
             ☰
           </button>
@@ -69,43 +69,79 @@ export default function Header() {
           <nav
             className={`${
               menuOpen ? "block" : "hidden"
-            } lg:flex lg:items-center lg:space-x-6 font-medium mt-4 lg:mt-0`}
+            } lg:flex lg:items-center lg:space-x-8 font-medium mt-4 lg:mt-0`}
           >
-            <Link to="/" className="block text-gray-800 hover:text-red-600">
+            {/* ... Các link khác giữ nguyên ... */}
+            <Link to="/" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
               Trang chủ
             </Link>
-            <Link to="/pages" className="block text-gray-800 hover:text-red-600">
+            <Link to="/pages" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
               Giới thiệu
             </Link>
-            <Link to="/Đăng_ký_hiến_máu" className="block text-gray-800 hover:text-red-600">
+            <Link to="/Đăng_ký_hiến_máu" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
               Đăng ký hiến máu
             </Link>
-            <Link to="/Thông_tin_nhóm_máu" className="block text-gray-800 hover:text-red-600">
+            <Link to="/Thông_tin_nhóm_máu" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
               Thông tin nhóm máu
             </Link>
-            <Link to="/Yêu_cầu_máu_khẩn_cấp" className="block text-gray-800 hover:text-red-600">
+            <Link to="/Yêu_cầu_máu_khẩn_cấp" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
               Yêu cầu máu khẩn cấp
             </Link>
-            <Link to="/blog" className="block text-gray-800 hover:text-red-600">
+            <Link to="/blog" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
               Tin tức
             </Link>
-            {/* <Link to="/login" className="block text-red-600 font-bold hover:underline">
-              Đăng nhập
-            </Link> */}
+
+            {/* PHẦN LOGIC ĐĂNG NHẬP / DROPDOWN USER */}
             {user ? (
-              <>
-                <span className="text-red-600 font-bold">
-                  Xin chào, {user?.name || user?.username || "Người dùng"}
-                </span>
-                <button
-                  onClick={handleLogout}
-                  className="text-sm text-gray-600 hover:text-red-600 ml-2"
-                >
-                  Đăng xuất
+              // Nếu đã đăng nhập, hiển thị menu dropdown
+              // THAY ĐỔI 1: Thêm 'pb-2' để tạo vùng đệm hover
+              <div className="relative group pb-2"> 
+                <button className="flex items-center space-x-2 focus:outline-none py-2 lg:py-0">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                    alt="avatar"
+                    className="w-8 h-8 rounded-full border-2 border-red-200"
+                  />
+                  <span className="text-gray-800 font-semibold">
+                    {user.full_name || user.username}
+                  </span>
                 </button>
-              </>
+
+                {/* THAY ĐỔI 2: Dùng 'top-full' và bỏ 'mt-2' */}
+                <div className="absolute right-0 top-full w-48 bg-white rounded-md shadow-xl z-20 hidden group-hover:block ring-1 ring-black ring-opacity-5">
+                  <div className="py-1">
+                    <Link
+                      to="/profile"
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
+                    >
+                      Tài Khoản Của Tôi
+                    </Link>
+                    {user.role === 'staff' && (
+                      <Link
+                        to="/staff/dashboard"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
+                      >
+                        Dashboard
+                      </Link>
+                    )}
+                    <Link
+                        to="/orders"
+                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
+                    >
+                        Đơn Mua
+                    </Link>
+                    <div className="border-t border-gray-100 my-1"></div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
+                    >
+                      Đăng Xuất
+                    </button>
+                  </div>
+                </div>
+              </div>
             ) : (
-              <Link to="/login" className="block text-red-600 font-bold hover:underline">
+              <Link to="/login" className="block py-2 lg:py-0 text-red-600 font-bold hover:underline">
                 Đăng nhập
               </Link>
             )}
