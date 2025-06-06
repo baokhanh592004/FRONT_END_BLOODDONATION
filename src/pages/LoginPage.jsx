@@ -18,21 +18,63 @@ export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword
       [name]: type === "checkbox" ? checked : value,
     }));
   };
+//======================CODE CŨ ==========================
+  // const handleSubmit = async e => {
+  //   e.preventDefault();
+  //   setError(null);
+  //   try {
+  //     const res = await axios.post("http://localhost:8080/api/auth/login", { 
+  //       login: formData.login,
+  //       password: formData.password,
+  //     });
+  //     alert(res.data.message);
+
+  //   } catch (err) {
+  //     setError(err.response?.data?.message || "Login failed");
+  //   }
+  // };
+  //===============================================================
+
+  //=========================CODE MỚI SỬA===========================================================
+  // Thay thế toàn bộ hàm handleSubmit của bạn bằng hàm này
 
   const handleSubmit = async e => {
     e.preventDefault();
     setError(null);
     try {
-      const res = await axios.post("http://localhost:8080/api/auth/login", {
-        login: formData.login,
-        password: formData.password,
-      });
-      alert(res.data.message);
-      // Có thể thêm lưu token hoặc chuyển trang sau đăng nhập thành công
+      // ========================= CODE ĐÃ SỬA =======================
+
+      // 1. Gọi API để lấy TẤT CẢ user
+      // URL của bạn từ hình ảnh
+      const res = await axios.get("https://683fa15a5b39a8039a552588.mockapi.io/api/login/user");
+      
+      // 2. Dùng hàm `find` để tìm user trong mảng data trả về
+      // Một user được xem là hợp lệ khi:
+      //    a. (username HOẶC email) khớp với giá trị người dùng đã nhập vào ô "login"
+      //    b. và password cũng phải khớp
+      const foundUser = res.data.find(user => 
+        (user.username === formData.login || user.email === formData.login) && 
+        user.password === formData.password
+      );
+
+      // 3. Kiểm tra kết quả
+      if (foundUser) {
+        // Nếu tìm thấy user, đăng nhập thành công
+        localStorage.setItem("user", JSON.stringify(foundUser)); // Lưu thông tin user vào localStorage
+        alert("Đăng nhập thành công!");
+        window.location.href = "/"; // Chuyển hướng về trang chủ
+      } else {
+        // Nếu không tìm thấy, báo lỗi
+        setError("Sai tên đăng nhập, email hoặc mật khẩu!");
+      }
+
     } catch (err) {
-      setError(err.response?.data?.message || "Login failed");
+      // Xử lý các lỗi khác (ví dụ: mất mạng, API sập)
+      console.error("Login error:", err);
+      setError("Đã có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.");
     }
   };
+  //===========================================================================================
 
   return (
     <div style={styles.container}>
@@ -76,12 +118,15 @@ export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword
           Đăng ký
         </span> */}
         <Link to="/register" style={styles.switchLink}>
-  Đăng ký
-</Link>
+          Đăng ký
+        </Link>
       </p>
-      <button onClick={onSwitchToForgotPassword} style={{ marginTop: 10, cursor: "pointer", background: "none", border: "none", color: "#d32f2f" }}>
+      {/* <button onClick={onSwitchToForgotPassword} style={{ marginTop: 10, cursor: "pointer", background: "none", border: "none", color: "#d32f2f" }}>
         Quên mật khẩu?
-      </button>
+      </button> */}
+      <Link to="/forgotPassword" style={{ marginTop: 10, cursor: "pointer", background: "none", border: "none", color: "#d32f2f" }}>
+        Quên mật khẩu?
+      </Link>
     </div>
   );
 }
