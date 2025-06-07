@@ -1,3 +1,4 @@
+// src/pages/StaffDashboard.js
 import React from "react";
 import { FaUser, FaChartBar, FaTint, FaCheckCircle } from "react-icons/fa";
 
@@ -10,6 +11,7 @@ const bloodData = [
 
 const StaffDashboard = () => {
   return (
+    // Component gốc bao gồm cả layout và nội dung
     <div className="flex h-screen bg-gray-100">
       {/* Sidebar */}
       <aside className="w-64 bg-white border-r p-4">
