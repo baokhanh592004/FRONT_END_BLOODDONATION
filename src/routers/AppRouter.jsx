@@ -7,7 +7,7 @@ import AppLayout from '../layouts/AppLayout';
 import Dashboard from '../pages/Dashboard';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
-import StaffDashboard from '../pages/StaffDashboard';
+import StaffDashboard from '../pages/StaffDashboard'; // Import trang Dashboard của nhân viên
 
 import StaffRoute from './StaffRouter'; // Import StaffRoute để bảo vệ route staff
 export default function AppRouters() {
@@ -21,11 +21,11 @@ export default function AppRouters() {
         <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
 
         <Route path="/staff/dashboard" element= {
-          <StaffRoute>
-            {/* Chỉ nhân viên mới có thể truy cập trang này */}
-            {/* Nếu không có quyền, sẽ chuyển hướng về trang đăng nhập */}
-            <StaffDashboard/> 
-          </StaffRoute>
+        <StaffRoute>
+          {/* Chỉ nhân viên mới có thể truy cập trang này */}
+          {/* Nếu không có quyền, sẽ chuyển hướng về trang đăng nhập */}
+          <StaffDashboard />
+        </StaffRoute>
         }/>
       </Route>
       
