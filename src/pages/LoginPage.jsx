@@ -1,71 +1,64 @@
 import React, { useState } from "react";
-import axios from "axios";
+
 import { useNavigate } from "react-router-dom";
+import api from "../api/axios";
 
 export default function LoginPage() {
-
-   const navigate = useNavigate(); 
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
-    login: "",  // username hoặc email
+    login: "",
     password: "",
     remember: true,
   });
 
-
-
-
   const [error, setError] = useState(null);
 
-    const handleSwitchToRegister = () => {
-    navigate("/register"); // ✅ Chuyển sang trang đăng ký
+  const handleSwitchToRegister = () => {
+    navigate("/register");
   };
-    
 
-
-  const handleChange = e => {
+  const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
-  const handleSubmit = async e => {
-  e.preventDefault();
-  setError(null);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError(null);
 
-  try {
-    const res = await axios.post("http://localhost:8080/api/auth/login", {
-      login: formData.login,
-      password: formData.password,
-    });
+    try {
+const res = await api.post("/api/auth/login", {
+  login: formData.login,
+  password: formData.password,
+});
 
-const { token, user } = res.data;
+      const { success, token, user, message } = res.data;
 
-if (!token || !user) {
-  setError("Dữ liệu đăng nhập không hợp lệ.");
-  return;
-}
+      if (!success || !token) {
+        setError(message || "Đăng nhập thất bại.");
+        return;
+      }
 
-localStorage.setItem("token", token);
-localStorage.setItem("user", JSON.stringify(user));
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
-// 🔥 Tạo sự kiện tùy chỉnh để thông báo Header cập nhật
-const loginEvent = new CustomEvent("userUpdated", { detail: user });
-window.dispatchEvent(loginEvent);
+      const loginEvent = new CustomEvent("userUpdated", { detail: user });
+      window.dispatchEvent(loginEvent);
 
-navigate("/");
-  } catch (err) {
-    setError(err.response?.data?.message || "Đăng nhập thất bại");
-  }
-};
-
+      navigate("/");
+    } catch (err) {
+      console.error("Login error:", err.response);
+      setError(err.response?.data?.message || "Đăng nhập thất bại");
+    }
+  };
 
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>Đăng nhập</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
-        
         <input
           name="login"
           type="text"
@@ -96,7 +89,6 @@ navigate("/");
         <button type="submit" style={styles.submitBtn}>Đăng nhập</button>
       </form>
 
-
       {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
 
       <p style={styles.switchText}>
@@ -105,7 +97,6 @@ navigate("/");
           Đăng ký
         </span>
       </p>
-
     </div>
   );
 }
@@ -121,10 +112,15 @@ const styles = {
     fontFamily: "Arial, sans-serif",
     backgroundColor: "white",
   },
-  title: { marginBottom: 20, fontWeight: "bold", fontSize: 22, textAlign: "center", color: "#121212" },
+  title: {
+    marginBottom: 20,
+    fontWeight: "bold",
+    fontSize: 22,
+    textAlign: "center",
+    color: "#121212",
+  },
   form: { display: "flex", flexDirection: "column", gap: 10 },
-    label: { fontWeight: "600", fontSize: 14, marginBottom: 4, color: "#121212" },
-
+  label: { fontWeight: "600", fontSize: 14, marginBottom: 4, color: "#121212" },
   input: {
     padding: 10,
     fontSize: 14,
@@ -133,7 +129,6 @@ const styles = {
     width: "100%",
     boxSizing: "border-box",
   },
-  
   submitBtn: {
     marginTop: 10,
     backgroundColor: "#d32f2f",
@@ -144,21 +139,6 @@ const styles = {
     border: "none",
     cursor: "pointer",
   },
-    googleBtn: {
-    marginTop: 15,
-    width: "100%",
-    borderRadius: 5,
-    border: "1px solid #ddd",
-    backgroundColor: "white",
-    padding: 10,
-    cursor: "pointer",
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    fontSize: 14,
-    color: "#333",
-  },
-
   switchText: { marginTop: 20, color: "#d32f2f", textAlign: "center" },
   switchLink: { fontWeight: "bold", cursor: "pointer" },
 };

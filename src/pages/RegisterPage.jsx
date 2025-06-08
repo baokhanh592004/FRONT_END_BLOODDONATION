@@ -1,65 +1,69 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
 import axios from "axios";
 
-
-export default function RegisterPage() {
-
-    const navigate = useNavigate();
-    const handleSwitchToLogin = () => {
-        navigate('/login');
-    }
-
+export default function RegisterPage({ onSwitchToLogin }) {
   const [formData, setFormData] = useState({
+    username: "",
     fullName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    phone: "",
+    phoneNumber: "",
   });
+
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
 
   const handleChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  const [error, setError] = useState(null);
-
-
   const handleSubmit = async e => {
     e.preventDefault();
     setError(null);
+    setSuccess(null);
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp");
+      setError("Password confirmation does not match!");
       return;
     }
 
     try {
-      const res = await axios.post("http://localhost:8080/api/auth/register", {
-        fullName: formData.fullName,
-        email: formData.email,
-        password: formData.password,
-        phone: formData.phone,
+      const res = await axios.post("http://localhost:8080/api/auth/register", formData);
+      setSuccess(res.data);
+      setFormData({
+        username: "",
+        fullName: "",
+        email: "",
+        password: "",
+        confirmPassword: "",
+        phoneNumber: "",
       });
-
-      alert(res.data.message || "Đăng ký thành công!");
-      navigate("/login"); // Chuyển sang trang đăng nhập sau khi đăng ký xong
     } catch (err) {
-      setError(err.response?.data?.message || "Đăng ký thất bại");
+      setError(err.response?.data || "Registration failed.");
     }
-};
+  };
 
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>Đăng ký tài khoản</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
         <input
+          name="username"
+          placeholder="Tên đăng nhập"
+          value={formData.username}
+          onChange={handleChange}
+          style={styles.input}
+          required
+        />
+        <input
           name="fullName"
           placeholder="Họ và tên"
           value={formData.fullName}
           onChange={handleChange}
           style={styles.input}
+          required
         />
         <input
           name="email"
@@ -68,44 +72,44 @@ export default function RegisterPage() {
           value={formData.email}
           onChange={handleChange}
           style={styles.input}
+          required
         />
-        <div style={{ position: "relative", width: "100%" }}>
-          <input
-            name="password"
-            type="password"
-            placeholder="Mật khẩu"
-            value={formData.password}
-            onChange={handleChange}
-            style={styles.input}
-          />
-          {/* Icon mắt có thể thêm sau nếu cần */}
-        </div>
-        <div style={{ position: "relative", width: "100%" }}>
-          <input
-            name="confirmPassword"
-            type="password"
-            placeholder="Xác nhận mật khẩu"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            style={styles.input}
-          />
-          {/* Icon mắt có thể thêm sau nếu cần */}
-        </div>
         <input
-          name="phone"
-          type="tel"
-          placeholder="Số điện thoại"
-          value={formData.phone}
+          name="password"
+          type="password"
+          placeholder="Mật khẩu"
+          value={formData.password}
           onChange={handleChange}
           style={styles.input}
+          required
+        />
+        <input
+          name="confirmPassword"
+          type="password"
+          placeholder="Xác nhận mật khẩu"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          style={styles.input}
+          required
+        />
+        <input
+          name="phoneNumber"
+          type="tel"
+          placeholder="Số điện thoại"
+          value={formData.phoneNumber}
+          onChange={handleChange}
+          style={styles.input}
+          required
         />
         <button type="submit" style={styles.submitBtn}>Đăng ký</button>
-        {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
-
       </form>
+
+      {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
+      {success && <p style={{ color: "green", marginTop: 10 }}>{success}</p>}
+
       <p style={styles.switchText}>
         Đã có tài khoản?{" "}
-        <span style={styles.switchLink} onClick={handleSwitchToLogin}>
+        <span style={styles.switchLink} onClick={onSwitchToLogin}>
           Đăng nhập
         </span>
       </p>

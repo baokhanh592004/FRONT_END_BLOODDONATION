@@ -7,44 +7,45 @@ export default function Header() {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-useEffect(() => {
-  const syncUserFromStorage = () => {
-    try {
-      const raw = localStorage.getItem("user");
-      if (raw && raw !== "undefined") {
-        const parsed = JSON.parse(raw);
-        if (parsed && parsed.username) {
-          setUser(parsed);
+
+  useEffect(() => {
+    const syncUserFromStorage = () => {
+      try {
+        const raw = localStorage.getItem("user");
+        if (raw && raw !== "undefined") {
+          const parsed = JSON.parse(raw);
+          if (parsed && parsed.username) {
+            setUser(parsed);
+          } else {
+            setUser(null);
+          }
         } else {
           setUser(null);
         }
-      } else {
+      } catch (e) {
+        console.error("Lỗi parse localStorage:", e);
         setUser(null);
       }
-    } catch (e) {
-      console.error("Lỗi parse localStorage:", e);
-      setUser(null);
-    }
-  };
+    };
 
-  // Lần đầu mount
-  syncUserFromStorage();
+    // Lần đầu mount
+    syncUserFromStorage();
 
-  // Nghe sự kiện từ login page
-  const handleUserUpdate = (e) => {
-    if (e?.detail) {
-      setUser(e.detail);
-    }
-  };
+    // Nghe sự kiện từ login page
+    const handleUserUpdate = (e) => {
+      if (e?.detail) {
+        setUser(e.detail);
+      }
+    };
 
-  window.addEventListener("userUpdated", handleUserUpdate);
-  window.addEventListener("storage", syncUserFromStorage);
+    window.addEventListener("userUpdated", handleUserUpdate);
+    window.addEventListener("storage", syncUserFromStorage);
 
-  return () => {
-    window.removeEventListener("userUpdated", handleUserUpdate);
-    window.removeEventListener("storage", syncUserFromStorage);
-  };
-}, []);
+    return () => {
+      window.removeEventListener("userUpdated", handleUserUpdate);
+      window.removeEventListener("storage", syncUserFromStorage);
+    };
+  }, []);
 
 
 
@@ -105,14 +106,75 @@ useEffect(() => {
             <Link to="/Yêu_cầu_máu_khẩn_cấp" className="block text-gray-800 hover:text-red-600">Yêu cầu máu khẩn cấp</Link>
             <Link to="/blog" className="block text-gray-800 hover:text-red-600">Tin tức</Link>
 
+
+
+
+
+            {/* PHẦN LOGIC ĐĂNG NHẬP / DROPDOWN USER */}
             {user ? (
-              <div className="flex items-center gap-2">
-                <span className="text-red-600 font-bold">👤 {user.username}</span>
-                <button onClick={handleLogout} className="text-sm text-gray-600 hover:underline">Đăng xuất</button>
+              // Nếu đã đăng nhập, hiển thị menu dropdown
+              // THAY ĐỔI 1: Thêm 'pb-2' để tạo vùng đệm hover
+              <div className="relative group pb-2">
+                <button className="flex items-center space-x-2 focus:outline-none py-2 lg:py-0">
+                  <img
+                    src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                    alt="avatar"
+                    className="w-8 h-8 rounded-full border-2 border-red-200"
+                  />
+                  <span className="text-gray-800 font-semibold">
+                    {user.full_name || user.username}
+                  </span>
+                </button>
+
+                {/* THAY ĐỔI 2: Dùng 'top-full' và bỏ 'mt-2' */}
+                <div className="absolute right-0 top-full w-48 bg-white rounded-md shadow-xl z-20 hidden group-hover:block ring-1 ring-black ring-opacity-5">
+                  <div className="py-1">
+                    <Link
+                      to={user.role === "ADMIN" ? "/admin/users" : "/profile"}
+                      className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
+                    >
+                      Tài Khoản Của Tôi
+                    </Link>
+
+
+                    {/* 🛠 Hiển thị Admin Panel cho Admin */}
+                    {user.role === 'ADMIN' && (
+                      <>
+                        <Link
+                          to="/admin/dashboard"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
+                        >
+                          🛠 Admin Panel
+                        </Link>
+                        <Link
+                          to="/admin/users"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
+                        >
+                          👥 Quản lý người dùng
+                        </Link>
+                      </>
+                    )}
+
+                    {/* ============================================= */}
+
+
+                    <div className="border-t border-gray-100 my-1"></div>
+                    <button
+                      onClick={handleLogout}
+                      className="w-full text-left block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
+                    >
+                      Đăng Xuất
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : (
-              <Link to="/login" className="block text-red-600 font-bold hover:underline">Đăng nhập</Link>
+              <Link to="/login" className="block py-2 lg:py-0 text-red-600 font-bold hover:underline">
+                Đăng nhập
+              </Link>
             )}
+
+
           </nav>
         </div>
       </header>
