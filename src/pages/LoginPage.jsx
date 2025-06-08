@@ -36,44 +36,39 @@ export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword
   //===============================================================
 
   //=========================CODE MỚI SỬA===========================================================
-  // Thay thế toàn bộ hàm handleSubmit của bạn bằng hàm này
+ // 🔥 THAY ĐỔI: Hàm handleSubmit được cải tiến với logic chuyển hướng thông minh
+ const handleSubmit = async e => {
+  e.preventDefault();
+  setError(null);
+  try {
+    const res = await axios.get("https://683fa15a5b39a8039a552588.mockapi.io/api/login/user");
+    
+    const foundUser = res.data.find(user => 
+      (user.username === formData.login || user.email === formData.login) && 
+      user.password === formData.password
+    );
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setError(null);
-    try {
-      // ========================= CODE ĐÃ SỬA =======================
-
-      // 1. Gọi API để lấy TẤT CẢ user
-      // URL của bạn từ hình ảnh
-      const res = await axios.get("https://683fa15a5b39a8039a552588.mockapi.io/api/login/user");
+    if (foundUser) {
+      localStorage.setItem("user", JSON.stringify(foundUser));
+      alert("Đăng nhập thành công!");
       
-      // 2. Dùng hàm `find` để tìm user trong mảng data trả về
-      // Một user được xem là hợp lệ khi:
-      //    a. (username HOẶC email) khớp với giá trị người dùng đã nhập vào ô "login"
-      //    b. và password cũng phải khớp
-      const foundUser = res.data.find(user => 
-        (user.username === formData.login || user.email === formData.login) && 
-        user.password === formData.password
-      );
-
-      // 3. Kiểm tra kết quả
-      if (foundUser) {
-        // Nếu tìm thấy user, đăng nhập thành công
-        localStorage.setItem("user", JSON.stringify(foundUser)); // Lưu thông tin user vào localStorage
-        alert("Đăng nhập thành công!");
-        window.location.href = "/"; // Chuyển hướng về trang chủ
+      // ⭐ CẢI TIẾN: Tự động chuyển hướng dựa trên vai trò (role)
+      if (foundUser.role === 'staff') {
+        window.location.href = "/staff/dashboard"; // Chuyển staff đến trang của họ
       } else {
-        // Nếu không tìm thấy, báo lỗi
-        setError("Sai tên đăng nhập, email hoặc mật khẩu!");
+        window.location.href = "/"; // Chuyển user thường về trang chủ
       }
 
-    } catch (err) {
-      // Xử lý các lỗi khác (ví dụ: mất mạng, API sập)
-      console.error("Login error:", err);
-      setError("Đã có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.");
+    } else {
+      setError("Sai tên đăng nhập, email hoặc mật khẩu!");
     }
-  };
+
+  } catch (err) {
+    console.error("Login error:", err);
+    setError("Đã có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.");
+  }
+};
+
   //===========================================================================================
 
   return (
