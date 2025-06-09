@@ -91,22 +91,6 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Ngày sinh */}
-          <div className="flex items-center">
-            <HiCalendar className="text-red-500 text-xl flex-shrink-0 mr-3" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
-              <input
-                type="date"
-                name="dob"
-                value={profile.dob}
-                onChange={handleChange}
-                readOnly={!isEditing}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
-              />
-            </div>
-          </div>
-
           {/* Giới tính */}
           <div className="flex items-center">
             <HiOutlineUserCircle className="text-red-500 text-xl flex-shrink-0 mr-3" />
@@ -178,11 +162,11 @@ const Profile = () => {
           <div className="flex items-center">
             <MdBloodtype className="text-red-500 text-xl flex-shrink-0 mr-3" />
             <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Nhóm máu</label>
               <input
-                type="date"
-                name="dob"
-                value={profile.dob}
+                type="text"
+                name="bloodType"
+                value={profile.bloodType}
                 onChange={handleChange}
                 readOnly={!isEditing}
                 className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
