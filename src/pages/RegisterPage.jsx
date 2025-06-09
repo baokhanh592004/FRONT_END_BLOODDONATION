@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-export default function RegisterPage({ onSwitchToLogin }) {
+export default function RegisterPage() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     fullName: "",
@@ -9,7 +11,14 @@ export default function RegisterPage({ onSwitchToLogin }) {
     password: "",
     confirmPassword: "",
     phoneNumber: "",
+    gender: "",
+    address: "",
+    role: "MEMBER",
   });
+  const handleSwitchToLogin = () => {
+    navigate("/login");
+  };
+
 
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -31,7 +40,11 @@ export default function RegisterPage({ onSwitchToLogin }) {
 
     try {
       const res = await axios.post("http://localhost:8080/api/auth/register", formData);
-      setSuccess(res.data);
+
+      // Nếu server trả về string (ok)
+      setSuccess(typeof res.data === "string" ? res.data : "Đăng ký thành công!");
+
+      // Reset form
       setFormData({
         username: "",
         fullName: "",
@@ -39,11 +52,23 @@ export default function RegisterPage({ onSwitchToLogin }) {
         password: "",
         confirmPassword: "",
         phoneNumber: "",
+        gender: "",
+        address: "",
+        role: "MEMBER",
       });
     } catch (err) {
-      setError(err.response?.data || "Registration failed.");
+      const data = err.response?.data;
+      if (typeof data === "string") {
+        setError(data);
+      } else if (typeof data === "object") {
+        const messages = Object.values(data).join(" | ");
+        setError(messages);
+      } else {
+        setError("Registration failed.");
+      }
     }
   };
+
 
   return (
     <div style={styles.container}>
@@ -101,6 +126,20 @@ export default function RegisterPage({ onSwitchToLogin }) {
           style={styles.input}
           required
         />
+        <input
+          name="gender"
+          placeholder="Giới tính (Nam/Nữ)"
+          value={formData.gender}
+          onChange={handleChange}
+          style={styles.input}
+        />
+        <input
+          name="address"
+          placeholder="Địa chỉ"
+          value={formData.address}
+          onChange={handleChange}
+          style={styles.input}
+        />
         <button type="submit" style={styles.submitBtn}>Đăng ký</button>
       </form>
 
@@ -109,7 +148,7 @@ export default function RegisterPage({ onSwitchToLogin }) {
 
       <p style={styles.switchText}>
         Đã có tài khoản?{" "}
-        <span style={styles.switchLink} onClick={onSwitchToLogin}>
+        <span style={styles.switchLink} onClick={handleSwitchToLogin}>
           Đăng nhập
         </span>
       </p>

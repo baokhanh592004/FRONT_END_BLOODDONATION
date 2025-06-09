@@ -23,6 +23,15 @@ export const updateUserById = (id, data) => {
   });
 };
 
+export async function createUser(data) {
+  const token = localStorage.getItem('token');
+  return axios.post("/api/admin/users", data, {
+    headers: {
+      Authorization: `Bearer ${token}`
+    }
+  });
+}
+
 export const updateUserStatus = (id, status) => {
   const token = localStorage.getItem('token');
   return axios.put(`/api/admin/users/${id}/status`, { status }, {

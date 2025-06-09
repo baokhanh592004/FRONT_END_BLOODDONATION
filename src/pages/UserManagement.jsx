@@ -4,8 +4,11 @@ import {
   updateUserById,
   updateUserRole,
   updateUserStatus,
-  deleteUserById
+  deleteUserById,
+  createUser
 } from '../api/userApi';
+
+
 
 const UserManagement = () => {
   const [users, setUsers] = useState([]);
@@ -105,7 +108,35 @@ const UserManagement = () => {
     }
   };
 
+
+
+  const handleCreateUser = async () => {
+    try {
+      await createUser(formData);
+      alert('Tạo người dùng thành công!');
+      setIsCreating(false);
+      setFormData({
+        username: '',
+        password: '',
+        fullName: '',
+        email: '',
+        phoneNumber: '',
+        gender: '',
+        address: '',
+        role: '',
+        status: 'ACTIVE'
+      }); // reset
+      loadUsers();
+    } catch (err) {
+      alert('Lỗi khi tạo người dùng!');
+      console.error(err);
+    }
+  };
+
+  const [isCreating, setIsCreating] = useState(false);
+
   return (
+
     <div style={{ padding: '20px' }}>
       <h2>Quản lý người dùng</h2>
 
@@ -152,9 +183,53 @@ const UserManagement = () => {
         </tbody>
       </table>
 
-      {editingUserId && (
+      {(editingUserId) && (
         <div style={{ marginTop: '20px' }}>
           <h3>Chỉnh sửa người dùng</h3>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', maxWidth: '600px' }}>
+            <input name="username" value={formData.username} onChange={handleInputChange} placeholder="Username" />
+            <input name="password" value={formData.password} onChange={handleInputChange} placeholder="Password mới" />
+            <input name="fullName" value={formData.fullName} onChange={handleInputChange} placeholder="Họ và tên" />
+            <input name="email" value={formData.email} onChange={handleInputChange} placeholder="Email" />
+            <input name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} placeholder="Số điện thoại" />
+
+            <select name="gender" value={formData.gender} onChange={handleInputChange}>
+              <option value="">-- Chọn giới tính --</option>
+              <option value="Nam">Nam</option>
+              <option value="Nữ">Nữ</option>
+              <option value="Khác">Khác</option>
+            </select>
+
+            <input name="address" value={formData.address} onChange={handleInputChange} placeholder="Địa chỉ" />
+
+            <select name="role" value={formData.role} onChange={handleInputChange}>
+              <option value="">-- Chọn vai trò --</option>
+              <option value="Adnin">ADMIN</option>
+              <option value="Staff">STAFF</option>
+              <option value="Member">MEMBER</option>
+              <option value="Guest">GUEST</option>
+              <option value="TREATMENT_CENTER">TREATMENT_CENTER</option>
+            </select>
+          </div>
+
+          <div style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+            <button onClick={handleSave}>Lưu</button>
+            <button onClick={handleUpdateRole}>Cập nhật vai trò</button>
+            <button onClick={handleUpdateStatus}>
+              {formData.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'}
+            </button>
+            <button onClick={handleDeleteUser} style={{ color: 'red' }}>Xóa</button>
+            <button onClick={() => setEditingUserId(null)}>Hủy</button>
+          </div>
+
+          <div style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
+
+          </div>
+        </div>
+      )}
+      {isCreating && (
+        <div style={{ marginTop: '20px' }}>
+          <h3>Tạo người dùng</h3>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', maxWidth: '600px' }}>
             <input name="username" value={formData.username} onChange={handleInputChange} placeholder="Username" />
             <input name="password" value={formData.password} onChange={handleInputChange} placeholder="Password mới" />
@@ -176,22 +251,45 @@ const UserManagement = () => {
               <option value="ADMIN">ADMIN</option>
               <option value="STAFF">STAFF</option>
               <option value="MEMBER">MEMBER</option>
-              <option value="GUEST">GUEST</option>
-              <option value="TREATMENT_CENTER">TREATMENT_CENTER</option>
             </select>
           </div>
-
           <div style={{ marginTop: '20px', display: 'flex', flexWrap: 'wrap', gap: '10px' }}>
-            <button onClick={handleSave}>Lưu</button>
-            <button onClick={handleUpdateRole}>Cập nhật vai trò</button>
-            <button onClick={handleUpdateStatus}>
-              {formData.status === 'ACTIVE' ? 'Vô hiệu hóa' : 'Kích hoạt'}
-            </button>
-            <button onClick={handleDeleteUser} style={{ color: 'red' }}>Xóa</button>
-            <button onClick={() => setEditingUserId(null)}>Hủy</button>
+          </div>
+          <div>
+            <button onClick={handleCreateUser}>Tạo</button>
+            <button onClick={() => setIsCreating(false)}>Hủy</button>
           </div>
         </div>
       )}
+      <button
+        onClick={() => {
+          setIsCreating(true);
+          setEditingUserId(null);
+          setFormData({
+            username: '',
+            password: '',
+            fullName: '',
+            email: '',
+            phoneNumber: '',
+            gender: '',
+            address: '',
+            role: '',
+            status: 'ACTIVE'
+          });
+        }}
+        style={{
+          marginBottom: '12px',
+          padding: '8px 14px',
+          backgroundColor: '#28a745',
+          color: '#fff',
+          border: 'none',
+          borderRadius: '4px',
+          cursor: 'pointer'
+        }}
+      >
+        + Tạo người dùng mới
+      </button>
+
     </div>
   );
 };
