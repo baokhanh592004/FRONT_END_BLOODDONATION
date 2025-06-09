@@ -1,31 +1,61 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
-// Dữ liệu giả, thêm ID và status
+// Dữ liệu giả, thêm ID, status và cancelReason
 const mockDonors = [
-  { id: 1, name: 'Nguyễn Văn A', bloodType: 'O+', dob: '12/01/1990', status: 'pending' },
-  { id: 2, name: 'Trần Thị B', bloodType: 'A-', dob: '07/07/1985', status: 'pending' },
-  { id: 3, name: 'Lê Văn Luyện', bloodType: 'B+', dob: '03/05/1995', status: 'completed' },
+  { id: 1, name: 'Nguyễn Văn A', bloodType: 'O+', dob: '12/01/1990', status: 'pending', cancelReason: '' },
+  { id: 2, name: 'Trần Thị B', bloodType: 'A-', dob: '07/07/1985', status: 'pending', cancelReason: '' },
+  { id: 3, name: 'Lê Văn Luyện', bloodType: 'B+', dob: '03/05/1995', status: 'completed', cancelReason: '' },
 ];
 
 const StatusBadge = ({ status }) => {
-    const isPending = status === 'pending';
-    return (
-      <span className={`px-3 py-1 text-xs font-semibold rounded-full ${isPending ? 'bg-yellow-200 text-yellow-800' : 'bg-green-200 text-green-800'}`}>
-        {isPending ? 'Đang chờ' : 'Hoàn thành'}
-      </span>
-    );
+  let className = '';
+  let text = '';
+
+  switch (status) {
+    case 'pending':
+      className = 'bg-yellow-200 text-yellow-800';
+      text = 'Đang chờ';
+      break;
+    case 'completed':
+      className = 'bg-green-200 text-green-800';
+      text = 'Hoàn thành';
+      break;
+    case 'cancelled':
+      className = 'bg-red-200 text-red-800';
+      text = 'Đã hủy';
+      break;
+    default:
+      break;
+  }
+
+  return (
+    <span className={`px-3 py-1 text-xs font-semibold rounded-full ${className}`}>
+      {text}
+    </span>
+  );
 };
 
 const DonationManagementPage = () => {
   const [donors, setDonors] = useState(mockDonors);
 
   const handleStatusChange = (donorId, newStatus) => {
-    setDonors(currentDonors =>
-      currentDonors.map(donor =>
-        donor.id === donorId ? { ...donor, status: newStatus } : donor
-      )
-    );
+    if (newStatus === 'cancelled') {
+      const reason = prompt('Vui lòng nhập lý do hủy đơn đăng ký:');
+      if (!reason) return; // Không cập nhật nếu không có lý do
+
+      setDonors(currentDonors =>
+        currentDonors.map(donor =>
+          donor.id === donorId ? { ...donor, status: newStatus, cancelReason: reason } : donor
+        )
+      );
+    } else {
+      setDonors(currentDonors =>
+        currentDonors.map(donor =>
+          donor.id === donorId ? { ...donor, status: newStatus, cancelReason: '' } : donor
+        )
+      );
+    }
   };
 
   const handleSaveChanges = () => {
@@ -53,6 +83,7 @@ const DonationManagementPage = () => {
               <th className="px-6 py-3 text-left font-medium text-gray-600">Họ tên</th>
               <th className="px-6 py-3 text-left font-medium text-gray-600">Nhóm máu</th>
               <th className="px-6 py-3 text-left font-medium text-gray-600">Trạng thái</th>
+              <th className="px-6 py-3 text-left font-medium text-gray-600">Lý do hủy</th>
               <th className="px-6 py-3 text-center font-medium text-gray-600">Thao tác</th>
             </tr>
           </thead>
@@ -64,15 +95,16 @@ const DonationManagementPage = () => {
                 <td className="px-6 py-4">
                   <StatusBadge status={donor.status} />
                 </td>
+                <td className="px-6 py-4 text-sm text-red-600 italic">
+                  {donor.status === 'cancelled' ? donor.cancelReason : ''}
+                </td>
                 <td className="px-6 py-4 flex items-center justify-center gap-4">
-                  {/* Link để đi đến trang khai báo sức khỏe */}
                   <Link
                     to={`/staff/donors/${donor.id}`}
                     className="text-blue-600 hover:underline font-semibold"
                   >
                     Khai báo sức khỏe
                   </Link>
-                  {/* Select để đổi trạng thái */}
                   <select
                     value={donor.status}
                     onChange={(e) => handleStatusChange(donor.id, e.target.value)}
@@ -80,6 +112,7 @@ const DonationManagementPage = () => {
                   >
                     <option value="pending">Đang chờ</option>
                     <option value="completed">Hoàn thành</option>
+                    <option value="cancelled">Đã hủy</option>
                   </select>
                 </td>
               </tr>

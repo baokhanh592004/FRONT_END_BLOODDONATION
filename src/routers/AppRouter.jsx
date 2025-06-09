@@ -16,7 +16,7 @@ import StaffDashboard from '../pages/staff/StaffDashboard';
 import DonationManagementPage from '../pages/staff/DonationManagementPage'; // THAY THẾ PatientManagementPage
 import DonorHealthCheckPage from '../pages/staff/DonorHealthCheckPage'; // <-- THÊM MỚI
 
-import DonationUpdatePage from '../pages/staff/DonationUpdatePage';
+
 import BloodInventoryPage from '../pages/staff/BloodInventoryPage';
 import UrgentDonorSearchPage from '../pages/staff/UrgentDonorSearchPage';
 import RequestApprovalPage from '../pages/staff/RequestApprovalPage';
@@ -45,11 +45,9 @@ export default function AppRouters() {
         }
       >
         <Route path="dashboard" element={<StaffDashboard />} />
-        
           {/* PHẦN NÀY LẤY ID TỪ BACKEND LÊN */}
           <Route path="donors" element={<DonationManagementPage />} /> {/* Route cho danh sách */}
-          <Route path="donors/:donorId" element={<DonorHealthCheckPage />} /> {/* Route cho trang chi tiết/khai báo */}
-        <Route path="donations" element={<DonationUpdatePage />} />
+          <Route path="donors/:donorId" element={<DonorHealthCheckPage />} /> {/* Route cho trang chi tiết/khai báo */} 
         <Route path="inventory" element={<BloodInventoryPage />} />
         <Route path="search-urgent" element={<UrgentDonorSearchPage />} />
         <Route path="requests" element={<RequestApprovalPage />} />
