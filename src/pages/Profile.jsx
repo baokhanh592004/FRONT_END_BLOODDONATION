@@ -82,7 +82,7 @@ const Profile = () => {
               <input
                 type="text"
                 name="name"
-                value={profile.name}
+                value={profile.fullName}
                 onChange={handleChange}
                 readOnly={!isEditing}
                 className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
