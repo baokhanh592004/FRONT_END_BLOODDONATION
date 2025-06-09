@@ -12,12 +12,14 @@ import {
 
 const Profile = () => {
   const [profile, setProfile] = useState({
-    name: "",
-    dob: "",
-    gender: "",
-    phone: "",
+    fullName: "",
     email: "",
+    phoneNumber: "",
     address: "",
+    gender: "",
+    weight: "",
+    bloodType: "",
+    healthStatus: "",
   });
 
   const [isEditing, setIsEditing] = useState(false);
