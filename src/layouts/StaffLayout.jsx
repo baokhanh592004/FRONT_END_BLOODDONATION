@@ -5,7 +5,9 @@ import { FaUser, FaTachometerAlt, FaUsers, FaSyncAlt, FaTint, FaSearch, FaCheckS
 // Dữ liệu cho các link trên sidebar
 const navLinks = [
   { to: '/staff/dashboard', icon: <FaTachometerAlt />, text: 'Dashboard' },
-  { to: '/staff/patients', icon: <FaUsers />, text: 'Danh sách hồ sơ bệnh nhân' },
+
+  { to: '/staff/donors', icon: <FaUsers />, text: 'Danh sách đăng ký hiến máu' },
+  
   { to: '/staff/donations', icon: <FaSyncAlt />, text: 'Cập nhật trạng thái đơn hiến máu' },
   { to: '/staff/inventory', icon: <FaTint />, text: 'Quản lý kho máu' },
   { to: '/staff/search-urgent', icon: <FaSearch />, text: 'Tìm kiếm người hiến máu khẩn cấp' },
