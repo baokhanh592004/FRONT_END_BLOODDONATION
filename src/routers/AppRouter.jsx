@@ -16,7 +16,7 @@ export default function AppRouters() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/profile" element={<Profile/>}></Route>
+        <Route path="/profile-donor" element={<Profile/>}></Route>
       </Route>
       
     </Routes>
