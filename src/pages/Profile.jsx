@@ -18,9 +18,7 @@ const Profile = () => {
     phoneNumber: "",
     address: "",
     gender: "",
-    weight: "",
     bloodType: "",
-    healthStatus: "",
   });
 
   const [isEditing, setIsEditing] = useState(false);
