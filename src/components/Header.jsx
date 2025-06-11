@@ -118,7 +118,7 @@ export default function Header() {
                     </Link>
 
                     {/* === ĐANG THIẾU CÁC ROLE KHÁC ===== */}
-                    {user.role === 'staff' && (
+                    {user.role === 'STAFF' && (
                       <Link
                         to="/staff/dashboard"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"

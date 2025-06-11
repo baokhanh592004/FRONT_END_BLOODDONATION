@@ -53,7 +53,7 @@ export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword
       alert("Đăng nhập thành công!");
       
       // ⭐ CẢI TIẾN: Tự động chuyển hướng dựa trên vai trò (role)
-      if (foundUser.role === 'staff') {
+      if (foundUser.role === 'STAFF') {
         window.location.href = "/staff/dashboard"; // Chuyển staff đến trang của họ
       } else {
         window.location.href = "/"; // Chuyển user thường về trang chủ
