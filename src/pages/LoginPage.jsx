@@ -22,46 +22,33 @@ export default function LoginPage() {
       [name]: type === "checkbox" ? checked : value,
     }));
   };
+// Bên trong file LoginPage.js
 
-  const handleSubmit = async e => {
-    e.preventDefault();
-    setError(null);
-    try {
-      // BƯỚC 1: GỬI ĐI - Phần này của bạn đã đúng
-      const res = await axios.post("http://localhost:8080/api/auth/login", {
-        login: formData.login,
-        password: formData.password,
-      });
+const handleSubmit = async e => {
+  e.preventDefault();
+  setError(null);
+  try {
+    const res = await axios.post("http://localhost:8080/api/auth/login", {
+      login: formData.login,
+      password: formData.password,
+    });
 
-      // BƯỚC 2: XỬ LÝ VÀ LƯU PHẢN HỒI - Đây là phần quan trọng cần thêm vào
-      // ======================================================================
-      // Giả định backend trả về object có chứa 'user' và 'token'
-      if (res.data && res.data.user && res.data.token) {
-        // 2.1. Lưu thông tin người dùng vào localStorage.
-        // Header sẽ đọc key 'user' này.
-        localStorage.setItem("user", JSON.stringify(res.data.user));
+    if (res.data && res.data.user && res.data.token) {
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+      localStorage.setItem("token", res.data.token);
 
-        // 2.2. Lưu token để dùng cho các yêu cầu xác thực sau này.
-        localStorage.setItem("token", res.data.token);
+      // THAY ĐỔI Ở ĐÂY:
+      // Thay vì: navigate("/");
+      // Hãy dùng:
+      window.location.href = "/"; // <-- Dòng này sẽ tải lại trang và điều hướng về trang chủ
 
-        // 2.3. Chuyển hướng người dùng về trang chủ.
-        navigate("/");
-
-        // (Tùy chọn) Reload lại trang để đảm bảo mọi component (như Header) đều cập nhật.
-        // Thường không cần thiết nhưng hữu ích trong một số trường hợp.
-        // window.location.reload(); 
-        
-      } else {
-        // Nếu backend trả về thành công nhưng cấu trúc dữ liệu không đúng
-        setError("Dữ liệu đăng nhập trả về không hợp lệ.");
-      }
-      // ======================================================================
-
-    } catch (err) {
-      // Xử lý lỗi từ server (sai mật khẩu, user không tồn tại...)
-      setError(err.response?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại.");
+    } else {
+      setError("Dữ liệu đăng nhập trả về không hợp lệ.");
     }
-  };
+  } catch (err) {
+    setError(err.response?.data?.message || "Đăng nhập thất bại.");
+  }
+};
 
   // Phần JSX (giao diện) giữ nguyên như cũ, nó đã tốt rồi.
   return (
