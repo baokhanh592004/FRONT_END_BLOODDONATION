@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+// Import thêm useNavigate và Link để xử lý sau khi đăng nhập
+import { Link, useNavigate } from "react-router-dom";
 
-export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword }) {
+export default function LoginPage() {
+  // Khởi tạo hook useNavigate để chuyển trang
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    login: "",  // username hoặc email
+    login: "",
     password: "",
     remember: true,
   });
@@ -18,59 +22,48 @@ export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-//======================CODE CŨ ==========================
-  // const handleSubmit = async e => {
-  //   e.preventDefault();
-  //   setError(null);
-  //   try {
-  //     const res = await axios.post("http://localhost:8080/api/auth/login", { 
-  //       login: formData.login,
-  //       password: formData.password,
-  //     });
-  //     alert(res.data.message);
 
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || "Login failed");
-  //   }
-  // };
-  //===============================================================
+  const handleSubmit = async e => {
+    e.preventDefault();
+    setError(null);
+    try {
+      // BƯỚC 1: GỬI ĐI - Phần này của bạn đã đúng
+      const res = await axios.post("http://localhost:8080/api/auth/login", {
+        login: formData.login,
+        password: formData.password,
+      });
 
-  //=========================CODE MỚI SỬA===========================================================
- // 🔥 THAY ĐỔI: Hàm handleSubmit được cải tiến với logic chuyển hướng thông minh
- const handleSubmit = async e => {
-  e.preventDefault();
-  setError(null);
-  try {
-    const res = await axios.get("https://683fa15a5b39a8039a552588.mockapi.io/api/login/user");
-    
-    const foundUser = res.data.find(user => 
-      (user.username === formData.login || user.email === formData.login) && 
-      user.password === formData.password
-    );
+      // BƯỚC 2: XỬ LÝ VÀ LƯU PHẢN HỒI - Đây là phần quan trọng cần thêm vào
+      // ======================================================================
+      // Giả định backend trả về object có chứa 'user' và 'token'
+      if (res.data && res.data.user && res.data.token) {
+        // 2.1. Lưu thông tin người dùng vào localStorage.
+        // Header sẽ đọc key 'user' này.
+        localStorage.setItem("user", JSON.stringify(res.data.user));
 
-    if (foundUser) {
-      localStorage.setItem("user", JSON.stringify(foundUser));
-      alert("Đăng nhập thành công!");
-      
-      // ⭐ CẢI TIẾN: Tự động chuyển hướng dựa trên vai trò (role)
-      if (foundUser.role === 'STAFF') {
-        window.location.href = "/staff/dashboard"; // Chuyển staff đến trang của họ
+        // 2.2. Lưu token để dùng cho các yêu cầu xác thực sau này.
+        localStorage.setItem("token", res.data.token);
+
+        // 2.3. Chuyển hướng người dùng về trang chủ.
+        navigate("/");
+
+        // (Tùy chọn) Reload lại trang để đảm bảo mọi component (như Header) đều cập nhật.
+        // Thường không cần thiết nhưng hữu ích trong một số trường hợp.
+        // window.location.reload(); 
+        
       } else {
-        window.location.href = "/"; // Chuyển user thường về trang chủ
+        // Nếu backend trả về thành công nhưng cấu trúc dữ liệu không đúng
+        setError("Dữ liệu đăng nhập trả về không hợp lệ.");
       }
+      // ======================================================================
 
-    } else {
-      setError("Sai tên đăng nhập, email hoặc mật khẩu!");
+    } catch (err) {
+      // Xử lý lỗi từ server (sai mật khẩu, user không tồn tại...)
+      setError(err.response?.data?.message || "Đăng nhập thất bại. Vui lòng kiểm tra lại.");
     }
+  };
 
-  } catch (err) {
-    console.error("Login error:", err);
-    setError("Đã có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.");
-  }
-};
-
-  //===========================================================================================
-
+  // Phần JSX (giao diện) giữ nguyên như cũ, nó đã tốt rồi.
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>Đăng nhập</h2>
@@ -105,27 +98,22 @@ export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword
         <button type="submit" style={styles.submitBtn}>Đăng nhập</button>
       </form>
 
-      {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
+      {error && <p style={{ color: "red", marginTop: 10, textAlign: 'center' }}>{error}</p>}
 
       <p style={styles.switchText}>
         Chưa có tài khoản?{" "}
-        {/* <span style={styles.switchLink} onClick={onSwitchToRegister}>
-          Đăng ký
-        </span> */}
         <Link to="/register" style={styles.switchLink}>
           Đăng ký
         </Link>
       </p>
-      {/* <button onClick={onSwitchToForgotPassword} style={{ marginTop: 10, cursor: "pointer", background: "none", border: "none", color: "#d32f2f" }}>
-        Quên mật khẩu?
-      </button> */}
-      <Link to="/forgotPassword" style={{ marginTop: 10, cursor: "pointer", background: "none", border: "none", color: "#d32f2f" }}>
+      <Link to="/forgot-password" style={styles.forgotLink}>
         Quên mật khẩu?
       </Link>
     </div>
   );
 }
 
+// Giữ nguyên styles, chỉ thêm style cho link quên mật khẩu
 const styles = {
   container: {
     width: 320,
@@ -160,6 +148,14 @@ const styles = {
     border: "none",
     cursor: "pointer",
   },
-  switchText: { marginTop: 20, color: "#d32f2f", textAlign: "center" },
-  switchLink: { fontWeight: "bold", cursor: "pointer" },
+  switchText: { marginTop: 20, color: "#121212", textAlign: "center" }, // Đổi màu cho dễ đọc
+  switchLink: { fontWeight: "bold", cursor: "pointer", color: "#d32f2f", textDecoration: 'none' },
+  forgotLink: { 
+    display: 'block', // Để nó xuống dòng và căn giữa
+    textAlign: 'center', 
+    marginTop: 10, 
+    cursor: "pointer", 
+    color: "#d32f2f",
+    textDecoration: 'none'
+  },
 };
