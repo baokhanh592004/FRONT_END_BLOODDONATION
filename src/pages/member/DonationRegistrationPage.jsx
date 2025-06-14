@@ -38,10 +38,9 @@ const StyledCalendar = ({ onChange, value }) => {
     />
   );
 };
-
 // ====================================================================
-// COMPONENT 2: Khung hiển thị thông tin người dùng
-// Nhận dữ liệu từ 'user' prop.
+// COMPONENT 2: Khung hiển thị thông tin người dùng (ĐÃ SỬA LẠI)
+// Nhận dữ liệu từ 'user' prop và hiển thị đúng thông tin.
 // ====================================================================
 const UserInfoDisplay = ({ user }) => {
   // Hiển thị trạng thái tải nếu chưa có dữ liệu user
@@ -53,32 +52,58 @@ const UserInfoDisplay = ({ user }) => {
     );
   }
 
-  // Định dạng ngày sinh cho đẹp
-  const formattedDob = user.dob ? new Date(user.dob).toLocaleDateString('vi-VN') : '-';
+  // Do backend không có ngày sinh (dob), ta sẽ ẩn phần này đi hoặc để trống
+  // const formattedDob = user.dob ? new Date(user.dob).toLocaleDateString('vi-VN') : '-';
 
   return (
     <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
       <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Thông tin cá nhân</h3>
       <div className="space-y-3 text-sm text-gray-700">
-        <div className="flex justify-between items-center"><span>Họ và tên:</span> <span className="font-medium text-gray-900">{user.full_Name || '-'}</span></div>
-        <div className="flex justify-between items-center"><span>Số CCCD:</span> <span className="font-medium text-gray-900">{user.cccd || '-'}</span></div>
-        <div className="flex justify-between items-center"><span>Ngày sinh:</span> <span className="font-medium text-gray-900">{formattedDob}</span></div>
-        <div className="flex justify-between items-center"><span>Giới tính:</span> <span className="font-medium text-gray-900">{user.gender || '-'}</span></div>
-        <div className="flex justify-between items-center"><span>Nhóm máu:</span> <span className="font-bold text-red-600">{user.bloodType || 'Chưa xác định'}</span></div>
+        {/* SỬA LẠI: từ full_Name -> fullName */}
+        <div className="flex justify-between items-center">
+            <span>Họ và tên:</span> 
+            <span className="font-medium text-gray-900">{user.fullName || 'Chưa cập nhật'}</span>
+        </div>
+        
+        {/* THÊM MỚI: Hiển thị username thay cho CCCD vì backend không có */}
+        <div className="flex justify-between items-center">
+            <span>Tên đăng nhập:</span> 
+            <span className="font-medium text-gray-900">{user.username || '-'}</span>
+        </div>
+
+        {/* SỬA LẠI: Hiển thị gender và xử lý trường hợp null */}
+        <div className="flex justify-between items-center">
+            <span>Giới tính:</span> 
+            <span className="font-medium text-gray-900">{user.gender || 'Chưa cập nhật'}</span>
+        </div>
+        
+        {/* ẨN TẠM: Các trường dob, cccd, bloodType không có từ backend */}
+        {/* <div className="flex justify-between items-center"><span>Số CCCD:</span> <span className="font-medium text-gray-900">{user.cccd || '-'}</span></div> */}
+        {/* <div className="flex justify-between items-center"><span>Ngày sinh:</span> <span className="font-medium text-gray-900">{formattedDob}</span></div> */}
+        {/* <div className="flex justify-between items-center"><span>Nhóm máu:</span> <span className="font-bold text-red-600">{user.bloodType || 'Chưa xác định'}</span></div> */}
       </div>
       
       <h3 className="text-xl font-semibold mt-6 mb-4 text-gray-800 border-b pb-2">Thông tin liên hệ</h3>
       <div className="space-y-3 text-sm text-gray-700">
-        <div className="flex justify-between items-center"><span>Email:</span> <span className="font-medium text-gray-900">{user.email}</span></div>
+        <div className="flex justify-between items-center">
+            <span>Email:</span> 
+            <span className="font-medium text-gray-900">{user.email || 'Chưa cập nhật'}</span>
+        </div>
+
+        {/* THÊM MỚI: Hiển thị số điện thoại từ backend */}
+        <div className="flex justify-between items-center">
+            <span>Số điện thoại:</span> 
+            <span className="font-medium text-gray-900">{user.phoneNumber || 'Chưa cập nhật'}</span>
+        </div>
+        
         <div className="flex justify-between items-start">
             <span>Địa chỉ:</span> 
-            <span className="font-medium text-gray-900 text-right w-3/4">{user.address || '-'}</span>
+            <span className="font-medium text-gray-900 text-right w-3/4">{user.address || 'Chưa cập nhật'}</span>
         </div>
       </div>
     </div>
   );
 };
-
 
 // ====================================================================
 // COMPONENT 3: Trang chính DonationRegistrationPage
