@@ -10,6 +10,7 @@ import HomePages from '../pages/HomePages';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
+import DonationRegistrationPage from '../pages/member/DonationRegistrationPage'; // <-- THÊM MỚI
 
 // Staff Pages
 import StaffDashboard from '../pages/staff/StaffDashboard';
@@ -33,6 +34,10 @@ export default function AppRouters() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
+
+        {/* === SỬ DỤNG ROUTE MỚI === */}
+        <Route path="/register-donation" element={<DonationRegistrationPage />} />
+
       </Route>
 
       {/* Routes được bảo vệ cho Staff */}
