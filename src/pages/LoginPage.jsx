@@ -1,10 +1,14 @@
 import React, { useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
+// Import thêm useNavigate và Link để xử lý sau khi đăng nhập
+import { Link, useNavigate } from "react-router-dom";
 
-export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword }) {
+export default function LoginPage() {
+  // Khởi tạo hook useNavigate để chuyển trang
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    login: "",  // username hoặc email
+    login: "",
     password: "",
     remember: true,
   });
@@ -18,59 +22,40 @@ export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword
       [name]: type === "checkbox" ? checked : value,
     }));
   };
-//======================CODE CŨ ==========================
-  // const handleSubmit = async e => {
-  //   e.preventDefault();
-  //   setError(null);
-  //   try {
-  //     const res = await axios.post("http://localhost:8080/api/auth/login", { 
-  //       login: formData.login,
-  //       password: formData.password,
-  //     });
-  //     alert(res.data.message);
+// Bên trong file LoginPage.js
 
-  //   } catch (err) {
-  //     setError(err.response?.data?.message || "Login failed");
-  //   }
-  // };
-  //===============================================================
-
-  //=========================CODE MỚI SỬA===========================================================
- // 🔥 THAY ĐỔI: Hàm handleSubmit được cải tiến với logic chuyển hướng thông minh
- const handleSubmit = async e => {
+const handleSubmit = async e => {
   e.preventDefault();
   setError(null);
   try {
-    const res = await axios.get("https://683fa15a5b39a8039a552588.mockapi.io/api/login/user");
-    
-    const foundUser = res.data.find(user => 
-      (user.username === formData.login || user.email === formData.login) && 
-      user.password === formData.password
-    );
+    const res = await axios.post("http://localhost:8080/api/auth/login", {
+      login: formData.login,
+      password: formData.password,
+    });
 
-    if (foundUser) {
-      localStorage.setItem("user", JSON.stringify(foundUser));
-      alert("Đăng nhập thành công!");
-      
-      // ⭐ CẢI TIẾN: Tự động chuyển hướng dựa trên vai trò (role)
-      if (foundUser.role === 'staff') {
-        window.location.href = "/staff/dashboard"; // Chuyển staff đến trang của họ
-      } else {
-        window.location.href = "/"; // Chuyển user thường về trang chủ
-      }
+    // SỬA ĐỔI TẠI ĐÂY
+    // Kiểm tra xem response có chứa cả token và user không
+    if (res.data && res.data.token && res.data.user) {
+      // 1. Lưu token (vẫn nên giữ lại để dùng cho các request API sau này)
+      localStorage.setItem("token", res.data.token);
 
+      // 2. ĐÂY LÀ CHỖ SỬA QUAN TRỌNG NHẤT:
+      // Lưu toàn bộ đối tượng người dùng vào localStorage dưới dạng chuỗi JSON.
+      // Key phải là "user" để khớp với component Header.
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      // 3. Tải lại trang để Header component đọc dữ liệu mới
+      window.location.href = "/";
     } else {
-      setError("Sai tên đăng nhập, email hoặc mật khẩu!");
+      // Nếu response không đúng định dạng mong muốn
+      setError("Dữ liệu đăng nhập trả về không hợp lệ. Thiếu token hoặc thông tin người dùng.");
     }
-
   } catch (err) {
-    console.error("Login error:", err);
-    setError("Đã có lỗi xảy ra khi đăng nhập. Vui lòng thử lại.");
+    setError(err.response?.data?.message || "Đăng nhập thất bại.");
   }
 };
 
-  //===========================================================================================
-
+  // Phần JSX (giao diện) giữ nguyên như cũ, nó đã tốt rồi.
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>Đăng nhập</h2>
@@ -105,27 +90,22 @@ export default function LoginPage({ onSwitchToRegister, onSwitchToForgotPassword
         <button type="submit" style={styles.submitBtn}>Đăng nhập</button>
       </form>
 
-      {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
+      {error && <p style={{ color: "red", marginTop: 10, textAlign: 'center' }}>{error}</p>}
 
       <p style={styles.switchText}>
         Chưa có tài khoản?{" "}
-        {/* <span style={styles.switchLink} onClick={onSwitchToRegister}>
-          Đăng ký
-        </span> */}
         <Link to="/register" style={styles.switchLink}>
           Đăng ký
         </Link>
       </p>
-      {/* <button onClick={onSwitchToForgotPassword} style={{ marginTop: 10, cursor: "pointer", background: "none", border: "none", color: "#d32f2f" }}>
-        Quên mật khẩu?
-      </button> */}
-      <Link to="/forgotPassword" style={{ marginTop: 10, cursor: "pointer", background: "none", border: "none", color: "#d32f2f" }}>
+      <Link to="/forgot-password" style={styles.forgotLink}>
         Quên mật khẩu?
       </Link>
     </div>
   );
 }
 
+// Giữ nguyên styles, chỉ thêm style cho link quên mật khẩu
 const styles = {
   container: {
     width: 320,
@@ -160,6 +140,14 @@ const styles = {
     border: "none",
     cursor: "pointer",
   },
-  switchText: { marginTop: 20, color: "#d32f2f", textAlign: "center" },
-  switchLink: { fontWeight: "bold", cursor: "pointer" },
+  switchText: { marginTop: 20, color: "#121212", textAlign: "center" }, // Đổi màu cho dễ đọc
+  switchLink: { fontWeight: "bold", cursor: "pointer", color: "#d32f2f", textDecoration: 'none' },
+  forgotLink: { 
+    display: 'block', // Để nó xuống dòng và căn giữa
+    textAlign: 'center', 
+    marginTop: 10, 
+    cursor: "pointer", 
+    color: "#d32f2f",
+    textDecoration: 'none'
+  },
 };

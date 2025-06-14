@@ -10,11 +10,14 @@ import HomePages from '../pages/HomePages';
 import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
+import DonationRegistrationPage from '../pages/member/DonationRegistrationPage'; // <-- THÊM MỚI
 
 // Staff Pages
 import StaffDashboard from '../pages/staff/StaffDashboard';
-import PatientManagementPage from '../pages/staff/PatientManagementPage';
-import DonationUpdatePage from '../pages/staff/DonationUpdatePage';
+import DonationManagementPage from '../pages/staff/DonationManagementPage'; // THAY THẾ PatientManagementPage
+import DonorHealthCheckPage from '../pages/staff/DonorHealthCheckPage'; // <-- THÊM MỚI
+
+
 import BloodInventoryPage from '../pages/staff/BloodInventoryPage';
 import UrgentDonorSearchPage from '../pages/staff/UrgentDonorSearchPage';
 import RequestApprovalPage from '../pages/staff/RequestApprovalPage';
@@ -31,6 +34,10 @@ export default function AppRouters() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
+
+        {/* === SỬ DỤNG ROUTE MỚI === */}
+        <Route path="/register-donation" element={<DonationRegistrationPage />} />
+
       </Route>
 
       {/* Routes được bảo vệ cho Staff */}
@@ -43,8 +50,9 @@ export default function AppRouters() {
         }
       >
         <Route path="dashboard" element={<StaffDashboard />} />
-        <Route path="patients" element={<PatientManagementPage />} />
-        <Route path="donations" element={<DonationUpdatePage />} />
+          {/* PHẦN NÀY LẤY ID TỪ BACKEND LÊN */}
+          <Route path="donors" element={<DonationManagementPage />} /> {/* Route cho danh sách */}
+          <Route path="donors/:donorId" element={<DonorHealthCheckPage />} /> {/* Route cho trang chi tiết/khai báo */} 
         <Route path="inventory" element={<BloodInventoryPage />} />
         <Route path="search-urgent" element={<UrgentDonorSearchPage />} />
         <Route path="requests" element={<RequestApprovalPage />} />

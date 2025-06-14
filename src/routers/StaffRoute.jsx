@@ -18,7 +18,7 @@ const StaffRoute = ({ children }) => {
   
   // "Thẻ của anh ghi chức vụ là 'staff' phải không?"
   // Đây là dòng code KIỂM TRA QUYỀN HẠN quan trọng nhất.
-  const isAuthorized = user && user.role === 'staff';
+  const isAuthorized = user && user.role === 'STAFF';
 
   // 3. Vệ sĩ ra quyết định
   if (isAuthorized) {
