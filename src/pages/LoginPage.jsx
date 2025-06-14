@@ -33,17 +33,22 @@ const handleSubmit = async e => {
       password: formData.password,
     });
 
-    if (res.data && res.data.user && res.data.token) {
-      localStorage.setItem("user", JSON.stringify(res.data.user));
+    // SỬA ĐỔI TẠI ĐÂY
+    // Kiểm tra xem response có chứa cả token và user không
+    if (res.data && res.data.token && res.data.user) {
+      // 1. Lưu token (vẫn nên giữ lại để dùng cho các request API sau này)
       localStorage.setItem("token", res.data.token);
 
-      // THAY ĐỔI Ở ĐÂY:
-      // Thay vì: navigate("/");
-      // Hãy dùng:
-      window.location.href = "/"; // <-- Dòng này sẽ tải lại trang và điều hướng về trang chủ
+      // 2. ĐÂY LÀ CHỖ SỬA QUAN TRỌNG NHẤT:
+      // Lưu toàn bộ đối tượng người dùng vào localStorage dưới dạng chuỗi JSON.
+      // Key phải là "user" để khớp với component Header.
+      localStorage.setItem("user", JSON.stringify(res.data.user));
 
+      // 3. Tải lại trang để Header component đọc dữ liệu mới
+      window.location.href = "/";
     } else {
-      setError("Dữ liệu đăng nhập trả về không hợp lệ.");
+      // Nếu response không đúng định dạng mong muốn
+      setError("Dữ liệu đăng nhập trả về không hợp lệ. Thiếu token hoặc thông tin người dùng.");
     }
   } catch (err) {
     setError(err.response?.data?.message || "Đăng nhập thất bại.");
