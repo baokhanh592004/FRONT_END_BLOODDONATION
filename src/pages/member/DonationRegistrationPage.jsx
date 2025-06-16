@@ -65,11 +65,11 @@ const UserInfoDisplay = ({ user }) => {
             <span className="font-medium text-gray-900">{user.fullName || 'Chưa cập nhật'}</span>
         </div>
         
-        {/* THÊM MỚI: Hiển thị username thay cho CCCD vì backend không có */}
+        {/* THÊM MỚI: Hiển thị username thay cho CCCD vì backend không có
         <div className="flex justify-between items-center">
             <span>Tên đăng nhập:</span> 
             <span className="font-medium text-gray-900">{user.username || '-'}</span>
-        </div>
+        </div> */}
 
         {/* SỬA LẠI: Hiển thị gender và xử lý trường hợp null */}
         <div className="flex justify-between items-center">
@@ -120,25 +120,55 @@ export default function DonationRegistrationPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // 1. LẤY THÔNG TIN USER TỪ LOCALSTORAGE
-    const storedUser = localStorage.getItem('user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    } else {
-      // Nếu không có, chuyển về trang login
-      navigate('/login', { replace: true });
-      return; 
-    }
+    const fetchInitialData = async () => {
+      const token = localStorage.getItem('token');
+      const storedUserJSON = localStorage.getItem('user');
 
-    // 2. GỌI API ĐỂ LẤY DANH SÁCH TRUNG TÂM HIẾN MÁU
-    const fetchDonationCenters = async () => {
+      if (!token || !storedUserJSON) {
+        console.error("Không tìm thấy token hoặc thông tin người dùng. Đang chuyển hướng...");
+        navigate('/login', { replace: true });
+        return;
+      }
+
       try {
-        // Thay thế endpoint này bằng API thật của bạn
-        const response = await axios.get('http://localhost:8080/api/donation-centers');
-        setDonationCenters(response.data);
-        if (response.data.length > 0) {
-          // Tự động chọn trung tâm đầu tiên làm mặc định
-          setSelectedCenter(response.data[0].center_id);
+        const storedUser = JSON.parse(storedUserJSON);
+        // === SỬA ĐỔI CHÍNH Ở ĐÂY ===
+        const userId = storedUser.userId; 
+
+        if (!userId) {
+          // Lỗi này giờ không nên xảy ra nữa
+          throw new Error("Không tìm thấy ID người dùng trong dữ liệu đã lưu.");
+        }
+
+        const userResponse = await axios.get(
+          `http://localhost:8080/api/user/${userId}/info`,
+          {
+            headers: {
+              'Authorization': `Bearer ${token}`
+            }
+          }
+        );
+
+        // Lưu ý: Response từ API /info cũng phải nhất quán về key (ví dụ: username, phoneNumber)
+        // Dựa vào ảnh của bạn, nó trả về username và phoneNumber (camelCase) là đúng rồi.
+        const fullUserData = { ...storedUser, ...userResponse.data };
+        setUser(fullUserData);
+
+      } catch (err) {
+        setError('Không thể tải thông tin người dùng. Vui lòng đăng nhập lại.');
+        console.error("Lỗi khi lấy thông tin người dùng:", err);
+        if (err.response?.status === 401 || err.response?.status === 403) {
+            navigate('/login', { replace: true });
+        }
+        return;
+      }
+
+      // Phần lấy danh sách trung tâm hiến máu giữ nguyên
+      try {
+        const centersResponse = await axios.get('http://localhost:8080/api/DonationCenter');
+        setDonationCenters(centersResponse.data);
+        if (centersResponse.data.length > 0) {
+          setSelectedCenter(centersResponse.data[0].centerId);
         }
       } catch (err) {
         setError('Lỗi: Không thể tải danh sách trung tâm hiến máu.');
@@ -146,7 +176,7 @@ export default function DonationRegistrationPage() {
       }
     };
 
-    fetchDonationCenters();
+    fetchInitialData();
   }, [navigate]);
 
   const handleSubmit = async () => {
@@ -168,11 +198,11 @@ export default function DonationRegistrationPage() {
       if (!token) throw new Error('Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
 
       const registrationData = {
-        userId: user.user_id,
+        userId: user.userId, // <-- CHẮC CHẮN RẰNG Ở ĐÂY CŨNG LÀ "userId"
         centerId: parseInt(selectedCenter, 10),
         readyDate: selectedDate.toISOString(),
-        componentTypeId: 1, // Giả định mặc định là máu toàn phần (ID=1)
-      };
+        componentTypeId: 1, 
+    };
       
       // Gửi yêu cầu đăng ký đến API
       await axios.post(
