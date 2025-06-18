@@ -11,7 +11,7 @@ import LoginPage from '../pages/LoginPage';
 import RegisterPage from '../pages/RegisterPage';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 import DonationRegistrationPage from '../pages/member/DonationRegistrationPage'; // <-- THÊM MỚI
-
+import DonationQuestionnairePage from '../pages/member/DonationQuestionnairePage'; // <-- THÊM MỚI
 // Staff Pages
 import StaffDashboard from '../pages/staff/StaffDashboard';
 import DonationManagementPage from '../pages/staff/DonationManagementPage'; // THAY THẾ PatientManagementPage
@@ -37,7 +37,7 @@ export default function AppRouters() {
 
         {/* === SỬ DỤNG ROUTE MỚI === */}
         <Route path="/register-donation" element={<DonationRegistrationPage />} />
-
+        <Route path="/member/donation-questionnaire" element={<DonationQuestionnairePage />} />
       </Route>
 
       {/* Routes được bảo vệ cho Staff */}
