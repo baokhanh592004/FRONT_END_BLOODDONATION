@@ -6,8 +6,7 @@ import Calendar from 'react-calendar';
 import axios from 'axios';
 
 // ====================================================================
-// COMPONENT 1: Lịch được style bằng Tailwind
-// Tách ra để code chính gọn gàng hơn.
+// COMPONENT 1: StyledCalendar (No changes needed)
 // ====================================================================
 const StyledCalendar = ({ onChange, value }) => {
   return (
@@ -39,11 +38,9 @@ const StyledCalendar = ({ onChange, value }) => {
   );
 };
 // ====================================================================
-// COMPONENT 2: Khung hiển thị thông tin người dùng (ĐÃ SỬA LẠI)
-// Nhận dữ liệu từ 'user' prop và hiển thị đúng thông tin.
+// COMPONENT 2: UserInfoDisplay (No changes needed)
 // ====================================================================
 const UserInfoDisplay = ({ user }) => {
-  // Hiển thị trạng thái tải nếu chưa có dữ liệu user
   if (!user) {
     return (
       <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 text-center text-gray-500">
@@ -52,35 +49,18 @@ const UserInfoDisplay = ({ user }) => {
     );
   }
 
-  // Do backend không có ngày sinh (dob), ta sẽ ẩn phần này đi hoặc để trống
-  // const formattedDob = user.dob ? new Date(user.dob).toLocaleDateString('vi-VN') : '-';
-
   return (
     <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200">
       <h3 className="text-xl font-semibold mb-4 text-gray-800 border-b pb-2">Thông tin cá nhân</h3>
       <div className="space-y-3 text-sm text-gray-700">
-        {/* SỬA LẠI: từ full_Name -> fullName */}
         <div className="flex justify-between items-center">
             <span>Họ và tên:</span> 
             <span className="font-medium text-gray-900">{user.fullName || 'Chưa cập nhật'}</span>
         </div>
-        
-        {/* THÊM MỚI: Hiển thị username thay cho CCCD vì backend không có
-        <div className="flex justify-between items-center">
-            <span>Tên đăng nhập:</span> 
-            <span className="font-medium text-gray-900">{user.username || '-'}</span>
-        </div> */}
-
-        {/* SỬA LẠI: Hiển thị gender và xử lý trường hợp null */}
         <div className="flex justify-between items-center">
             <span>Giới tính:</span> 
             <span className="font-medium text-gray-900">{user.gender || 'Chưa cập nhật'}</span>
         </div>
-        
-        {/* ẨN TẠM: Các trường dob, cccd, bloodType không có từ backend */}
-        {/* <div className="flex justify-between items-center"><span>Số CCCD:</span> <span className="font-medium text-gray-900">{user.cccd || '-'}</span></div> */}
-        {/* <div className="flex justify-between items-center"><span>Ngày sinh:</span> <span className="font-medium text-gray-900">{formattedDob}</span></div> */}
-        {/* <div className="flex justify-between items-center"><span>Nhóm máu:</span> <span className="font-bold text-red-600">{user.bloodType || 'Chưa xác định'}</span></div> */}
       </div>
       
       <h3 className="text-xl font-semibold mt-6 mb-4 text-gray-800 border-b pb-2">Thông tin liên hệ</h3>
@@ -89,13 +69,10 @@ const UserInfoDisplay = ({ user }) => {
             <span>Email:</span> 
             <span className="font-medium text-gray-900">{user.email || 'Chưa cập nhật'}</span>
         </div>
-
-        {/* THÊM MỚI: Hiển thị số điện thoại từ backend */}
         <div className="flex justify-between items-center">
             <span>Số điện thoại:</span> 
             <span className="font-medium text-gray-900">{user.phoneNumber || 'Chưa cập nhật'}</span>
         </div>
-        
         <div className="flex justify-between items-start">
             <span>Địa chỉ:</span> 
             <span className="font-medium text-gray-900 text-right w-3/4">{user.address || 'Chưa cập nhật'}</span>
@@ -109,7 +86,7 @@ const UserInfoDisplay = ({ user }) => {
 // COMPONENT 3: Trang chính DonationRegistrationPage
 // ====================================================================
 export default function DonationRegistrationPage() {
-  const [user, setUser] = useState(null); // Dữ liệu người dùng lấy từ localStorage
+  const [user, setUser] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [donationCenters, setDonationCenters] = useState([]);
   const [selectedCenter, setSelectedCenter] = useState('');
@@ -130,27 +107,20 @@ export default function DonationRegistrationPage() {
         return;
       }
 
+      // ========= START: Tải thông tin User (giữ nguyên) ==========
       try {
         const storedUser = JSON.parse(storedUserJSON);
-        // === SỬA ĐỔI CHÍNH Ở ĐÂY ===
         const userId = storedUser.userId; 
 
         if (!userId) {
-          // Lỗi này giờ không nên xảy ra nữa
           throw new Error("Không tìm thấy ID người dùng trong dữ liệu đã lưu.");
         }
 
         const userResponse = await axios.get(
           `http://localhost:8080/api/user/${userId}/info`,
-          {
-            headers: {
-              'Authorization': `Bearer ${token}`
-            }
-          }
+          { headers: { 'Authorization': `Bearer ${token}` } }
         );
 
-        // Lưu ý: Response từ API /info cũng phải nhất quán về key (ví dụ: username, phoneNumber)
-        // Dựa vào ảnh của bạn, nó trả về username và phoneNumber (camelCase) là đúng rồi.
         const fullUserData = { ...storedUser, ...userResponse.data };
         setUser(fullUserData);
 
@@ -160,27 +130,39 @@ export default function DonationRegistrationPage() {
         if (err.response?.status === 401 || err.response?.status === 403) {
             navigate('/login', { replace: true });
         }
-        return;
+        return; // Dừng lại nếu không tải được user
       }
+      // ========= END: Tải thông tin User ==========
 
-      // Phần lấy danh sách trung tâm hiến máu giữ nguyên
+
+      // ========= START: BỔ SUNG API TẢI DANH SÁCH TRUNG TÂM HIẾN MÁU =========
       try {
-        const centersResponse = await axios.get('http://localhost:8080/api/DonationCenter');
+        // Sử dụng API endpoint từ Postman của bạn.
+        // Thêm header Authorization vì đây là route cần xác thực.
+        const centersResponse = await axios.get(
+            'http://localhost:8080/api/user/donation-center/names', 
+            { headers: { 'Authorization': `Bearer ${token}` } }
+        );
+
+        // Lưu ý: Giả định API trả về một mảng các object, mỗi object có `centerId` và `name`.
+        // Ví dụ: [{ "centerId": 1, "name": "Bach Mai Hospital" }, ...]
         setDonationCenters(centersResponse.data);
-        if (centersResponse.data.length > 0) {
-          setSelectedCenter(centersResponse.data[0].centerId);
+
+        // Tự động chọn trung tâm đầu tiên trong danh sách
+        if (centersResponse.data && centersResponse.data.length > 0) {
+          setSelectedCenter(centersResponse.data[0].centerId); 
         }
       } catch (err) {
         setError('Lỗi: Không thể tải danh sách trung tâm hiến máu.');
         console.error("Fetch centers error:", err);
       }
+      // ========= END: BỔ SUNG API ==========
     };
 
     fetchInitialData();
   }, [navigate]);
 
   const handleSubmit = async () => {
-    // Kiểm tra các điều kiện cần thiết
     if (!selectedCenter) {
       setError('Vui lòng chọn một địa điểm hiến máu.');
       return;
@@ -196,27 +178,25 @@ export default function DonationRegistrationPage() {
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error('Phiên đăng nhập không hợp lệ. Vui lòng đăng nhập lại.');
-
-      const registrationData = {
-        userId: user.userId, // <-- CHẮC CHẮN RẰNG Ở ĐÂY CŨNG LÀ "userId"
-        centerId: parseInt(selectedCenter, 10),
-        readyDate: selectedDate.toISOString(),
-        componentTypeId: 1, 
-    };
       
-      // Gửi yêu cầu đăng ký đến API
+      // SỬA LẠI API ENDPOINT VÀ PAYLOAD CHO ĐÚNG VỚI YÊU CẦU
+      // Dựa vào các tab trong Postman, API đăng ký có thể là /api/user/appointments/register
+      const registrationData = {
+        userId: user.userId,
+        centerId: parseInt(selectedCenter, 10),
+        scheduledDate: selectedDate.toISOString().split('T')[0], // Gửi định dạng YYYY-MM-DD
+      };
+      
       await axios.post(
-        'http://localhost:8080/api/donations/register',
+        'http://localhost:8080/api/user/appointments/register', // API endpoint để đăng ký
         registrationData,
         { headers: { 'Authorization': `Bearer ${token}` } }
       );
 
-      // Xử lý khi thành công
       alert('Bạn đã đăng ký lịch hẹn thành công! Chúng tôi sẽ sớm liên hệ để xác nhận.');
-      navigate('/member/my-appointments'); // Chuyển đến trang quản lý lịch hẹn
+      navigate('/member/my-appointments');
 
     } catch (err) {
-      // Xử lý khi có lỗi
       setError(err.response?.data?.message || err.message || 'Đã có lỗi xảy ra trong quá trình đăng ký.');
       console.error("Submit error:", err);
     } finally {
@@ -230,14 +210,11 @@ export default function DonationRegistrationPage() {
         <h2 className="text-3xl font-bold text-center mb-8 text-gray-800">Thông tin đăng ký hiến máu</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
-            {/* Cột Trái: Hiển thị thông tin user */}
             <div className="flex flex-col gap-8">
                 <UserInfoDisplay user={user} />
             </div>
 
-            {/* Cột Phải: Form tương tác */}
             <div className="bg-white p-6 rounded-lg shadow-md border border-gray-200 flex flex-col">
-              {/* 1. Dropdown chọn trung tâm */}
               <div className="mb-6">
                 <label htmlFor="donation-center" className="block text-lg font-semibold mb-2 text-gray-700">
                   Chọn địa điểm hiến máu
@@ -249,10 +226,11 @@ export default function DonationRegistrationPage() {
                   className="w-full p-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
                   {donationCenters.length === 0 ? (
-                    <option disabled>Đang tải danh sách...</option>
+                    <option value="" disabled>Đang tải hoặc không có địa điểm...</option>
                   ) : (
+                    // SỬA LẠI: Dùng `centerId` để nhất quán
                     donationCenters.map((center) => (
-                      <option key={center.center_id} value={center.center_id}>
+                      <option key={center.centerId} value={center.centerId}>
                         {center.name}
                       </option>
                     ))
@@ -260,7 +238,6 @@ export default function DonationRegistrationPage() {
                 </select>
               </div>
 
-              {/* 2. Lịch chọn ngày */}
               <div className="flex-grow">
                 <h3 className="text-lg font-semibold mb-4 text-gray-700">Chọn ngày bạn có thể đến</h3>
                 <div className="flex justify-center">
@@ -268,12 +245,11 @@ export default function DonationRegistrationPage() {
                 </div>
               </div>
 
-              {/* Thông báo lỗi và nút Submit */}
               {error && <p className="text-red-500 text-center mt-4 font-medium">{error}</p>}
               <div className="text-center mt-6">
                 <button
                   onClick={handleSubmit}
-                  disabled={isLoading || !user || donationCenters.length === 0}
+                  disabled={isLoading || !user || !selectedCenter}
                   className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-12 rounded-lg transition duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   {isLoading ? 'Đang gửi đăng ký...' : 'Xác nhận đăng ký'}
