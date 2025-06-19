@@ -89,7 +89,7 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Ngày sinh */}
+          {/* Ngày sinh
           <div className="flex items-center">
             <HiCalendar className="text-red-500 text-xl flex-shrink-0 mr-3" />
             <div className="w-full">
@@ -103,7 +103,7 @@ const Profile = () => {
                 className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
               />
             </div>
-          </div>
+          </div> */}
 
           {/* Giới tính */}
           <div className="flex items-center">
