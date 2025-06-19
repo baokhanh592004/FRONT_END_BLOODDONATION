@@ -78,7 +78,7 @@ export default function Header() {
             <Link to="/pages" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
               Giới thiệu
             </Link>
-            <Link to="/Đăng_ký_hiến_máu" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
+            <Link to="/register-donation" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
               Đăng ký hiến máu
             </Link>
             <Link to="/Thông_tin_nhóm_máu" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
@@ -118,7 +118,7 @@ export default function Header() {
                     </Link>
 
                     {/* === ĐANG THIẾU CÁC ROLE KHÁC ===== */}
-                    {user.role === 'staff' && (
+                    {user.role === 'STAFF' && (
                       <Link
                         to="/staff/dashboard"
                         className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
