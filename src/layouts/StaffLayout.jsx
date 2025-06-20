@@ -19,7 +19,7 @@ const StaffLayout = () => {
     <div className="flex h-screen bg-gray-100 font-sans">
       {/* Sidebar */}
       <aside className="w-80 bg-white border-r p-5 flex-shrink-0">
-        <h2 className="text-xl font-bold text-green-700 mb-6">Staff Panel</h2>
+        <h2 className="text-xl font-bold text-green-700 mb-6">Staff  </h2>
         <nav className="space-y-2">
           {/* Mục cá nhân */}
           <div className="flex items-center p-2 text-gray-700 rounded-md">
