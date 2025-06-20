@@ -4,6 +4,7 @@ import { Routes, Route } from 'react-router-dom';
 // Layouts
 import AppLayout from '../layouts/AppLayout';
 import StaffLayout from '../layouts/StaffLayout'; // <-- IMPORT
+import AdminLayout from '../layouts/AdminLayout';
 
 // General Pages
 import HomePages from '../pages/HomePages';
@@ -12,7 +13,7 @@ import RegisterPage from '../pages/RegisterPage';
 import ForgotPasswordPage from '../pages/ForgotPasswordPage';
 import Profile from '../pages/Profile'; // <-- THÊM MỚI
 import DonationRegistrationPage from '../pages/member/DonationRegistrationPage'; // <-- THÊM MỚI
-import DonationQuestionnairePage from '../pages/member/DonationQuestionnairePage'; // <-- THÊM MỚI
+import HealthAnswer from '../pages/member/HealthAnswer';
 // Staff Pages
 import StaffDashboard from '../pages/staff/StaffDashboard';
 import DonationManagementPage from '../pages/staff/DonationManagementPage'; // THAY THẾ PatientManagementPage
@@ -25,6 +26,10 @@ import RequestApprovalPage from '../pages/staff/RequestApprovalPage';
 
 // Route Protector
 import StaffRoute from './StaffRoute';
+// Admin Pages
+import AdminRouter from './AdminRouter';
+import UserManagement from '../pages/admin/UserManagement';
+import HealthQuestion from '../pages/admin/HealthQuestion';
 
 export default function AppRouters() {
   return (
@@ -37,9 +42,9 @@ export default function AppRouters() {
         <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
 
         {/* === SỬ DỤNG ROUTE MỚI === */}
-        <Route path="/profile" element={<Profile/>} />
+        <Route path="/profile" element={<Profile />} />
         <Route path="/register-donation" element={<DonationRegistrationPage />} />
-        <Route path="/member/donation-questionnaire" element={<DonationQuestionnairePage />} />
+        <Route path="/member/donation-questionnaire" element={<HealthAnswer />} />
       </Route>
 
       {/* Routes được bảo vệ cho Staff */}
@@ -51,14 +56,32 @@ export default function AppRouters() {
           </StaffRoute>
         }
       >
+
+
         <Route path="dashboard" element={<StaffDashboard />} />
-          {/* PHẦN NÀY LẤY ID TỪ BACKEND LÊN */}
-          <Route path="donors" element={<DonationManagementPage />} /> {/* Route cho danh sách */}
-          <Route path="donors/:donorId" element={<DonorHealthCheckPage />} /> {/* Route cho trang chi tiết/khai báo */} 
+        {/* PHẦN NÀY LẤY ID TỪ BACKEND LÊN */}
+        <Route path="donors" element={<DonationManagementPage />} /> {/* Route cho danh sách */}
+        <Route path="donors/:donorId" element={<DonorHealthCheckPage />} /> {/* Route cho trang chi tiết/khai báo */}
         <Route path="inventory" element={<BloodInventoryPage />} />
         <Route path="search-urgent" element={<UrgentDonorSearchPage />} />
         <Route path="requests" element={<RequestApprovalPage />} />
       </Route>
+
+
+      <Route
+        path="/admin"
+        element={
+          <AdminRouter>
+            <AdminLayout />
+          </AdminRouter>
+        }
+      >
+        <Route path="dashboard" element={<StaffDashboard/>} />
+        <Route path="usermanagement" element={<UserManagement />} />
+        <Route path="healthquestion" element={<HealthQuestion/>} />
+
+      </Route>
+
     </Routes>
   );
 }
