@@ -54,17 +54,18 @@ export default function AppRouters() {
           <StaffRoute>
             <StaffLayout />
           </StaffRoute>
+
         }
       >
+          <Route path="dashboard" element={<StaffDashboard />} />
+            {/* PHẦN NÀY LẤY ID TỪ BACKEND LÊN */}
+            <Route path="donors" element={<DonationManagementPage />} /> {/* Route cho danh sách */}
+            <Route path="donors/:donorId" element={<DonorHealthCheckPage />} /> {/* Route cho trang chi tiết/khai báo */} 
+          <Route path="inventory" element={<BloodInventoryPage />} />
+          <Route path="search-urgent" element={<UrgentDonorSearchPage />} />
+          <Route path="requests" element={<RequestApprovalPage />} />
 
-
-        <Route path="dashboard" element={<StaffDashboard />} />
-        {/* PHẦN NÀY LẤY ID TỪ BACKEND LÊN */}
-        <Route path="donors" element={<DonationManagementPage />} /> {/* Route cho danh sách */}
-        <Route path="donors/:donorId" element={<DonorHealthCheckPage />} /> {/* Route cho trang chi tiết/khai báo */}
-        <Route path="inventory" element={<BloodInventoryPage />} />
-        <Route path="search-urgent" element={<UrgentDonorSearchPage />} />
-        <Route path="requests" element={<RequestApprovalPage />} />
+       
       </Route>
 
 
@@ -81,6 +82,7 @@ export default function AppRouters() {
         <Route path="healthquestion" element={<HealthQuestion/>} />
 
       </Route>
+
 
     </Routes>
   );
