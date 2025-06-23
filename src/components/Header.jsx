@@ -67,9 +67,8 @@ export default function Header() {
 
           {/* Nav links */}
           <nav
-            className={`${
-              menuOpen ? "block" : "hidden"
-            } lg:flex lg:items-center lg:space-x-8 font-medium mt-4 lg:mt-0`}
+            className={`${menuOpen ? "block" : "hidden"
+              } lg:flex lg:items-center lg:space-x-8 font-medium mt-4 lg:mt-0`}
           >
             {/* ... Các link khác giữ nguyên ... */}
             <Link to="/" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
@@ -95,7 +94,7 @@ export default function Header() {
             {user ? (
               // Nếu đã đăng nhập, hiển thị menu dropdown
               // THAY ĐỔI 1: Thêm 'pb-2' để tạo vùng đệm hover
-              <div className="relative group pb-2"> 
+              <div className="relative group pb-2">
                 <button className="flex items-center space-x-2 focus:outline-none py-2 lg:py-0">
                   <img
                     src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
@@ -127,12 +126,17 @@ export default function Header() {
                       </Link>
                     )}
                     {/* ============================================= */}
-                    <Link
-                        to="/orders"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
-                    >
-                        Đơn Mua
-                    </Link>
+                    {user.role === 'ADMIN' && (
+                      <>
+                        <Link
+                          to="/admin/dashboard"
+                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
+                        >
+                          Dashboard
+                        </Link>
+                      </>
+                    )}
+
                     <div className="border-t border-gray-100 my-1"></div>
                     <button
                       onClick={handleLogout}

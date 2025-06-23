@@ -4,22 +4,17 @@ import { FaUser, FaTachometerAlt, FaUsers, FaSyncAlt, FaTint, FaSearch, FaCheckS
 
 // Dữ liệu cho các link trên sidebar
 const navLinks = [
-  { to: '/staff/dashboard', icon: <FaTachometerAlt />, text: 'Dashboard' },
-
-  { to: '/staff/donors', icon: <FaUsers />, text: 'Danh sách đăng ký hiến máu' },
-  
-  // { to: '/staff/donations', icon: <FaSyncAlt />, text: 'Cập nhật trạng thái đơn hiến máu' },
-  { to: '/staff/inventory', icon: <FaTint />, text: 'Quản lý kho máu' },
-  { to: '/staff/search-urgent', icon: <FaSearch />, text: 'Tìm kiếm người hiến máu khẩn cấp' },
-  { to: '/staff/requests', icon: <FaCheckSquare />, text: 'Phê duyệt yêu cầu' },
+  { to: '/admin/dashboard', icon: <FaTachometerAlt />, text: 'Dashboard' },
+  { to: '/admin/usermanagement', icon: <FaUsers />, text: 'Quản Lý Người Dùng' },
+  { to: '/admin/healthquestion', icon: <FaUsers />, text: 'Tạo Câu hỏi' },
 ];
 
-const StaffLayout = () => {
+const AdminLayout = () => {
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
       {/* Sidebar */}
       <aside className="w-80 bg-white border-r p-5 flex-shrink-0">
-        <h2 className="text-xl font-bold text-green-700 mb-6">Staff  </h2>
+        <h2 className="text-xl font-bold text-green-700 mb-6">Admin  </h2>
         <nav className="space-y-2">
           {/* Mục cá nhân */}
           <div className="flex items-center p-2 text-gray-700 rounded-md">
@@ -57,4 +52,4 @@ const StaffLayout = () => {
   );
 };
 
-export default StaffLayout;
+export default AdminLayout;
