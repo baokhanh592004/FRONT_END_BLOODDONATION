@@ -4,12 +4,11 @@ const HomePages = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
  
-
   const participatingHospitals = [
     {
       name: "Bệnh viện Chợ Rẫy",
       image: "https://images.unsplash.com/photo-1538108149393-fbbd81895907?ixlib=rb-4.0.3",
-      certification: "Chứng nhận ISO 9001:2015"
+      certification: "Chứng nhận ISO 9a001:2015"
     },
     {
       name: "Bệnh viện Huyết học",
@@ -43,6 +42,31 @@ const HomePages = () => {
     }
   ];
 
+  const bloodTypesDetail = {
+    O: {
+      name: "Group O",
+      description: "không có kháng nguyên A và B trên tế bào hồng cầu (nhưng cả kháng thể A và B đều có trong huyết tương)",
+      image: "/images/blood-o.png" // Đường dẫn đến ảnh bạn đã upload
+    },
+    A: {
+      name: "Group A",
+      description: "chỉ có kháng nguyên A trên tế bào hồng cầu (và kháng thể B trong huyết tương)",
+      image: "/images/blood-a.png"
+    },
+    B: {
+      name: "Group B",
+      description: "chỉ có kháng nguyên B trên tế bào hồng cầu (và kháng thể A trong huyết tương)",
+      image: "/images/blood-b.png"
+    },
+    AB: {
+      name: "Group AB",
+      description: "có cả kháng nguyên A và B trên tế bào hồng cầu (nhưng không có kháng thể A và B trong huyết tương)",
+      image: "/images/blood-ab.png"
+    }
+  };
+  
+  const [selectedBloodType, setSelectedBloodType] = useState("O");
+  
   return (
     <div className="min-h-screen bg-gray-50">
       {/* Participating Hospitals */}
@@ -59,19 +83,34 @@ const HomePages = () => {
         </div>
       </section>
 
-      {/* Blood Type Info */}
       <section className="bg-red-100 p-6">
-        <h2 className="text-2xl font-bold text-center mb-6">Thông tin nhóm máu</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {bloodTypeInfo.map((blood, idx) => (
-            <div key={idx} className="bg-white p-4 rounded-lg shadow-sm border text-center">
-              <h3 className="text-xl font-semibold text-red-600">Nhóm máu: {blood.type}</h3>
-              <p className="text-sm">Cho: {blood.canGiveTo.join(", ")}</p>
-              <p className="text-sm">Nhận: {blood.canReceiveFrom.join(", ")}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+  <h2 className="text-2xl font-bold text-center mb-6">Thông tin nhóm máu</h2>
+
+  <div className="flex justify-center space-x-2 mb-6">
+    {["A", "B", "AB", "O"].map((type) => (
+      <button
+        key={type}
+        onClick={() => setSelectedBloodType(type)}
+        className={`px-4 py-2 rounded-full text-sm font-semibold ${
+          selectedBloodType === type ? "bg-red-600 text-white" : "bg-white text-gray-700 border"
+        }`}
+      >
+        Group {type}
+      </button>
+    ))}
+  </div>
+
+  <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-4 text-center">
+    <h3 className="text-xl font-semibold">{bloodTypesDetail[selectedBloodType].name}</h3>
+    <p className="text-sm text-gray-600 mb-4">{bloodTypesDetail[selectedBloodType].description}</p>
+    <img
+      src={bloodTypesDetail[selectedBloodType].image}
+      alt={bloodTypesDetail[selectedBloodType].name}
+      className="mx-auto w-full max-h-72 object-contain"
+    />
+  </div>
+</section>
+
 
       {/* Blog Section */}
       <section className="p-6">
