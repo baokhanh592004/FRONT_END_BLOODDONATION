@@ -1,0 +1,126 @@
+/* src/components/BloodTypeVisualizer/BloodTypeVisualizer.css */
+
+.visualizer-container {
+    font-family: sans-serif;
+    background-color: #f8f8f8; /* Màu nền xám nhạt giống ảnh */
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    padding: 24px;
+    max-width: 600px;
+    margin: 2rem auto;
+    overflow: hidden;
+  }
+  
+  .visualizer-title {
+    text-align: center;
+    color: #333;
+    font-weight: 500;
+    margin-bottom: 24px;
+  }
+  
+  .visualizer-main {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    position: relative;
+  }
+  
+  .column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 120px; /* Độ rộng của cột */
+  }
+  
+  .column-title {
+    font-size: 0.8rem;
+    color: #666;
+    letter-spacing: 1px;
+    margin-bottom: 30px;
+  }
+  
+  .nodes-container {
+    display: flex;
+    flex-direction: column;
+    gap: 65px; /* Khoảng cách giữa các túi máu/vòng tròn */
+  }
+  
+  .node {
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    border-radius: 50%;
+    transition: all 0.4s ease;
+    color: #333;
+  }
+  
+  /* Style cho túi máu (DONOR) */
+  .blood-bag {
+    background-color: #e0e0e0; /* Màu nền khi không được chọn */
+    border: 2px solid #ccc;
+    cursor: pointer;
+  }
+  
+  .blood-bag.active {
+    background-color: #dc2626; /* Màu đỏ khi được chọn */
+    color: white;
+    border-color: #b91c1c;
+    transform: scale(1.05); /* Hiệu ứng phóng to nhẹ */
+  }
+  
+  /* Style cho vòng tròn người nhận (RECIPIENT) */
+  .recipient-circle {
+    background-color: white;
+    border: 2px solid #ccc;
+  }
+  
+  .recipient-circle.active {
+    background-color: #dc2626; /* Màu đỏ khi tương thích */
+    color: white;
+    border-color: #b91c1c;
+  }
+  
+  
+  /* Phần quan trọng: SVG và Animation đường nối */
+  .connector-svg {
+    position: absolute;
+    top: 90px; /* Căn chỉnh vị trí của SVG */
+    left: 120px; /* Bắt đầu sau cột DONOR */
+    width: calc(100% - 240px); /* Chiếm không gian giữa 2 cột */
+    height: 350px;
+    overflow: visible;
+  }
+  
+  .connection-path {
+    fill: none;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+  
+    /* Đây là 'ma thuật' của animation: */
+    /* 1. Đặt stroke-dasharray bằng chiều dài của đường kẻ để tạo 1 nét đứt duy nhất */
+    stroke-dasharray: 250; 
+    /* 2. Đặt stroke-dashoffset bằng chiều dài để "ẩn" đường kẻ đi */
+    stroke-dashoffset: 250;
+    /* 3. Hiệu ứng chuyển động mượt mà cho stroke-dashoffset */
+    transition: stroke-dashoffset 0.8s cubic-bezier(0.45, 0.05, 0.55, 0.95);
+    stroke: #e0e0e0; /* Màu mặc định của đường kẻ khi ẩn */
+  }
+  
+  /* Khi đường kẻ có class .active */
+  .connection-path.active {
+    /* 4. Đặt stroke-dashoffset về 0 để "vẽ" đường kẻ ra */
+    stroke-dashoffset: 0;
+    stroke: url(#line-gradient); /* Sử dụng màu gradient đã định nghĩa */
+  }
+  
+  
+  .description-text {
+    text-align: center;
+    margin-top: 30px;
+    color: #333;
+    min-height: 40px; /* Đảm bảo layout không bị giật khi text thay đổi */
+  }

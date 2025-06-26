@@ -1,5 +1,6 @@
 // src/components/ScreeningModal.js
-
+// cái này dùng trong kiểm tra sức khỏe người hiến máu 
+// được tạo bởi staff 
 import React, { useState } from 'react';
 
 export default function ScreeningModal({ appointment, onClose, onSubmit, isSubmitting }) {
