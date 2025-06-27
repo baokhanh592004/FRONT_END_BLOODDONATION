@@ -1,6 +1,5 @@
-// src/components/BloodTypeVisualizer/BloodTypeVisualizer.js
 import React, { useState } from 'react';
-import './BloodTypeVisualizer.css'; // Import file CSS để định dạng
+import './BloodTypeVisualizer.css';
 
 // Dữ liệu về khả năng tương thích khi hiến máu
 const compatibilityData = {
@@ -25,8 +24,7 @@ const compatibilityData = {
 const bloodTypes = ['O', 'A', 'B', 'AB'];
 
 const BloodTypeVisualizer = () => {
-  // State để lưu trữ nhóm máu người cho đang được chọn
-  const [selectedDonor, setSelectedDonor] = useState('A'); // Mặc định chọn nhóm A giống ảnh của bạn
+  const [selectedDonor, setSelectedDonor] = useState('A');
 
   const handleDonorClick = (type) => {
     setSelectedDonor(type);
@@ -56,31 +54,22 @@ const BloodTypeVisualizer = () => {
 
         {/* Lớp SVG để vẽ các đường nối */}
         <svg className="connector-svg" viewBox="0 0 100 400" preserveAspectRatio="none">
-          <defs>
-            {/* Tạo gradient để đường line có màu đỏ */}
-            <linearGradient id="line-gradient" x1="0%" y1="0%" x2="100%" y2="0%">
-              <stop offset="0%" style={{ stopColor: '#ef4444', stopOpacity: 1 }} />
-              <stop offset="100%" style={{ stopColor: '#ef4444', stopOpacity: 1 }} />
-            </linearGradient>
-          </defs>
           <g>
-            {/* Vẽ tất cả các đường nối có thể */}
             {bloodTypes.map((donorType, donorIndex) =>
               compatibilityData[donorType].canDonateTo.map((recipientType) => {
                 const recipientIndex = bloodTypes.indexOf(recipientType);
                 const isActive = selectedDonor === donorType;
+                const pathKey = `${donorType}-${recipientType}`;
+                const verticalGap = 100; // Khoảng cách giữa các nút
+                const donorY = donorIndex * verticalGap + 35;
+                const recipientY = recipientIndex * verticalGap + 35;
 
-                // Tạo một đường cong Bezier mượt mà
-                // M: Move to (điểm bắt đầu)
-                // C: Curve to (control point 1, control point 2, end point)
-                const pathData = `M 0 ${donorIndex * 100 + 50} C 50 ${donorIndex * 100 + 50}, 50 ${recipientIndex * 100 + 50}, 100 ${recipientIndex * 100 + 50}`;
-                
+                const pathData = `M 0 ${donorY} C 50 ${donorY}, 50 ${recipientY}, 100 ${recipientY}`;
                 return (
                   <path
-                    key={`${donorType}-${recipientType}`}
+                    key={pathKey}
                     className={`connection-path ${isActive ? 'active' : ''}`}
                     d={pathData}
-                    stroke="url(#line-gradient)"
                   />
                 );
               })
