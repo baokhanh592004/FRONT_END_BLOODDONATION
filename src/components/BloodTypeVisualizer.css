@@ -1,5 +1,3 @@
-/* src/components/BloodTypeVisualizer/BloodTypeVisualizer.css */
-
 .visualizer-container {
     font-family: sans-serif;
     background-color: #f8f8f8; /* Màu nền xám nhạt giống ảnh */
@@ -42,7 +40,7 @@
   .nodes-container {
     display: flex;
     flex-direction: column;
-    gap: 65px; /* Khoảng cách giữa các túi máu/vòng tròn */
+    gap: 50px; /* Khoảng cách giữa các túi máu/vòng tròn */
   }
   
   .node {
@@ -56,6 +54,8 @@
     border-radius: 50%;
     transition: all 0.4s ease;
     color: #333;
+    z-index: 10;
+    position: relative;
   }
   
   /* Style cho túi máu (DONOR) */
@@ -88,33 +88,25 @@
   /* Phần quan trọng: SVG và Animation đường nối */
   .connector-svg {
     position: absolute;
-    top: 90px; /* Căn chỉnh vị trí của SVG */
-    left: 120px; /* Bắt đầu sau cột DONOR */
-    width: calc(100% - 240px); /* Chiếm không gian giữa 2 cột */
-    height: 350px;
+    top: 90px;
+    left: 120px;
+    width: calc(100% - 240px);
+    height: 400px; /* Tăng chiều cao cho đúng */
     overflow: visible;
-  }
+  } 
   
   .connection-path {
     fill: none;
-    stroke-width: 2.5;
-    stroke-linecap: round;
-  
-    /* Đây là 'ma thuật' của animation: */
-    /* 1. Đặt stroke-dasharray bằng chiều dài của đường kẻ để tạo 1 nét đứt duy nhất */
-    stroke-dasharray: 250; 
-    /* 2. Đặt stroke-dashoffset bằng chiều dài để "ẩn" đường kẻ đi */
-    stroke-dashoffset: 250;
-    /* 3. Hiệu ứng chuyển động mượt mà cho stroke-dashoffset */
-    transition: stroke-dashoffset 0.8s cubic-bezier(0.45, 0.05, 0.55, 0.95);
-    stroke: #e0e0e0; /* Màu mặc định của đường kẻ khi ẩn */
+    stroke-width: 0; /* Ban đầu không có đường */
+    stroke: transparent; /* Hoặc bạn có thể dùng none */
+    transition: stroke 0.4s ease, stroke-width 0.4s ease;
   }
   
   /* Khi đường kẻ có class .active */
   .connection-path.active {
-    /* 4. Đặt stroke-dashoffset về 0 để "vẽ" đường kẻ ra */
-    stroke-dashoffset: 0;
-    stroke: url(#line-gradient); /* Sử dụng màu gradient đã định nghĩa */
+    /* Đường kẻ được chọn: đậm hơn và màu đỏ */
+    stroke-width: 3.5;
+    stroke: #ef4444;
   }
   
   
