@@ -1,16 +1,14 @@
 // src/pages/staff/DonationManagementPage.js
-
 import React, { useState, useEffect, forwardRef } from 'react';
 import axios from 'axios';
-
-// Import thư viện DatePicker và CSS của nó
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
-
-// Import component Modal. Sửa lại đường dẫn nếu bạn đặt file ở chỗ khác.
 import ScreeningModal from '../../components/ScreeningModal';
+import DonationHistoryModal from '../../components/DonationHistoryModal';
 
-// --- CÁC HÀM TIỆN ÍCH (Không thay đổi) ---
+// ==========================
+// Tiện ích định dạng ngày
+// ==========================
 const formatDateForDisplay = (dateString) => {
   if (!dateString) return '';
   const [year, month, day] = dateString.split('-');
@@ -24,7 +22,9 @@ const formatDateForApi = (dateObject) => {
   return adjustedDate.toISOString().split('T')[0];
 };
 
-// --- COMPONENT TÙY CHỈNH CHO Ô CHỌN NGÀY (Không thay đổi) ---
+// ==========================
+// DatePicker tùy chỉnh
+// ==========================
 const DatePickerCustomInput = forwardRef(({ value, onClick }, ref) => (
   <button
     className="w-full sm:w-auto bg-white text-left text-gray-700 font-medium py-2 px-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 flex justify-between items-center"
@@ -38,27 +38,35 @@ const DatePickerCustomInput = forwardRef(({ value, onClick }, ref) => (
   </button>
 ));
 
-
-// --- COMPONENT CHÍNH ---
+// ==========================
+// Component chính
+// ==========================
 export default function DonationManagementPage() {
+  // ---------- States ----------
   const [groupedAppointments, setGroupedAppointments] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // State để quản lý modal
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [currentAppointment, setCurrentAppointment] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Lấy TẤT CẢ các cuộc hẹn khi component được tải
+  const [showHistoryModal, setShowHistoryModal] = useState(false);
+  const [donationHistory, setDonationHistory] = useState([]);
+
+  // ---------- useEffect ----------
+  useEffect(() => {
+    fetchAllAppointments();
+  }, []);
+
+  // ---------- API gọi toàn bộ lịch hẹn ----------
   const fetchAllAppointments = async () => {
     setLoading(true);
     setError(null);
     try {
       const token = localStorage.getItem('token');
       if (!token) throw new Error("Bạn chưa đăng nhập hoặc token không hợp lệ.");
-
       const response = await axios.get('http://localhost:8080/api/staff/appointments', {
         headers: { Authorization: `Bearer ${token}` }
       });
@@ -70,7 +78,6 @@ export default function DonationManagementPage() {
         return acc;
       }, {});
       setGroupedAppointments(grouped);
-
     } catch (err) {
       setError("Không thể tải dữ liệu. Vui lòng thử lại.");
       console.error("API Error (fetchAll):", err);
@@ -79,16 +86,10 @@ export default function DonationManagementPage() {
     }
   };
 
-  useEffect(() => {
-    fetchAllAppointments();
-  }, []);
-
-  // Tìm kiếm cuộc hẹn theo ngày đã chọn
+  // ---------- API tìm kiếm theo ngày ----------
   const handleSearchByDate = async () => {
-    if (!selectedDate) {
-      alert("Vui lòng chọn một ngày để tìm kiếm.");
-      return;
-    }
+    if (!selectedDate) return alert("Vui lòng chọn một ngày để tìm kiếm.");
+
     setLoading(true);
     setError(null);
     try {
@@ -96,7 +97,6 @@ export default function DonationManagementPage() {
       if (!token) throw new Error("Bạn chưa đăng nhập hoặc token không hợp lệ.");
 
       const dateForApi = formatDateForApi(selectedDate);
-
       const response = await axios.get('http://localhost:8080/api/staff/appointments/by-date', {
         headers: { Authorization: `Bearer ${token}` },
         params: { date: dateForApi }
@@ -107,7 +107,6 @@ export default function DonationManagementPage() {
         newGroupedData[dateForApi] = response.data;
       }
       setGroupedAppointments(newGroupedData);
-
     } catch (err) {
       setError("Không tìm thấy dữ liệu cho ngày đã chọn hoặc có lỗi xảy ra.");
       setGroupedAppointments({});
@@ -117,24 +116,22 @@ export default function DonationManagementPage() {
     }
   };
 
-  // Reset lại bộ lọc và hiển thị tất cả cuộc hẹn
-  const handleReset = () => {
-    setSelectedDate(null);
-    fetchAllAppointments();
+  // ---------- API xem lịch sử hiến máu ----------
+  const fetchDonationHistory = async (userId) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.get(`http://localhost:8080/api/staff/donation-history/user/${userId}`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      setDonationHistory(response.data);
+      setShowHistoryModal(true);
+    } catch (err) {
+      alert("Không thể tải lịch sử hiến máu.");
+      console.error("Donation history error:", err);
+    }
   };
 
-  // Các hàm để điều khiển modal
-  const handleOpenScreeningModal = (appointment) => {
-    setCurrentAppointment(appointment);
-    setIsModalOpen(true);
-  };
-
-  const handleCloseScreeningModal = () => {
-    setIsModalOpen(false);
-    setCurrentAppointment(null);
-  };
-
-  // Hàm gọi API sàng lọc
+  // ---------- API gửi kết quả sàng lọc ----------
   const handleScreeningSubmit = async ({ passed, remarks }) => {
     if (!currentAppointment) return;
 
@@ -152,7 +149,6 @@ export default function DonationManagementPage() {
       alert('Cập nhật kết quả sàng lọc thành công!');
       handleCloseScreeningModal();
       fetchAllAppointments();
-
     } catch (err) {
       const errorMessage = err.response?.data?.message || "Có lỗi xảy ra, không thể cập nhật.";
       alert(`Lỗi: ${errorMessage}`);
@@ -160,6 +156,23 @@ export default function DonationManagementPage() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  // ---------- Xử lý Modal ----------
+  const handleOpenScreeningModal = (appointment) => {
+    setCurrentAppointment(appointment);
+    setIsModalOpen(true);
+  };
+
+  const handleCloseScreeningModal = () => {
+    setIsModalOpen(false);
+    setCurrentAppointment(null);
+  };
+
+  // ---------- Các xử lý phụ ----------
+  const handleReset = () => {
+    setSelectedDate(null);
+    fetchAllAppointments();
   };
 
   const sortedDates = Object.keys(groupedAppointments).sort((a, b) => new Date(b) - new Date(a));
@@ -173,12 +186,13 @@ export default function DonationManagementPage() {
     COMPLETED: 'text-indigo-600 bg-indigo-100',
   };
 
+  // ---------- Giao diện ----------
   return (
     <div className="bg-gray-50 min-h-full p-4 sm:p-6 lg:p-8">
       <div className="max-w-7xl mx-auto">
         <h2 className="text-3xl font-bold text-gray-900 mb-6">Quản lý lịch hẹn hiến máu</h2>
 
-        {/* Toolbar */}
+        {/* Bộ lọc ngày */}
         <div className="bg-white p-4 rounded-lg shadow-sm mb-8 flex flex-col sm:flex-row items-center gap-4">
           <div className="w-full sm:w-52">
             <DatePicker
@@ -189,21 +203,11 @@ export default function DonationManagementPage() {
               wrapperClassName="w-full"
             />
           </div>
-          <button
-            onClick={handleSearchByDate}
-            className="w-full sm:w-auto px-5 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
-          >
-            Tìm kiếm
-          </button>
-          <button
-            onClick={handleReset}
-            className="w-full sm:w-auto px-5 py-2 bg-gray-600 text-white font-semibold rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 transition-colors"
-          >
-            Reset
-          </button>
+          <button onClick={handleSearchByDate} className="w-full sm:w-auto px-5 py-2 bg-blue-600 text-white font-semibold rounded-md shadow-sm hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">Tìm kiếm</button>
+          <button onClick={handleReset} className="w-full sm:w-auto px-5 py-2 bg-gray-600 text-white font-semibold rounded-md shadow-sm hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors">Reset</button>
         </div>
 
-        {/* Vùng hiển thị kết quả */}
+        {/* Kết quả */}
         {loading ? (
           <p className="text-center text-gray-500 py-10">Đang tải...</p>
         ) : error ? (
@@ -226,17 +230,19 @@ export default function DonationManagementPage() {
                       </div>
 
                       <button
+                        onClick={() => fetchDonationHistory(app.user.userId)}
+                        className="ml-2 flex-shrink-0 px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                      >
+                        Lịch sử hiến máu
+                      </button>
+
+                      <button
                         onClick={() => handleOpenScreeningModal(app)}
-                        className="ml-4 flex-shrink-0 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                        
-                        // <<< THAY ĐỔI DUY NHẤT NẰM Ở ĐÂY: Sửa điều kiện 'disabled' >>>
-                        // Nút sẽ chỉ bị vô hiệu hóa nếu cuộc hẹn đã bị hủy hoặc đã hoàn thành.
-                        // Cho phép sàng lọc lại các trạng thái PENDING, CONFIRMED, APPROVED, REJECTED.
-                        disabled={app.status === 'CANCELLED' || app.status === 'COMPLETED'}
+                        disabled={['CANCELLED', 'COMPLETED'].includes(app.status)}
+                        className="ml-4 flex-shrink-0 px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:bg-gray-400 disabled:cursor-not-allowed"
                       >
                         Sàng lọc
                       </button>
-
                     </li>
                   ))}
                 </ul>
@@ -250,13 +256,22 @@ export default function DonationManagementPage() {
         )}
       </div>
 
-      {/* Render Modal nếu isModalOpen là true */}
+      {/* Modal sàng lọc */}
       {isModalOpen && (
         <ScreeningModal
           appointment={currentAppointment}
           onClose={handleCloseScreeningModal}
           onSubmit={handleScreeningSubmit}
           isSubmitting={isSubmitting}
+        />
+      )}
+
+      {/* // ---------- Modal lịch sử hiến máu ---------- */}
+      {showHistoryModal && (
+        <DonationHistoryModal
+          isOpen={showHistoryModal}
+          onClose={() => setShowHistoryModal(false)}
+          donationHistory={donationHistory}
         />
       )}
     </div>
