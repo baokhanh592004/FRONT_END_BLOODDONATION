@@ -1,39 +1,39 @@
 import React from 'react';
-import { NavLink, Outlet } from 'react-router-dom';
-import { FaUser, FaTachometerAlt, FaUsers, FaSyncAlt, FaTint, FaSearch, FaCheckSquare } from 'react-icons/fa';
+import { NavLink, Outlet, useNavigate } from 'react-router-dom';
+import { FaUser, FaTachometerAlt, FaUsers, FaSyncAlt, FaTint, FaSearch, FaCheckSquare, FaSignOutAlt } from 'react-icons/fa';
 
-// Dữ liệu cho các link trên sidebar
 const navLinks = [
   { to: '/staff/dashboard', icon: <FaTachometerAlt />, text: 'Dashboard' },
-
   { to: '/staff/donors', icon: <FaUsers />, text: 'Danh sách đăng ký hiến máu' },
-  
-  // { to: '/staff/donations', icon: <FaSyncAlt />, text: 'Cập nhật trạng thái đơn hiến máu' },
   { to: '/staff/inventory', icon: <FaTint />, text: 'Quản lý kho máu' },
   { to: '/staff/search-urgent', icon: <FaSearch />, text: 'Tìm kiếm người hiến máu khẩn cấp' },
   { to: '/staff/requests', icon: <FaCheckSquare />, text: 'Phê duyệt yêu cầu' },
 ];
 
 const StaffLayout = () => {
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("user");
+    navigate("/login");
+  };
+
   return (
     <div className="flex h-screen bg-gray-100 font-sans">
       {/* Sidebar */}
       <aside className="w-80 bg-white border-r p-5 flex-shrink-0">
-        <h2 className="text-xl font-bold text-green-700 mb-6">Staff  </h2>
+        <h2 className="text-xl font-bold text-green-700 mb-6">Staff</h2>
         <nav className="space-y-2">
-          {/* Mục cá nhân */}
           <div className="flex items-center p-2 text-gray-700 rounded-md">
             <FaUser className="mr-3" />
             <span>Hồ sơ cá nhân</span>
           </div>
           <hr className="my-4" />
 
-          {/* Các mục chức năng */}
           {navLinks.map((link, index) => (
             <NavLink
               key={index}
               to={link.to}
-              // Dùng NavLink để tự động thêm class 'active' khi route khớp
               className={({ isActive }) =>
                 `flex items-center p-3 text-sm font-medium rounded-md transition-colors duration-200 ${
                   isActive
@@ -46,10 +46,19 @@ const StaffLayout = () => {
               {link.text}
             </NavLink>
           ))}
+
+          {/* Nút Đăng xuất */}
+          <button
+            onClick={handleLogout}
+            className="flex items-center p-3 text-sm font-medium text-red-600 rounded-md hover:bg-red-100 hover:text-red-800 transition-colors duration-200 mt-4"
+          >
+            <FaSignOutAlt className="mr-4 text-lg" />
+            Đăng xuất
+          </button>
         </nav>
       </aside>
 
-      {/* Main content - Nội dung của các trang con sẽ được render ở đây */}
+      {/* Main Content */}
       <main className="flex-1 p-6 lg:p-8 overflow-y-auto">
         <Outlet />
       </main>
