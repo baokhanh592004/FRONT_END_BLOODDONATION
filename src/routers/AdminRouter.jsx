@@ -3,7 +3,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 
-const StaffRoute = ({ children }) => {
+const AdminRoute = ({ children }) => {
   // 1. Vệ sĩ hỏi: "Thẻ của anh là gì?"
   //    Code sẽ lấy thông tin người dùng đã được lưu trong localStorage khi đăng nhập.
   const userString = localStorage.getItem('user');
@@ -33,4 +33,4 @@ const StaffRoute = ({ children }) => {
   }
 };
 
-export default StaffRoute;
+export default AdminRoute;

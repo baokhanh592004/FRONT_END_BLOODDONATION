@@ -1,6 +1,7 @@
 import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 
+
 // Layouts
 import AppLayout from '../layouts/AppLayout';
 import StaffLayout from '../layouts/StaffLayout'; // <-- IMPORT
@@ -18,11 +19,10 @@ import HealthAnswer from '../pages/member/HealthAnswer';
 import StaffDashboard from '../pages/staff/StaffDashboard';
 import DonationManagementPage from '../pages/staff/DonationManagementPage'; // THAY THẾ PatientManagementPage
 import DonorHealthCheckPage from '../pages/staff/DonorHealthCheckPage'; // <-- THÊM MỚI
-
-
 import BloodInventoryPage from '../pages/staff/BloodInventoryPage';
 import UrgentDonorSearchPage from '../pages/staff/UrgentDonorSearchPage';
 import RequestApprovalPage from '../pages/staff/RequestApprovalPage';
+import StaffPage from '../pages/staff/StaffPage';
 
 // Route Protector
 import StaffRoute from './StaffRoute';
@@ -30,9 +30,19 @@ import StaffRoute from './StaffRoute';
 import AdminRouter from './AdminRouter';
 import UserManagement from '../pages/admin/UserManagement';
 import HealthQuestion from '../pages/admin/HealthQuestion';
+import AdminDashboard from '../pages/admin/AdminDashboard';
+import AdminPage from '../pages/admin/AdminPage';
+// Center Pagé
+import CenterRoute from './CenterRouter';
+import CenterLayout from '../layouts/CenterLayout';
+import CenterPage from '../pages/center/CenterPage';
+
+//
+import { AuthProvider } from '../auth/AuthProvider';
 
 export default function AppRouters() {
   return (
+
     <Routes>
       {/* Routes cho người dùng chung */}
       <Route element={<AppLayout />}>
@@ -56,8 +66,6 @@ export default function AppRouters() {
           </StaffRoute>
         }
       >
-
-
         <Route path="dashboard" element={<StaffDashboard />} />
         {/* PHẦN NÀY LẤY ID TỪ BACKEND LÊN */}
         <Route path="donors" element={<DonationManagementPage />} /> {/* Route cho danh sách */}
@@ -65,6 +73,7 @@ export default function AppRouters() {
         <Route path="inventory" element={<BloodInventoryPage />} />
         <Route path="search-urgent" element={<UrgentDonorSearchPage />} />
         <Route path="requests" element={<RequestApprovalPage />} />
+        <Route path="bloodrequests" element={<StaffPage />} />
       </Route>
 
 
@@ -76,12 +85,34 @@ export default function AppRouters() {
           </AdminRouter>
         }
       >
-        <Route path="dashboard" element={<StaffDashboard/>} />
+        <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="usermanagement" element={<UserManagement />} />
-        <Route path="healthquestion" element={<HealthQuestion/>} />
+        <Route path="healthquestion" element={<HealthQuestion />} />
+        <Route path="requests" element={<AdminPage />} />
+      </Route>
+      
+      <Route
+        path="/center"
+        element={
+          <CenterRoute>
+            <CenterLayout />
+          </CenterRoute>
+        }
+      >
+        <Route path="createrequest" element={<CenterPage/>} />
 
       </Route>
-
     </Routes>
+
+
+
+
   );
+  function App() {
+    return (
+      <AuthProvider>
+        <AppContent />
+      </AuthProvider>
+    );
+  }
 }
