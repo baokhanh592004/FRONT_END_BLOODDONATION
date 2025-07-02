@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import BloodTypeVisualizer from "../components/BloodTypeVisualizer";
 
 const HomePages = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -60,18 +61,7 @@ const HomePages = () => {
       </section>
 
       {/* Blood Type Info */}
-      <section className="bg-red-100 p-6">
-        <h2 className="text-2xl font-bold text-center mb-6">Thông tin nhóm máu</h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {bloodTypeInfo.map((blood, idx) => (
-            <div key={idx} className="bg-white p-4 rounded-lg shadow-sm border text-center">
-              <h3 className="text-xl font-semibold text-red-600">Nhóm máu: {blood.type}</h3>
-              <p className="text-sm">Cho: {blood.canGiveTo.join(", ")}</p>
-              <p className="text-sm">Nhận: {blood.canReceiveFrom.join(", ")}</p>
-            </div>
-          ))}
-        </div>
-      </section>
+      <BloodTypeVisualizer />
 
       {/* Blog Section */}
       <section className="p-6">
