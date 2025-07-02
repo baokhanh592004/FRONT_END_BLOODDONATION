@@ -225,7 +225,7 @@ const loadUsers = async () => {
               <option value="STAFF">STAFF</option>  
               <option value="MEMBER">MEMBER</option>
               <option value="GUEST">GUEST</option>
-              <option value="TREATMENT_CENTER">TREATMENT_CENTER</option>
+              <option value="CENTER">CENTER</option>
             </select>
           </div>
 

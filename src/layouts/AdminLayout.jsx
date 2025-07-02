@@ -7,6 +7,8 @@ const navLinks = [
   { to: '/admin/dashboard', icon: <FaTachometerAlt />, text: 'Dashboard' },
   { to: '/admin/usermanagement', icon: <FaUsers />, text: 'Quản Lý Người Dùng' },
   { to: '/admin/healthquestion', icon: <FaUsers />, text: 'Tạo Câu hỏi' },
+  { to: '/admin/requests', icon: <FaUsers />, text: 'Yêu cầu máu' },
+  
 ];
 
 const AdminLayout = () => {

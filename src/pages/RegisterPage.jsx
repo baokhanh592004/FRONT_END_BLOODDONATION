@@ -21,7 +21,7 @@ export default function RegisterPage() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-    const handleSwitchToLogin = () => {
+  const handleSwitchToLogin = () => {
     navigate("/login");
   };
 
@@ -107,6 +107,17 @@ export default function RegisterPage() {
           style={styles.input}
           required
         />
+        <select
+          name="gender"
+          value={formData.gender}
+          onChange={handleChange}
+          style={styles.input}
+          required
+        >
+          <option value="">-- Chọn giới tính --</option>
+          <option value="Nam">Nam</option>
+          <option value="Nữ">Nữ</option>
+        </select>
         <input
           name="address"
           placeholder="Địa chỉ"
