@@ -30,6 +30,7 @@ import StaffRoute from './StaffRoute';
 import AdminRouter from './AdminRouter';
 import UserManagement from '../pages/admin/UserManagement';
 import HealthQuestion from '../pages/admin/HealthQuestion';
+import AdminPage from '../pages/admin/AdminPage';
 
 export default function AppRouters() {
   return (
@@ -80,6 +81,7 @@ export default function AppRouters() {
         <Route path="dashboard" element={<StaffDashboard/>} />
         <Route path="usermanagement" element={<UserManagement />} />
         <Route path="healthquestion" element={<HealthQuestion/>} />
+        <Route path='requests' element={<AdminPage/>} /> 
 
       </Route>
 
