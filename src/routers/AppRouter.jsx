@@ -30,6 +30,7 @@ import StaffRoute from './StaffRoute';
 import AdminRouter from './AdminRouter';
 import UserManagement from '../pages/admin/UserManagement';
 import HealthQuestion from '../pages/admin/HealthQuestion';
+import About from '../pages/About';
 
 export default function AppRouters() {
   return (
@@ -40,6 +41,7 @@ export default function AppRouters() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
+        <Route path="/about" element={<About/>} />
 
         {/* === SỬ DỤNG ROUTE MỚI === */}
         <Route path="/profile" element={<Profile />} />

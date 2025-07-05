@@ -45,6 +45,8 @@ export default function RegisterPage() {
         password: "",
         confirmPassword: "",
         phoneNumber: "",
+        address: "",
+        gender: "",
       });
     } catch (err) {
       setError(err.response?.data || "Registration failed.");
@@ -114,6 +116,18 @@ export default function RegisterPage() {
           onChange={handleChange}
           style={styles.input}
         />
+        <select
+          name="gender"
+          value={formData.gender}
+          onChange={handleChange}
+          style={styles.input}
+          required
+        >
+          <option value="">Chọn giới tính</option>
+          <option value="Nam">Nam</option>
+          <option value="Nữ">Nữ</option>
+          <option value="Khác">Khác</option>
+        </select>
         <button type="submit" style={styles.submitBtn}>Đăng ký</button>
       </form>
 
