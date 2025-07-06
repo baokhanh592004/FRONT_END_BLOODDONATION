@@ -31,6 +31,7 @@ import AdminRouter from './AdminRouter';
 import UserManagement from '../pages/admin/UserManagement';
 import HealthQuestion from '../pages/admin/HealthQuestion';
 import About from '../pages/About';
+import SendDonorNotification from '../pages/staff/SendDonorNotification';
 
 export default function AppRouters() {
   return (
@@ -60,10 +61,10 @@ export default function AppRouters() {
         }
       >
           <Route path="dashboard" element={<StaffDashboard />} />
-            {/* PHẦN NÀY LẤY ID TỪ BACKEND LÊN */}
-            <Route path="donors" element={<DonationManagementPage />} /> {/* Route cho danh sách */}
-          
-          <Route path="inventory" element={<BloodInventoryPage />} />
+          {/* PHẦN NÀY LẤY ID TỪ BACKEND LÊN */}
+          <Route path="donors" element={<DonationManagementPage />} /> {/*danh sách đăng kí hiến máu */}
+          <Route path="inventory" element={<BloodInventoryPage />} /> {/* quản lý kho máu */}
+          <Route path="notifications-broadcast" element={<SendDonorNotification/>} /> {/* gửi yêu cầu hiến máu khẩn cấp */}
           <Route path="search-urgent" element={<UrgentDonorSearchPage />} />
           <Route path="requests" element={<RequestApprovalPage />} />
 
