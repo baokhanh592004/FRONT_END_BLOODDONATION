@@ -38,6 +38,7 @@ export default function DonationManagementPage() {
     const [error, setError] = useState(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [currentAppointment, setCurrentAppointment] = useState(null);
+    const [bloodTypes, setBloodTypes] = useState([]);
 
     // States để điều khiển các loại modal khác nhau
     const [isScreeningModalOpen, setIsScreeningModalOpen] = useState(false);
@@ -46,12 +47,34 @@ export default function DonationManagementPage() {
     const [donationHistory, setDonationHistory] = useState([]);
 
     useEffect(() => {
-        fetchAllAppointments();
+        const initialFetch = async () => {
+            setLoading(true);
+            try {
+                await Promise.all([fetchAllAppointments(), fetchBloodTypes()]);
+            } catch (err) {
+                 setError("Không thể tải dữ liệu ban đầu. Vui lòng thử lại.");
+            } finally {
+                setLoading(false);
+            }
+        };
+        initialFetch();
     }, []);
 
     // --- HÀM GỌI API ---
+    const fetchBloodTypes = async () => {
+        try {
+            const token = localStorage.getItem('token');
+            if (!token) throw new Error("Token không hợp lệ.");
+            const response = await axios.get('http://localhost:8080/api/blood-types', {
+                 headers: { Authorization: `Bearer ${token}` }
+            });
+            setBloodTypes(response.data);
+        } catch (err) {
+            console.error("Lỗi khi tải danh sách nhóm máu:", err);
+        }
+    };
+
     const fetchAllAppointments = async () => {
-        setLoading(true);
         setError(null);
         try {
             const token = localStorage.getItem('token');
@@ -67,9 +90,7 @@ export default function DonationManagementPage() {
             }, {});
             setGroupedAppointments(grouped);
         } catch (err) {
-            setError("Không thể tải dữ liệu. Vui lòng thử lại.");
-        } finally {
-            setLoading(false);
+            setError("Không thể tải dữ liệu cuộc hẹn. Vui lòng thử lại.");
         }
     };
 
@@ -87,8 +108,6 @@ export default function DonationManagementPage() {
             const newGroupedData = {};
             if (response.data && response.data.length > 0) {
                 newGroupedData[dateForApi] = response.data;
-            } else {
-                 setGroupedAppointments({});
             }
             setGroupedAppointments(newGroupedData);
         } catch (err) {
@@ -98,33 +117,45 @@ export default function DonationManagementPage() {
             setLoading(false);
         }
     };
-
-    const handleScreeningSubmit = async ({ passed, remarks }) => {
+    
+    const handleScreeningSubmit = async (formData) => {
         if (!currentAppointment) return;
         setIsSubmitting(true);
+        const { passed, remarks, weight, bloodTypeId, healthStatus } = formData;
+        const token = localStorage.getItem('token');
         try {
-            const token = localStorage.getItem('token');
-            await axios.post(
-                `http://localhost:8080/api/staff/appointments/${currentAppointment.appointmentId}/screening`,
-                { passed, remarks },
-                { headers: { Authorization: `Bearer ${token}` } }
-            );
-            alert('Cập nhật kết quả sàng lọc thành công!');
+            // Bước 1: Cập nhật User Profile
+            const userProfilePayload = {
+                userId: currentAppointment.user.userId,
+                weight: parseFloat(weight),
+                bloodTypeId: parseInt(bloodTypeId),
+                healthStatus: healthStatus,
+                lastScreeningDate: new Date().toISOString().split('T')[0],
+            };
+            await axios.post(`http://localhost:8080/api/staff/user-profile`, userProfilePayload, { headers: { Authorization: `Bearer ${token}` } });
+
+            // Bước 2: Cập nhật trạng thái sàng lọc của cuộc hẹn
+            const screeningPayload = { passed, remarks };
+            await axios.post(`http://localhost:8080/api/staff/appointments/${currentAppointment.appointmentId}/screening`, screeningPayload, { headers: { Authorization: `Bearer ${token}` } });
+
+            alert('Cập nhật hồ sơ và kết quả sàng lọc thành công!');
             handleCloseAllModals();
             fetchAllAppointments();
         } catch (err) {
-            const errorMessage = err.response?.data?.message || "Có lỗi xảy ra, không thể cập nhật.";
+            const errorMessage = err.response?.data?.message || "Có lỗi xảy ra khi cập nhật.";
             alert(`Lỗi: ${errorMessage}`);
         } finally {
             setIsSubmitting(false);
         }
     };
     
+    // *** ĐÃ KHÔI PHỤC LẠI HÀM GỐC ***
     const handleRecordDonationSubmit = async (formData) => {
         if (!currentAppointment) return;
         setIsSubmitting(true);
         try {
             const token = localStorage.getItem('token');
+            // Gọi đúng API ban đầu
             await axios.post('http://localhost:8080/api/staff/donation-history/record', formData, {
                 headers: { Authorization: `Bearer ${token}` }
             });
@@ -170,7 +201,8 @@ export default function DonationManagementPage() {
 
     const handleReset = () => {
         setSelectedDate(null);
-        fetchAllAppointments();
+        setLoading(true);
+        fetchAllAppointments().finally(() => setLoading(false));
     };
 
     const sortedDates = Object.keys(groupedAppointments).sort((a, b) => new Date(b) - new Date(a));
@@ -182,7 +214,6 @@ export default function DonationManagementPage() {
         CANCELLED: 'text-gray-600 bg-gray-100',
     };
 
-    // --- GIAO DIỆN ---
     return (
         <div className="bg-gray-50 min-h-full p-4 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">
@@ -230,7 +261,7 @@ export default function DonationManagementPage() {
                 ) : ( <div className="text-center py-16 bg-white rounded-lg shadow-sm"><p className="text-gray-500">Không có lịch hẹn nào.</p></div> )}
             </div>
 
-            {isScreeningModalOpen && <ScreeningModal appointment={currentAppointment} onClose={handleCloseAllModals} onSubmit={handleScreeningSubmit} isSubmitting={isSubmitting} />}
+            {isScreeningModalOpen && <ScreeningModal appointment={currentAppointment} onClose={handleCloseAllModals} onSubmit={handleScreeningSubmit} isSubmitting={isSubmitting} bloodTypes={bloodTypes} />}
             {isHistoryModalOpen && <DonationHistoryModal isOpen={isHistoryModalOpen} onClose={handleCloseAllModals} donationHistory={donationHistory} />}
             {isRecordDonationModalOpen && <RecordDonationModal appointment={currentAppointment} onClose={handleCloseAllModals} onSubmit={handleRecordDonationSubmit} isSubmitting={isSubmitting} />}
         </div>
