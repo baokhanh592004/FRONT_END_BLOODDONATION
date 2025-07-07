@@ -8,6 +8,7 @@ const navLinks = [
   { to: '/staff/inventory', icon: <FaTint />, text: 'Quản lý kho máu' },
   { to: '/staff/search-urgent', icon: <FaSearch />, text: 'Tìm kiếm người hiến máu khẩn cấp' },
   { to: '/staff/requests', icon: <FaCheckSquare />, text: 'Phê duyệt yêu cầu' },
+  { to: '/staff/bloodrequests', icon: <FaCheckSquare />, text: 'Yêu cầu máu' },
 ];
 
 const StaffLayout = () => {
