@@ -32,9 +32,11 @@ export default function SendDonorNotification() {
     }
 
     // 2. Chuẩn bị dữ liệu và headers cho request
+    // *** THAY ĐỔI Ở ĐÂY: Thêm trường 'type' vào payload ***
     const notificationData = {
       title: title,
       message: message,
+      type: 'DONATION_REQUEST', // Gửi loại thông báo yêu cầu hiến máu
     };
 
     const config = {
@@ -79,9 +81,9 @@ export default function SendDonorNotification() {
 
   return (
     <div style={styles.container}>
-      <h2 style={styles.title}>Gửi thông báo khẩn</h2>
+      <h2 style={styles.title}>Gửi thông báo kêu gọi hiến máu</h2>
       <p style={styles.subtitle}>
-        Gửi một thông báo đến tất cả người hiến máu trong hệ thống.
+        Gửi một thông báo khẩn đến tất cả người hiến máu trong hệ thống.
       </p>
       <form onSubmit={handleSubmit} style={styles.form}>
         <div style={styles.formGroup}>
