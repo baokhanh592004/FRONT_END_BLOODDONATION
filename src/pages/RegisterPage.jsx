@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
-export default function RegisterPage({ onSwitchToLogin }) {
+export default function RegisterPage() {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
     fullName: "",
@@ -17,6 +19,10 @@ export default function RegisterPage({ onSwitchToLogin }) {
   const handleChange = e => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSwitchToLogin = () => {
+    navigate("/login");
   };
 
   const handleSubmit = async e => {
@@ -39,6 +45,8 @@ export default function RegisterPage({ onSwitchToLogin }) {
         password: "",
         confirmPassword: "",
         phoneNumber: "",
+        address: "",
+        gender: "",
       });
     } catch (err) {
       setError(err.response?.data || "Registration failed.");
@@ -101,6 +109,36 @@ export default function RegisterPage({ onSwitchToLogin }) {
           style={styles.input}
           required
         />
+        <select
+          name="gender"
+          value={formData.gender}
+          onChange={handleChange}
+          style={styles.input}
+          required
+        >
+          <option value="">-- Chọn giới tính --</option>
+          <option value="Nam">Nam</option>
+          <option value="Nữ">Nữ</option>
+        </select>
+        <input
+          name="address"
+          placeholder="Địa chỉ"
+          value={formData.address}
+          onChange={handleChange}
+          style={styles.input}
+        />
+        <select
+          name="gender"
+          value={formData.gender}
+          onChange={handleChange}
+          style={styles.input}
+          required
+        >
+          <option value="">Chọn giới tính</option>
+          <option value="Nam">Nam</option>
+          <option value="Nữ">Nữ</option>
+          <option value="Khác">Khác</option>
+        </select>
         <button type="submit" style={styles.submitBtn}>Đăng ký</button>
       </form>
 
@@ -109,7 +147,7 @@ export default function RegisterPage({ onSwitchToLogin }) {
 
       <p style={styles.switchText}>
         Đã có tài khoản?{" "}
-        <span style={styles.switchLink} onClick={onSwitchToLogin}>
+        <span style={styles.switchLink} onClick={handleSwitchToLogin}>
           Đăng nhập
         </span>
       </p>
