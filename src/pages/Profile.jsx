@@ -40,8 +40,8 @@ const Profile = () => {
           },}
         );
         setProfile(res.data);
-      } catch (error) {
-        console.error("Lỗi khi lấy hồ sơ:", error);
+      } catch (err) {
+        console.error("Lỗi khi lấy hồ sơ:", err);
       }
     };
 
