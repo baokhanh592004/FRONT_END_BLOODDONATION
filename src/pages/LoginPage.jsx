@@ -1,11 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
 // Import thêm useNavigate và Link để xử lý sau khi đăng nhập
-import { Link, useNavigate } from "react-router-dom";
+import { Link  } from "react-router-dom";
+import heartImage from '../assets/a.jpg';
 
 export default function LoginPage() {
   // Khởi tạo hook useNavigate để chuyển trang
-  const navigate = useNavigate();
+
 
   const [formData, setFormData] = useState({
     login: "",
@@ -57,7 +58,16 @@ const handleSubmit = async e => {
 
   // Phần JSX (giao diện) giữ nguyên như cũ, nó đã tốt rồi.
   return (
-    <div style={styles.container}>
+    
+    <div style={styles.wrapper}>
+       <div style={{ ...styles.backgroundImage }} />
+       <div style={styles.topRightText}>
+        🩸<span style={{ color: '#C21310', fontWeight: 'bold' }}>Trung tâm</span><span style={{ color: '#000000' }}> Hiến Máu</span>
+      </div>
+      <div style={styles.description}>
+        <h1>Một giọt máu – Ngàn hy vọng</h1>
+      </div>  
+ <div style={styles.loginBox}>
       <h2 style={styles.title}>Đăng nhập</h2>
       <form onSubmit={handleSubmit} style={styles.form}>
         <input
@@ -102,6 +112,7 @@ const handleSubmit = async e => {
         Quên mật khẩu?
       </Link>
     </div>
+    </div>
   );
 }
 
@@ -117,8 +128,39 @@ const styles = {
     fontFamily: "Arial, sans-serif",
     backgroundColor: "white",
   },
+  
   title: { marginBottom: 20, fontWeight: "bold", fontSize: 22, textAlign: "center", color: "#121212" },
   form: { display: "flex", flexDirection: "column", gap: 10 },
+    backgroundImage: {
+    position: 'absolute', // dùng fixed để đảm bảo luôn phủ toàn màn hình
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100vh',
+    backgroundImage: `url(${heartImage})`,
+    backgroundSize: '100% 100%',  // bạn muốn giữ nguyên hình không bị crop
+    backgroundRepeat: 'no-repeat',
+    backgroundPosition: 'center',
+    zIndex: 0,
+    borderradius: '10px',
+
+  },
+
+    loginBox: {
+    position: 'absolute',
+    top: '50%',
+    left: '40%',
+    transform: 'translateY(-50%)',
+    width: '30%',
+    backgroundColor: 'rgba(255, 255, 255)',
+    padding: 40,
+    borderRadius: 16,
+    boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+    zIndex: 2,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
+  },
   input: {
     padding: 10,
     fontSize: 14,
@@ -149,5 +191,25 @@ const styles = {
     cursor: "pointer", 
     color: "#d32f2f",
     textDecoration: 'none'
+  },
+    topRightText: {
+    position: 'absolute',
+    top: 310,
+    left: 95,
+    fontSize: 50,
+    fontWeight: 'bold',
+    padding: '5px 10px',
+    borderRadius: 8,
+    zIndex: 2,
+  },
+  description: {
+    position: 'absolute',
+    top: 370,
+    left: 160,
+    fontSize: 35,
+    fontWeight: 'bold',
+    padding: '5px 10px',
+    borderRadius: 8,
+    zIndex: 2,
   },
 };
