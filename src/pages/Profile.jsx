@@ -156,22 +156,6 @@ const Profile = () => {
             </div>
           </div>
           
-          {/* Nhóm máu */}
-          <div className="flex items-center">
-            <MdBloodtype className="text-red-500 text-xl flex-shrink-0 mr-3" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nhóm máu</label>
-              <input
-                type="text"
-                name="bloodType"
-                value={profile.bloodType}
-                onChange={handleChange}
-                readOnly={!isEditing}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
-              />
-            </div>
-          </div>
-
           {/* Nút chỉnh sửa / lưu */}
           <div className="pt-4">
             <button
