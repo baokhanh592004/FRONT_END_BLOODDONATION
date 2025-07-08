@@ -18,7 +18,12 @@ import HealthAnswer from '../pages/member/HealthAnswer';
 // Staff Pages
 import StaffDashboard from '../pages/staff/StaffDashboard';
 import DonationManagementPage from '../pages/staff/DonationManagementPage'; // THAY THẾ PatientManagementPage
+
 import DonorHealthCheckPage from '../pages/staff/DonorHealthCheckPage'; // <-- THÊM MỚI
+
+
+
+
 import BloodInventoryPage from '../pages/staff/BloodInventoryPage';
 import UrgentDonorSearchPage from '../pages/staff/UrgentDonorSearchPage';
 import RequestApprovalPage from '../pages/staff/RequestApprovalPage';
@@ -40,6 +45,11 @@ import CenterPage from '../pages/center/CenterPage';
 //
 import { AuthProvider } from '../auth/AuthProvider';
 
+import AdminPage from '../pages/admin/AdminPage';
+
+import About from '../pages/About';
+
+
 export default function AppRouters() {
   return (
 
@@ -50,6 +60,7 @@ export default function AppRouters() {
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
+        <Route path="/about" element={<About/>} />
 
         {/* === SỬ DỤNG ROUTE MỚI === */}
         <Route path="/profile" element={<Profile />} />
@@ -64,8 +75,10 @@ export default function AppRouters() {
           <StaffRoute>
             <StaffLayout />
           </StaffRoute>
+
         }
       >
+
         <Route path="dashboard" element={<StaffDashboard />} />
         {/* PHẦN NÀY LẤY ID TỪ BACKEND LÊN */}
         <Route path="donors" element={<DonationManagementPage />} /> {/* Route cho danh sách */}
@@ -74,6 +87,7 @@ export default function AppRouters() {
         <Route path="search-urgent" element={<UrgentDonorSearchPage />} />
         <Route path="requests" element={<RequestApprovalPage />} />
         <Route path="bloodrequests" element={<StaffPage />} />
+
       </Route>
 
 
@@ -87,8 +101,10 @@ export default function AppRouters() {
       >
         <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="usermanagement" element={<UserManagement />} />
+
         <Route path="healthquestion" element={<HealthQuestion />} />
         <Route path="requests" element={<AdminPage />} />
+
       </Route>
       
       <Route
@@ -101,7 +117,11 @@ export default function AppRouters() {
       >
         <Route path="createrequest" element={<CenterPage/>} />
 
+
       </Route>
+
+
+
     </Routes>
 
 
