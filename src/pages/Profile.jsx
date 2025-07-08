@@ -45,8 +45,6 @@ const Profile = () => {
       }
     };
 
-    fetchProfile();
-
   // Cập nhật dữ liệu khi thay đổi form
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -58,9 +56,13 @@ const Profile = () => {
 
   // Gửi dữ liệu lên backend hoặc bật chế độ chỉnh sửa
   const handleToggleEdit = async () => {
-    if (isEditing) {
+    if (isEditing && userId) {
       try {
-        await axios.put("/api/user/profile", profile);
+        await axios.patch(`/api/user/${userId}/profile`, profile, {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },
+        });
         console.log("Cập nhật thành công");
       } catch (error) {
         console.error("Lỗi khi cập nhật:", error);
@@ -68,6 +70,8 @@ const Profile = () => {
     }
     setIsEditing(!isEditing);
   };
+
+  if (!userId) return null;
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
