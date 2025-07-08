@@ -76,7 +76,7 @@ const Profile = () => {
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
-        <h2 className="text-2xl font-semibold text-center mb-6">Hồ Sơ Cá Nhân</h2>
+        <h2 className="text-2xl font-semibold text-center mb-6">HỒ SƠ Cá Nhân</h2>
 
         <div className="flex justify-center mb-6">
           <img
@@ -87,23 +87,15 @@ const Profile = () => {
         </div>
 
         <form className="space-y-4">
-          {/* Họ và tên */}
-          <div className="flex items-center">
-            <HiUser className="text-red-500 text-xl flex-shrink-0 mr-3" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
-              <input
-                type="text"
-                name="name"
-                value={profile.fullName}
-                onChange={handleChange}
-                readOnly={!isEditing}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
-              />
-            </div>
-          </div>
+          <InputField
+            icon={<HiUser />}
+            label="Họ và tên"
+            name="fullName"
+            value={profile.fullName}
+            onChange={handleChange}
+            readOnly={!isEditing}
+          />
 
-          {/* Giới tính */}
           <div className="flex items-center">
             <HiOutlineUserCircle className="text-red-500 text-xl flex-shrink-0 mr-3" />
             <div className="w-full">
@@ -115,46 +107,33 @@ const Profile = () => {
                 disabled={!isEditing}
                 className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
               >
-                <option>Nam</option>
-                <option>Nữ</option>
-                <option>Khác</option>
+                <option value="">Chọn</option>
+                <option value="Nam">Nam</option>
+                <option value="Nữ">Nữ</option>
+                <option value="Khác">Khác</option>
               </select>
             </div>
           </div>
 
-          {/* Số điện thoại */}
-          <div className="flex items-center">
-            <HiPhone className="text-red-500 text-xl flex-shrink-0 mr-3" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
-              <input
-                type="tel"
-                name="phone"
-                value={profile.phoneNumber}
-                onChange={handleChange}
-                readOnly={!isEditing}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
-              />
-            </div>
-          </div>
+          <InputField
+            icon={<HiPhone />}
+            label="Số điện thoại"
+            name="phoneNumber"
+            value={profile.phoneNumber}
+            onChange={handleChange}
+            readOnly={!isEditing}
+          />
 
-          {/* Email */}
-          <div className="flex items-center">
-            <HiMail className="text-red-500 text-xl flex-shrink-0 mr-3" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={profile.email}
-                onChange={handleChange}
-                readOnly={!isEditing}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
-              />
-            </div>
-          </div>
+          <InputField
+            icon={<HiMail />}
+            label="Email"
+            name="email"
+            value={profile.email}
+            onChange={handleChange}
+            readOnly={!isEditing}
+            type="email"
+          />
 
-          {/* Địa chỉ */}
           <div className="flex items-start">
             <HiHome className="text-red-500 text-xl flex-shrink-0 mr-3 mt-2" />
             <div className="w-full">
@@ -164,13 +143,12 @@ const Profile = () => {
                 value={profile.address}
                 onChange={handleChange}
                 readOnly={!isEditing}
-                rows={3}
+                rows={2}
                 className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"
               />
             </div>
           </div>
-          
-          {/* Nút chỉnh sửa / lưu */}
+
           <div className="pt-4">
             <button
               type="button"
@@ -185,5 +163,22 @@ const Profile = () => {
     </div>
   );
 };
+
+const InputField = ({ icon, label, name, value, onChange, readOnly, type = "text" }) => (
+  <div className="flex items-center">
+    <div className="text-red-500 text-xl flex-shrink-0 mr-3">{icon}</div>
+    <div className="w-full">
+      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
+      <input
+        type={type}
+        name={name}
+        value={value}
+        onChange={onChange}
+        readOnly={readOnly}
+        className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
+      />
+    </div>
+  </div>
+);
 
 export default Profile;
