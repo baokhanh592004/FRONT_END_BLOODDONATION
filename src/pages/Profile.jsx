@@ -3,13 +3,11 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
   HiUser,
-  HiCalendar,
   HiOutlineUserCircle,
   HiPhone,
   HiMail,
   HiHome,
 } from "react-icons/hi";
-import { MdBloodtype } from "react-icons/md";
 
 const Profile = () => {
   const [profile, setProfile] = useState({
@@ -18,7 +16,6 @@ const Profile = () => {
     phoneNumber: "",
     address: "",
     gender: "",
-    bloodType: "",
   });
 
   const [isEditing, setIsEditing] = useState(false);
