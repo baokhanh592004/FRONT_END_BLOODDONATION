@@ -47,7 +47,7 @@ export default function AppRouters() {
       {/* Routes cho người dùng chung */}
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePages />} />
-        <Route path="/login" element={<LoginPage />} />
+       
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
 
@@ -56,6 +56,7 @@ export default function AppRouters() {
         <Route path="/register-donation" element={<DonationRegistrationPage />} />
         <Route path="/member/donation-questionnaire" element={<HealthAnswer />} />
       </Route>
+       <Route path="/login" element={<LoginPage />} />
 
       {/* Routes được bảo vệ cho Staff */}
       <Route
