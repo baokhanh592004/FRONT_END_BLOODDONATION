@@ -17,16 +17,16 @@ import DonationRegistrationPage from '../pages/member/DonationRegistrationPage';
 import HealthAnswer from '../pages/member/HealthAnswer';
 // Staff Pages
 import StaffDashboard from '../pages/staff/StaffDashboard';
-import DonationManagementPage from '../pages/staff/DonationManagementPage'; // THAY THẾ PatientManagementPage
+// import DonationManagementPage from '../pages/staff/DonationManagementPage'; // THAY THẾ PatientManagementPage
 
-import DonorHealthCheckPage from '../pages/staff/DonorHealthCheckPage'; // <-- THÊM MỚI
-
-
+// import DonorHealthCheckPage from '../pages/staff/DonorHealthCheckPage'; // <-- THÊM MỚI
 
 
-import BloodInventoryPage from '../pages/staff/BloodInventoryPage';
-import UrgentDonorSearchPage from '../pages/staff/UrgentDonorSearchPage';
-import RequestApprovalPage from '../pages/staff/RequestApprovalPage';
+
+
+// import BloodInventoryPage from '../pages/staff/BloodInventoryPage';
+// import UrgentDonorSearchPage from '../pages/staff/UrgentDonorSearchPage';
+// import RequestApprovalPage from '../pages/staff/RequestApprovalPage';
 import StaffPage from '../pages/staff/StaffPage';
 
 // Route Protector
@@ -45,7 +45,7 @@ import CenterPage from '../pages/center/CenterPage';
 //
 import { AuthProvider } from '../auth/AuthProvider';
 
-import AdminPage from '../pages/admin/AdminPage';
+
 
 import About from '../pages/About';
 
@@ -82,11 +82,7 @@ export default function AppRouters() {
 
         <Route path="dashboard" element={<StaffDashboard />} />
         {/* PHẦN NÀY LẤY ID TỪ BACKEND LÊN */}
-        <Route path="donors" element={<DonationManagementPage />} /> {/* Route cho danh sách */}
-        <Route path="donors/:donorId" element={<DonorHealthCheckPage />} /> {/* Route cho trang chi tiết/khai báo */}
-        <Route path="inventory" element={<BloodInventoryPage />} />
-        <Route path="search-urgent" element={<UrgentDonorSearchPage />} />
-        <Route path="requests" element={<RequestApprovalPage />} />
+
         <Route path="bloodrequests" element={<StaffPage />} />
 
       </Route>
