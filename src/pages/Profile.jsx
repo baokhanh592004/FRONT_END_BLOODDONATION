@@ -19,20 +19,33 @@ const Profile = () => {
   });
 
   const [isEditing, setIsEditing] = useState(false);
+  const [userId, setUserId] = useState(null);
 
   // Lấy dữ liệu từ backend
   useEffect(() => {
-    const fetchProfile = async () => {
+    const token = localStorage.getItem("token");
+    const payload = token ? JSON.parse(atob(token.split(".")[1])) : null;
+    const id = payload?.id;
+    if (id){
+      setUserId(id);
+      fetchProfile(id);
+    }    
+  }, []);
+
+  const fetchProfile = async (id) => {
       try {
-        const response = await axios.get("/api/user/profile");
-        setProfile(response.data);
+        const res = await axios.get(`/api/user/${id}/profile`,
+          {headers: {
+            Authorization: `Bearer ${localStorage.getItem("token")}`,
+          },}
+        );
+        setProfile(res.data);
       } catch (error) {
         console.error("Lỗi khi lấy hồ sơ:", error);
       }
     };
 
     fetchProfile();
-  }, []);
 
   // Cập nhật dữ liệu khi thay đổi form
   const handleChange = (e) => {
