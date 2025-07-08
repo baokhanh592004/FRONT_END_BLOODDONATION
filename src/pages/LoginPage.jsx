@@ -1,12 +1,12 @@
 import React, { useState } from "react";
 import axios from "axios";
 // Import thêm useNavigate và Link để xử lý sau khi đăng nhập
-import { Link, useNavigate } from "react-router-dom";
+import { Link  } from "react-router-dom";
 import heartImage from '../assets/a.jpg';
 
 export default function LoginPage() {
   // Khởi tạo hook useNavigate để chuyển trang
-  const navigate = useNavigate();
+
 
   const [formData, setFormData] = useState({
     login: "",
