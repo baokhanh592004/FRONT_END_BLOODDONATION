@@ -20,7 +20,7 @@ export default function Header() {
     window.location.href = "/login";
   };
   //=====================
-
+  
   return (
     <>
       {/* Thanh thông tin liên hệ */}
@@ -74,7 +74,7 @@ export default function Header() {
             <Link to="/" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
               Trang chủ
             </Link>
-            <Link to="/pages" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
+            <Link to="/about" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
               Giới thiệu
             </Link>
             <Link to="/register-donation" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">

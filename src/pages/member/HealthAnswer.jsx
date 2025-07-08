@@ -25,6 +25,15 @@ const HealthAnswer = () => {
             return;
         }
 
+        // Gửi câu trả lời sức khỏe nếu có
+        axios.post('/api/health/answers', { answers }, {
+        headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+        }
+        })
+
+        
         // Lấy câu hỏi từ backend
         axios.get('/api/health/questions', {
             headers: {
@@ -36,6 +45,7 @@ const HealthAnswer = () => {
             setError('Không thể tải câu hỏi. Vui lòng thử lại.');
             console.error('Error fetching questions:', error);
         });
+
     }, [userId, center_id, scheduledDate, navigate]);
 
     const handleAnswerChange = (questionId, answerValue) => {
@@ -53,34 +63,49 @@ const HealthAnswer = () => {
 
     const handleSubmit = () => {
         if (answers.length !== questions.length) {
-            setError('Vui lòng trả lời tất cả câu hỏi.');
-            return;
+          setError('Vui lòng trả lời tất cả câu hỏi.');
+          return;
         }
-
+      
         const token = localStorage.getItem('token');
         if (!token) {
-            setError('Bạn cần đăng nhập để gửi câu trả lời.');
-            navigate('/login');
-            return;
+          setError('Bạn cần đăng nhập để gửi câu trả lời.');
+          navigate('/login');
+          return;
         }
-
-        // Gửi câu trả lời
+      
+        // Gửi câu trả lời sức khỏe
         axios.post('/api/health/answers', { answers }, {
-            headers: {
-                'Authorization': `Bearer ${token}`,
-            },
+          headers: { 'Authorization': `Bearer ${token}` },
         })
         .then(response => {
-                console.log(response.data);
-            alert('Bạn đủ điều kiện hiến máu!');
-            // Chuyển hướng sang bước tiếp theo (đặt lịch hẹn)
+          alert('Bạn đủ điều kiện hiến máu!');
+      
+          // Gửi đăng ký lịch hẹn
+          axios.post('/api/user/appointments/register', {
+            userId,
+            center_id,
+            appointmentTime: scheduledDate + "T08:00:00",
+            location: "Địa điểm placeholder",
+            bloodType: "A+"  // bạn có thể lấy từ `user` nếu cần
+          }, {
+            headers: { 'Authorization': `Bearer ${token}` },
+          })
+          .then(res => {
+            alert("Đăng ký lịch hẹn thành công!");
             navigate('/member/success');
+          })
+          .catch(err => {
+            console.error("Lỗi khi đăng ký lịch hẹn:", err);
+            setError("Đã vượt qua sàng lọc nhưng đăng ký lịch hẹn thất bại.");
+          });
         })
         .catch(error => {
-            setError('Bạn không đủ điều kiện hiến máu.');
-            console.error(error);
+          setError('Bạn không đủ điều kiện hiến máu.');
+          console.error(error);
         });
-    };
+      };
+      
 
     return (
         <div className="container mx-auto p-6">
