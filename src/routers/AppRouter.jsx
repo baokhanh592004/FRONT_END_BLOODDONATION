@@ -17,16 +17,16 @@ import DonationRegistrationPage from '../pages/member/DonationRegistrationPage';
 import HealthAnswer from '../pages/member/HealthAnswer';
 // Staff Pages
 import StaffDashboard from '../pages/staff/StaffDashboard';
-// import DonationManagementPage from '../pages/staff/DonationManagementPage'; // THAY THẾ PatientManagementPage
+import DonationManagementPage from '../pages/staff/DonationManagementPage'; // THAY THẾ PatientManagementPage
 
 // import DonorHealthCheckPage from '../pages/staff/DonorHealthCheckPage'; // <-- THÊM MỚI
 
 
 
 
-// import BloodInventoryPage from '../pages/staff/BloodInventoryPage';
-// import UrgentDonorSearchPage from '../pages/staff/UrgentDonorSearchPage';
-// import RequestApprovalPage from '../pages/staff/RequestApprovalPage';
+import BloodInventoryPage from '../pages/staff/BloodInventoryPage';
+import UrgentDonorSearchPage from '../pages/staff/UrgentDonorSearchPage';
+import RequestApprovalPage from '../pages/staff/RequestApprovalPage';
 import StaffPage from '../pages/staff/StaffPage';
 
 // Route Protector
@@ -48,6 +48,7 @@ import { AuthProvider } from '../auth/AuthProvider';
 
 
 import About from '../pages/About';
+import SendDonorNotification from '../pages/staff/SendDonorNotification';
 
 
 export default function AppRouters() {
@@ -79,6 +80,15 @@ export default function AppRouters() {
 
         }
       >
+
+          <Route path="dashboard" element={<StaffDashboard />} />
+          {/* PHẦN NÀY LẤY ID TỪ BACKEND LÊN */}
+          <Route path="donors" element={<DonationManagementPage />} /> {/*danh sách đăng kí hiến máu */}
+          <Route path="inventory" element={<BloodInventoryPage />} /> {/* quản lý kho máu */}
+          <Route path="notifications-broadcast" element={<SendDonorNotification/>} /> {/* gửi yêu cầu hiến máu khẩn cấp */}
+          <Route path="search-urgent" element={<UrgentDonorSearchPage />} />
+          <Route path="requests" element={<RequestApprovalPage />} />
+
 
         <Route path="dashboard" element={<StaffDashboard />} />
         {/* PHẦN NÀY LẤY ID TỪ BACKEND LÊN */}

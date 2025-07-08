@@ -154,3 +154,12 @@
 // };
 
 // export default BloodInventoryPage;
+import React from 'react'
+
+export default function BloodInventoryPage() {
+  return (
+    <div>
+      
+    </div>
+  )
+}

@@ -1,83 +1,74 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
-export default function RecordDonationModal({ appointment, onClose, onSubmit, isSubmitting }) {
-    const [bloodTypes, setBloodTypes] = useState([]);
+export default function RecordDonationModal({ appointment, userProfile, onClose, onSubmit, isSubmitting }) {
     const [componentTypes, setComponentTypes] = useState([]);
+    const [selectedComponentTypeId, setSelectedComponentTypeId] = useState('');
     
-    const [selectedBloodType, setSelectedBloodType] = useState(null);
-    const [selectedComponentType, setSelectedComponentType] = useState(null);
+    // --- THAY ĐỔI LOGIC CHO VIỆC NHẬP THỂ TÍCH ---
+    // 'units' sẽ lưu các giá trị chuẩn hoặc chuỗi 'other'
+    const [units, setUnits] = useState('350'); 
+    // 'customUnits' sẽ lưu giá trị khi người dùng chọn 'other'
+    const [customUnits, setCustomUnits] = useState('');
     
-    const [units, setUnits] = useState(350);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchComponentTypes = async () => {
             setLoading(true);
             setError('');
             try {
                 const token = localStorage.getItem('token');
-                if (!token) {
-                    setError("Token không hợp lệ. Vui lòng đăng nhập lại.");
-                    setLoading(false);
-                    return;
-                }
-
-                const apiHeaders = { headers: { Authorization: `Bearer ${token}` } };
-                
-                const [bloodTypeRes, componentTypeRes] = await Promise.all([
-                    axios.get('http://localhost:8080/api/blood-types', apiHeaders),
-                    axios.get('http://localhost:8080/api/component-types', apiHeaders)
-                ]);
-
-                const bloodData = bloodTypeRes.data || [];
-                const componentData = componentTypeRes.data || [];
-
-                setBloodTypes(bloodData);
+                const response = await axios.get('http://localhost:8080/api/component-types', {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const componentData = response.data || [];
                 setComponentTypes(componentData);
-
-                // SỬA Ở ĐÂY: Dùng đúng tên trường "id" từ API
-                if (bloodData.length > 0 && bloodData[0] && typeof bloodData[0].id !== 'undefined') {
-                    setSelectedBloodType(bloodData[0].id.toString());
+                if (componentData.length > 0) {
+                    setSelectedComponentTypeId(componentData[0].id);
                 }
-
-                // SỬA Ở ĐÂY: Dùng đúng tên trường "id" từ API
-                if (componentData.length > 0 && componentData[0] && typeof componentData[0].id !== 'undefined') {
-                    setSelectedComponentType(componentData[0].id.toString());
-                }
-
             } catch (err) {
-                setError('Không thể tải dữ liệu cần thiết. Vui lòng thử lại.');
-                console.error("Failed to fetch modal data:", err.response || err);
+                setError('Không thể tải danh sách thành phần máu.');
             } finally {
                 setLoading(false);
             }
         };
-        fetchData();
+        fetchComponentTypes();
     }, []);
+
+    const handleUnitChange = (e) => {
+        const value = e.target.value;
+        setUnits(value);
+        // Nếu người dùng chọn một giá trị chuẩn, xóa giá trị tùy chỉnh
+        if (value !== 'other') {
+            setCustomUnits('');
+        }
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        
-        const finalBloodTypeId = selectedBloodType ? parseInt(selectedBloodType, 10) : null;
-        const finalComponentTypeId = selectedComponentType ? parseInt(selectedComponentType, 10) : null;
-        const finalUnits = units ? parseInt(units, 10) : null;
 
-        if (!finalBloodTypeId || !finalComponentTypeId || !finalUnits || finalUnits <= 0) {
-            alert("Vui lòng đảm bảo đã chọn đủ thông tin và số đơn vị máu là một số dương.");
+        // Xác định giá trị thể tích cuối cùng
+        const finalUnits = units === 'other' ? parseInt(customUnits, 10) : parseInt(units, 10);
+        
+        // Validation
+        if (!selectedComponentTypeId || !finalUnits || finalUnits <= 0) {
+            alert("Vui lòng điền đầy đủ và chính xác các thông tin.");
             return;
         }
         
-        onSubmit({
+        const payload = {
             appointmentId: appointment.appointmentId,
-            bloodTypeId: finalBloodTypeId,
-            componentTypeId: finalComponentTypeId,
-            units: finalUnits
-        });
+            bloodTypeId: userProfile.bloodType.id,
+            componentTypeId: parseInt(selectedComponentTypeId, 10),
+            units: finalUnits, // Sử dụng giá trị cuối cùng
+        };
+        
+        onSubmit(payload);
     };
 
-    if (!appointment) return null;
+    if (!appointment || !userProfile) return null;
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-75 z-50 flex justify-center items-center p-4">
@@ -85,37 +76,52 @@ export default function RecordDonationModal({ appointment, onClose, onSubmit, is
                 <h3 className="text-xl font-bold text-gray-800 mb-2">Ghi nhận ca hiến máu</h3>
                 <p className="text-gray-600 mb-4">Người hiến: <span className="font-semibold">{appointment.user?.fullName}</span></p>
                 
-                {loading ? <p className="text-center py-4">Đang tải...</p> : error ? <p className="text-center text-red-500 py-4">{error}</p> :
+                {loading ? <p className="text-center py-4">Đang tải...</p> 
+                : error ? <p className="text-center text-red-500 py-4">{error}</p> 
+                : (
                     <form onSubmit={handleSubmit}>
                         <div className="space-y-4">
                             <div>
-                                <label htmlFor="bloodType" className="block text-sm font-medium text-gray-700">Loại máu</label>
-                                <select id="bloodType" value={selectedBloodType || ''} onChange={(e) => setSelectedBloodType(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                                    <option value="" disabled>-- Vui lòng chọn --</option>
-                                    {bloodTypes.map(type => (
-                                        // SỬA Ở ĐÂY: Dùng đúng tên trường "id" cho key và value
-                                        <option key={type.id} value={type.id.toString()}>
-                                            {type.type}
-                                        </option>
-                                    ))}
-                                </select>
+                                <label className="block text-sm font-medium text-gray-700">Nhóm máu</label>
+                                <p className="mt-1 block w-full px-3 py-2 bg-gray-100 border border-gray-300 rounded-md shadow-sm text-gray-800 font-semibold">
+                                    {userProfile.bloodType.type}
+                                </p>
                             </div>
                             <div>
                                 <label htmlFor="componentType" className="block text-sm font-medium text-gray-700">Loại thành phần</label>
-                                <select id="componentType" value={selectedComponentType || ''} onChange={(e) => setSelectedComponentType(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
-                                    <option value="" disabled>-- Vui lòng chọn --</option>
+                                <select id="componentType" value={selectedComponentTypeId} onChange={(e) => setSelectedComponentTypeId(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" required>
                                     {componentTypes.map(type => (
-                                        // SỬA Ở ĐÂY: Dùng đúng tên trường "id" cho key và value
-                                        <option key={type.id} value={type.id.toString()}>
-                                            {type.name}
-                                        </option>
+                                        <option key={type.id} value={type.id}>{type.name}</option>
                                     ))}
                                 </select>
                             </div>
+                            
+                            {/* --- PHẦN NHẬP THỂ TÍCH ĐÃ ĐƯỢC CẢI TIẾN --- */}
                             <div>
-                                <label htmlFor="units" className="block text-sm font-medium text-gray-700">Số đơn vị (ml)</label>
-                                <input type="number" id="units" value={units} onChange={(e) => setUnits(e.target.value)} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm" placeholder="VD: 350"/>
+                                <label htmlFor="units" className="block text-sm font-medium text-gray-700">Thể tích (ml)</label>
+                                <select id="units" value={units} onChange={handleUnitChange} className="mt-1 block w-full rounded-md border-gray-300 shadow-sm">
+                                    <option value="250">250</option>
+                                    <option value="350">350</option>
+                                    <option value="450">450</option>
+                                    <option value="other">Khác...</option>
+                                </select>
                             </div>
+
+                            {/* Ô nhập liệu này chỉ hiện ra khi người dùng chọn "Khác..." */}
+                            {units === 'other' && (
+                                <div>
+                                    <label htmlFor="customUnits" className="block text-sm font-medium text-gray-700">Nhập thể tích chính xác</label>
+                                    <input 
+                                        type="number"
+                                        id="customUnits"
+                                        value={customUnits}
+                                        onChange={(e) => setCustomUnits(e.target.value)}
+                                        className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        placeholder="VD: 320"
+                                        required 
+                                    />
+                                </div>
+                            )}
                         </div>
                         <div className="mt-6 flex justify-end gap-3">
                             <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-200 text-gray-800 font-semibold rounded-md hover:bg-gray-300">Hủy</button>
@@ -124,7 +130,7 @@ export default function RecordDonationModal({ appointment, onClose, onSubmit, is
                             </button>
                         </div>
                     </form>
-                }
+                )}
             </div>
         </div>
     );

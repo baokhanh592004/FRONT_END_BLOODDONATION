@@ -68,3 +68,12 @@
 //     </div>
 //   )
 // }
+import React from 'react'
+
+export default function UrgentDonorSearchPage() {
+  return (
+    <div>
+      
+    </div>
+  )
+}
