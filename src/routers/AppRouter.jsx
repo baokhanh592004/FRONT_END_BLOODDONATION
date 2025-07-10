@@ -57,18 +57,18 @@ export default function AppRouters() {
       {/* Routes cho người dùng chung */}
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePages />} />
-       
-        <Route path="/register" element={<RegisterPage />} />
+
+
         <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
-        <Route path="/about" element={<About/>} />
+        <Route path="/about" element={<About />} />
 
         {/* === SỬ DỤNG ROUTE MỚI === */}
         <Route path="/profile" element={<Profile />} />
         <Route path="/register-donation" element={<DonationRegistrationPage />} />
         <Route path="/member/donation-questionnaire" element={<HealthAnswer />} />
       </Route>
-       <Route path="/login" element={<LoginPage />} />
-
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
       {/* Routes được bảo vệ cho Staff */}
       <Route
         path="/staff"
@@ -103,7 +103,7 @@ export default function AppRouters() {
         <Route path="requests" element={<AdminPage />} />
 
       </Route>
-      
+
       <Route
         path="/center"
         element={
@@ -112,7 +112,7 @@ export default function AppRouters() {
           </CenterRoute>
         }
       >
-        <Route path="createrequest" element={<CenterPage/>} />
+        <Route path="createrequest" element={<CenterPage />} />
 
 
       </Route>
