@@ -140,7 +140,8 @@ export default function RegisterPage() {
         </form>
 
         {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
-        {success && <p style={{ color: "green", marginTop: 10 }}>{success}</p>}
+        {success && <p style={{ color: "green", marginTop: 10 }}>{success.message}</p>}
+
 
         <p style={styles.switchText}>
           Đã có tài khoản?{" "}
