@@ -23,7 +23,7 @@ import About from "../pages/About";
 import StaffDashboard from "../pages/staff/StaffDashboard";
 import DonationManagementPage from "../pages/staff/DonationManagementPage";
 import BloodInventoryPage from "../pages/staff/BloodInventoryPage";
-import UrgentDonorSearchPage from "../pages/staff/UrgentDonorSearchPage";
+
 import RequestApprovalPage from "../pages/staff/StaffPage";
 import NearbyDonorSearchPage from "../pages/staff/NearbyDonorSearchPage";
 import StaffRoute from "./StaffRoute";
@@ -40,6 +40,7 @@ import AdminDashboard from '../pages/admin/AdminDashboard';
 import CenterRoute from "./CenterRouter";
 import CenterLayout from "../layouts/CenterLayout";
 import CenterPage from "../pages/center/CenterPage";
+import SendDonorNotification from "../pages/staff/SendDonorNotification";
 
 // Route Protectors
 
@@ -84,7 +85,7 @@ export default function AppRouters() {
         <Route path="dashboard" element={<StaffDashboard />} />
         <Route path="donors" element={<DonationManagementPage />} />
         <Route path="inventory" element={<BloodInventoryPage />} />
-        <Route path="search-urgent" element={<UrgentDonorSearchPage />} />
+        <Route path="notifications-broadcast" element={<SendDonorNotification/>} />
         <Route path="bloodrequests" element={<RequestApprovalPage />} />
         <Route path="search-nearby" element={<NearbyDonorSearchPage />} />
 
