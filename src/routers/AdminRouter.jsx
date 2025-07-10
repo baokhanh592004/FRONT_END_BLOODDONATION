@@ -1,36 +1,28 @@
-// src/routes/StaffRouter.js
+// src/routes/AdminRouter.jsx
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 
-const AdminRoute = ({ children }) => {
-  // 1. Vệ sĩ hỏi: "Thẻ của anh là gì?"
-  //    Code sẽ lấy thông tin người dùng đã được lưu trong localStorage khi đăng nhập.
+
+const AdminRouter = ({ children }) => {
+  // 1. Lấy thông tin người dùng từ localStorage
+
   const userString = localStorage.getItem('user');
-  
-  // Nếu không có thẻ (chưa đăng nhập), vệ sĩ biết ngay là không được vào.
+
+  // 2. Nếu chưa đăng nhập, chuyển hướng về trang login
   if (!userString) {
     return <Navigate to="/login" replace />;
   }
 
-  // 2. Vệ sĩ xem thẻ và kiểm tra chức vụ.
+  // 3. Parse chuỗi JSON thành object
   const user = JSON.parse(userString);
-  
-  // "Thẻ của anh ghi chức vụ là 'staff' phải không?"
-  // Đây là dòng code KIỂM TRA QUYỀN HẠN quan trọng nhất.
+
+  // 4. Kiểm tra quyền là ADMIN
   const isAuthorized = user && user.role === 'ADMIN';
 
-  // 3. Vệ sĩ ra quyết định
-  if (isAuthorized) {
-    // Nếu đúng là 'staff', vệ sĩ nói: "Mời anh vào".
-    // {children} ở đây chính là <StaffLayout /> và các trang con của nó.
-    return children; 
-  } else {
-    // Nếu không phải 'staff' (ví dụ role là 'user' hoặc một giá trị khác),
-    // vệ sĩ nói: "Anh không có phận sự ở đây, mời quay lại".
-    // Và đá người dùng về trang đăng nhập.
-    return <Navigate to="/login" replace />;
-  }
+  // 5. Nếu có quyền, cho phép truy cập, ngược lại chuyển hướng về login
+  return isAuthorized ? children : <Navigate to="/login" replace />;
 };
 
-export default AdminRoute;
+
+export default AdminRouter;
