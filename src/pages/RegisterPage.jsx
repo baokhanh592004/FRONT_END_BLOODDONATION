@@ -12,6 +12,8 @@ export default function RegisterPage() {
     password: "",
     confirmPassword: "",
     phoneNumber: "",
+    gender: "",
+    address: "",
   });
 
   const [error, setError] = useState(null);
@@ -60,7 +62,7 @@ export default function RegisterPage() {
       </div>
       <div style={styles.description}>
         <h1>Một giọt máu – Ngàn hy vọng</h1>
-      </div>  
+      </div>
 
       <div style={styles.registerBox}>
         <h2 style={styles.title}>Đăng ký tài khoản</h2>
@@ -139,9 +141,12 @@ export default function RegisterPage() {
           <button type="submit" style={styles.submitBtn}>Đăng ký</button>
         </form>
 
-        {error && <p style={{ color: "red", marginTop: 10 }}>{error}</p>}
+        {error && (
+          <p style={{ color: "red", marginTop: 10 }}>
+            {typeof error === "string" ? error : JSON.stringify(error)}
+          </p>
+        )}
         {success && <p style={{ color: "green", marginTop: 10 }}>{success.message}</p>}
-
 
         <p style={styles.switchText}>
           Đã có tài khoản?{" "}
@@ -194,7 +199,7 @@ const styles = {
     flexDirection: 'column',
     justifyContent: 'center',
   },
-  title: { textAlign: "center",  marginTop: 0 , fontWeight: "bold", fontSize: 22, color: "#121212" },
+  title: { textAlign: "center", marginTop: 0, fontWeight: "bold", fontSize: 22, color: "#121212" },
   title1: { textAlign: "center", marginTop: 5, marginBottom: 20, fontWeight: "bold", fontSize: 22, color: "#7C7D80" },
   form: { display: "flex", flexDirection: "column", gap: 10 },
   input: {
