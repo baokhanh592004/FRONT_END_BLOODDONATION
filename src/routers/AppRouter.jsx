@@ -53,10 +53,11 @@ export default function AppRouters() {
       {/* ===== Public Routes ===== */}
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePages />} />
-       
-        <Route path="/register" element={<RegisterPage />} />
+
+
         <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
         <Route path="/about" element={<About />} />
+
         <Route path="/profile" element={<Profile />} />
 
         {/* ✅ Trang đăng ký hiến máu (Step 1 & 2) */}
@@ -70,9 +71,15 @@ export default function AppRouters() {
         />
         <Route path="/member/success" element={<SuccessPage />} />
       </Route>
+
+      <Route path="/login" element={<LoginPage />} />
+      <Route path="/register" element={<RegisterPage />} />
+      {/* Routes được bảo vệ cho Staff */}
+
        <Route path="/login" element={<LoginPage />} />
 
       {/* ===== Staff Routes (Protected) ===== */}
+
       <Route
         path="/staff"
         element={
@@ -106,6 +113,7 @@ export default function AppRouters() {
         <Route path="healthquestion" element={<HealthQuestion />} />
         <Route path="requests" element={<AdminPage />} />
       </Route>
+
       <Route
         path="/center"
         element={
@@ -115,6 +123,7 @@ export default function AppRouters() {
         }
       >
         <Route path="createrequest" element={<CenterPage />} />
+
       </Route>
 
     </Routes>
