@@ -8,7 +8,7 @@ const navLinks = [
   { to: '/admin/usermanagement', icon: <FaUsers />, text: 'Quản Lý Người Dùng' },
   { to: '/admin/healthquestion', icon: <FaClipboardList />, text: 'Tạo Câu hỏi' },
   { to: '/admin/requests', icon: <FaTint />, text: 'Yêu cầu máu' },
-  { to: '/', icon: <FaSignOutAlt  />, text: 'Đăng xuất' },
+  { to: '/', icon: <FaSignOutAlt  />, text: 'Quay lại' },
   
 ];
 
