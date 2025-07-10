@@ -3,8 +3,10 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 
+
 const AdminRouter = ({ children }) => {
   // 1. Lấy thông tin người dùng từ localStorage
+
   const userString = localStorage.getItem('user');
 
   // 2. Nếu chưa đăng nhập, chuyển hướng về trang login
@@ -21,5 +23,6 @@ const AdminRouter = ({ children }) => {
   // 5. Nếu có quyền, cho phép truy cập, ngược lại chuyển hướng về login
   return isAuthorized ? children : <Navigate to="/login" replace />;
 };
+
 
 export default AdminRouter;

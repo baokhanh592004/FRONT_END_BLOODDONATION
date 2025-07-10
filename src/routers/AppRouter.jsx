@@ -1,12 +1,14 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
 
+
 // Layouts
 import AppLayout from "../layouts/AppLayout";
 import StaffLayout from "../layouts/StaffLayout";
 import AdminLayout from "../layouts/AdminLayout";
 
 // General Pages
+
 import HomePages from "../pages/HomePages";
 import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
@@ -26,7 +28,9 @@ import RequestApprovalPage from "../pages/staff/StaffPage";
 import NearbyDonorSearchPage from "../pages/staff/NearbyDonorSearchPage";
 import StaffRoute from "./StaffRoute";
 
+
 // Admin Pages
+
 import AdminRouter from "./AdminRouter";
 import UserManagement from "../pages/admin/UserManagement";
 import HealthQuestion from "../pages/admin/HealthQuestion";
@@ -43,11 +47,12 @@ import CenterPage from "../pages/center/CenterPage";
 
 export default function AppRouters() {
   return (
+
     <Routes>
       {/* ===== Public Routes ===== */}
       <Route element={<AppLayout />}>
         <Route path="/" element={<HomePages />} />
-        <Route path="/login" element={<LoginPage />} />
+       
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/forgotPassword" element={<ForgotPasswordPage />} />
         <Route path="/about" element={<About />} />
@@ -64,6 +69,7 @@ export default function AppRouters() {
         />
         <Route path="/member/success" element={<SuccessPage />} />
       </Route>
+       <Route path="/login" element={<LoginPage />} />
 
       {/* ===== Staff Routes (Protected) ===== */}
       <Route
@@ -74,12 +80,14 @@ export default function AppRouters() {
           </StaffRoute>
         }
       >
+
         <Route path="dashboard" element={<StaffDashboard />} />
         <Route path="donors" element={<DonationManagementPage />} />
         <Route path="inventory" element={<BloodInventoryPage />} />
         <Route path="search-urgent" element={<UrgentDonorSearchPage />} />
         <Route path="bloodrequests" element={<RequestApprovalPage />} />
         <Route path="search-nearby" element={<NearbyDonorSearchPage />} />
+
       </Route>
 
       {/* ===== Admin Routes (Protected) ===== */}
@@ -91,6 +99,7 @@ export default function AppRouters() {
           </AdminRouter>
         }
       >
+
          <Route path="dashboard" element={<AdminDashboard />} />
         <Route path="usermanagement" element={<UserManagement />} />
         <Route path="healthquestion" element={<HealthQuestion />} />
@@ -106,6 +115,12 @@ export default function AppRouters() {
       >
         <Route path="createrequest" element={<CenterPage />} />
       </Route>
+
     </Routes>
+
+
+
+
   );
+
 }

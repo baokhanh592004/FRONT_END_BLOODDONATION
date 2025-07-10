@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 const donors = [
@@ -59,12 +60,3 @@ const UrgentDonorSearchPage = () => {
 };
 
 export default UrgentDonorSearchPage;
-// import React from 'react'
-
-// export default function UrgentDonorSearchPage() {
-//   return (
-//     <div>
-//       TÌM KIẾM NGƯỜI HIẾN MÁU KHẨN CÂP
-//     </div>
-//   )
-// }
