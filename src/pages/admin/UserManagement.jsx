@@ -183,9 +183,7 @@ const loadUsers = async () => {
                 <td className="px-4 py-2 border text-sm">{u.fullName}</td>
                 <td className="px-4 py-2 border text-sm">{u.email}</td>
                 <td className="px-4 py-2 border text-sm">{u.username}</td>
-                <td className="px-4 py-2 border text-sm">
-                  {u.gender === 'Nam' ? 'Nam' : 'Nam'}
-                </td>
+                <td className="px-4 py-2 border text-sm">{u.gender}</td>
                 <td className="px-4 py-2 border text-sm">{u.role}</td>
                 <td className="px-4 py-2 border text-sm">{u.status}</td>
                 <td className="px-4 py-2 border text-sm">{u.phoneNumber}</td>
