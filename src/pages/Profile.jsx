@@ -33,17 +33,17 @@ const Profile = () => {
   }, []);
 
   const fetchProfile = async (id) => {
-      try {
-        const res = await axios.get(`/api/user/${id}/profile`,
-          {headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },}
-        );
-        setProfile(res.data);
-      } catch (err) {
-        console.error("Lỗi khi lấy hồ sơ:", err);
-      }
-    };
+    try {
+      const res = await axios.get(`/api/user/${id}/profile`, {
+        headers: {
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+      });
+      setProfile(res.data);
+    } catch (err) {
+      console.error("Lỗi khi lấy hồ sơ:", err);
+    }
+  };
 
   // Cập nhật dữ liệu khi thay đổi form
   const handleChange = (e) => {
@@ -58,7 +58,7 @@ const Profile = () => {
   const handleToggleEdit = async () => {
     if (isEditing && userId) {
       try {
-        await axios.patch(`/api/user/${userId}/profile`, profile, {
+        await axios.patch(`/user/${userId}/profile`, profile, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem("token")}`,
           },
