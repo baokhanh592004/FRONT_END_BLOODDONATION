@@ -132,7 +132,7 @@ export default function Header() {
                           to="/admin/dashboard"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
                         >
-                          Dashboard
+                          Quản Lý Chung
                         </Link>
                       </>
                     )}
@@ -143,7 +143,7 @@ export default function Header() {
                           to="/center/createrequest"
                           className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
                         >
-                          CreateBloodQuestion
+                          Yêu cầu máu
                         </Link>
                       </>
                     )}
