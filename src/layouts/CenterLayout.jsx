@@ -4,7 +4,9 @@ import { FaUser, FaTachometerAlt, FaUsers, FaSyncAlt, FaTint, FaSearch, FaCheckS
 
 // Dữ liệu cho các link trên sidebar
 const navLinks = [
+
   { to: '/center/createrequest', icon: <FaTachometerAlt />, text: 'Tạo yêu cầu máu' },
+  
 
   
 ];
