@@ -29,7 +29,7 @@ const CenterPage = () => {
       const res = await getRequestsOfCenter();
       setMyRequests(res.data);
     } catch (err) {
-      console.error("❌ Lỗi tải danh sách yêu cầu:", err); 
+      console.error("❌ Lỗi tải danh sách yêu cầu:", err);
     }
   };
 
@@ -118,22 +118,35 @@ const CenterPage = () => {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
-          <input
-            type="number"
+          <select
             name="bloodTypeId"
-            placeholder="ID nhóm máu"
             value={form.bloodTypeId}
             onChange={handleChange}
             className="border border-gray-300 px-4 py-2 rounded-lg shadow-sm"
-          />
-          <input
-            type="number"
+          >
+            <option value="">-- Chọn nhóm máu --</option>
+            <option value="1">A+</option>
+            <option value="2">A-</option>
+            <option value="5">AB+</option>
+            <option value="6">AB-</option>
+            <option value="3">B+</option>
+            <option value="4">B-</option>
+            <option value="7">O+</option>
+            <option value="8">O-</option>
+          </select>
+
+          <select
             name="componentTypeId"
-            placeholder="ID thành phần máu"
             value={form.componentTypeId}
             onChange={handleChange}
             className="border border-gray-300 px-4 py-2 rounded-lg shadow-sm"
-          />
+          >
+            <option value="">-- Chọn thành phần máu --</option>
+            <option value="1">WHOLE - Máu toàn phần</option>
+            <option value="2">PLASMA - Huyết tương</option>
+            <option value="3">PLATELET - Tiểu cầu</option>
+            <option value="4">RBC - Hồng cầu</option>
+          </select>
           <input
             type="number"
             name="quantity"
@@ -203,15 +216,14 @@ const CenterPage = () => {
                 <p>
                   <strong className="text-gray-700">🚦 Trạng thái:</strong>{" "}
                   <span
-                    className={`font-semibold ${
-                      req.status === "PENDING"
+                    className={`font-semibold ${req.status === "PENDING"
                         ? "text-yellow-600"
                         : req.status === "REJECTED"
-                        ? "text-red-600"
-                        : req.status === "COMPLETED"
-                        ? "text-blue-600"
-                        : "text-green-600"
-                    }`}
+                          ? "text-red-600"
+                          : req.status === "COMPLETED"
+                            ? "text-blue-600"
+                            : "text-green-600"
+                      }`}
                   >
                     {req.status}
                   </span>
