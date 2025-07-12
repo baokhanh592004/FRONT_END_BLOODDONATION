@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import {
@@ -10,175 +9,166 @@ import {
 } from "react-icons/hi";
 
 const Profile = () => {
-  const [profile, setProfile] = useState({
+  const storedUser = JSON.parse(localStorage.getItem("user"));
+  const token = localStorage.getItem("token");
+
+  const [formData, setFormData] = useState({
     fullName: "",
     email: "",
     phoneNumber: "",
     address: "",
-    gender: "",
+    gender: ""
   });
-
+  const [message, setMessage] = useState("");
   const [isEditing, setIsEditing] = useState(false);
-  const [userId, setUserId] = useState(null);
 
-  // Lấy dữ liệu từ backend
   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const payload = token ? JSON.parse(atob(token.split(".")[1])) : null;
-    const id = payload?.id;
-    if (id){
-      setUserId(id);
-      fetchProfile(id);
-    }    
+    if (!storedUser || !token) {
+      setMessage("Bạn chưa đăng nhập.");
+      return;
+    }
+    axios
+      .get(`http://localhost:8080/api/user/${storedUser.userId}/profile`, {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then(res => {
+        setFormData(res.data);
+      })
+      .catch(err => {
+        console.error(err);
+        setMessage("Không thể tải thông tin hồ sơ.");
+      });
   }, []);
 
-  const fetchProfile = async (id) => {
-    try {
-      const res = await axios.get(`/api/user/${id}/profile`, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("token")}`,
-        },
-      });
-      setProfile(res.data);
-    } catch (err) {
-      console.error("Lỗi khi lấy hồ sơ:", err);
-    }
-  };
-
-  // Cập nhật dữ liệu khi thay đổi form
-  const handleChange = (e) => {
+  const handleChange = e => {
+    if (!isEditing) return;
     const { name, value } = e.target;
-    setProfile((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
+    setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // Gửi dữ liệu lên backend hoặc bật chế độ chỉnh sửa
-  const handleToggleEdit = async () => {
-    if (isEditing && userId) {
+  const handleToggle = async () => {
+    // Nếu đang trong chế độ editing thì thực hiện lưu
+    if (isEditing) {
+      setMessage("");  // clear cũ
       try {
-        await axios.patch(`/user/${userId}/profile`, profile, {
-          headers: {
-            Authorization: `Bearer ${localStorage.getItem("token")}`,
-          },
-        });
-        console.log("Cập nhật thành công");
-      } catch (error) {
-        console.error("Lỗi khi cập nhật:", error);
+        const res = await axios.patch(
+          `http://localhost:8080/api/user/${storedUser.userId}/profile`,
+          formData,
+          {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json"
+            }
+          }
+        );
+        // Nếu server trả về object mới, update lại state
+        if (res.data) setFormData(res.data);
+
+        setMessage("✅ Cập nhật hồ sơ thành công!");
+      } catch (err) {
+        console.error(err);
+        setMessage("❌ Cập nhật thất bại.");
+        // Giữ isEditing = true, để user có thể thử lại
+        return;
       }
     }
-    setIsEditing(!isEditing);
+    // Chuyển chế độ (nếu lưu thành công hoặc vừa bấm Edit)
+    setIsEditing(edit => !edit);
   };
-
-  if (!userId) return null;
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
-        <h2 className="text-2xl font-semibold text-center mb-6">HỒ SƠ Cá Nhân</h2>
-
-        <div className="flex justify-center mb-6">
-          <img
-            src="https://i.pravatar.cc/150?u=NguyenVanA"
-            alt="Avatar"
-            className="w-24 h-24 rounded-full border-4 border-red-500 object-cover"
-          />
-        </div>
-
+        <h2 className="text-2xl font-semibold text-center mb-6">Hồ Sơ Cá Nhân</h2>
         <form className="space-y-4">
-          <InputField
-            icon={<HiUser />}
-            label="Họ và tên"
-            name="fullName"
-            value={profile.fullName}
-            onChange={handleChange}
-            readOnly={!isEditing}
-          />
+          {/* Họ và tên */}
+          <div className="flex items-center">
+            <HiUser className="text-red-500 text-xl flex-shrink-0 mr-3" />
+            <input
+              name="fullName"
+              placeholder="Họ và tên"
+              value={formData.fullName}
+              onChange={handleChange}
+              readOnly={!isEditing}
+              className="w-full bg-gray-100 rounded-lg py-2 px-3"
+            />
+          </div>
 
+          {/* Giới tính */}
           <div className="flex items-center">
             <HiOutlineUserCircle className="text-red-500 text-xl flex-shrink-0 mr-3" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Giới tính</label>
-              <select
-                name="gender"
-                value={profile.gender}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
-              >
-                <option value="">Chọn</option>
-                <option value="Nam">Nam</option>
-                <option value="Nữ">Nữ</option>
-                <option value="Khác">Khác</option>
-              </select>
-            </div>
+            <select
+              name="gender"
+              value={formData.gender}
+              onChange={handleChange}
+              disabled={!isEditing}
+              className="w-full bg-gray-100 rounded-lg py-2 px-3"
+            >
+              <option value="">-- Giới tính --</option>
+              <option value="Nam">Nam</option>
+              <option value="Nữ">Nữ</option>
+              <option value="Khác">Khác</option>
+            </select>
           </div>
 
-          <InputField
-            icon={<HiPhone />}
-            label="Số điện thoại"
-            name="phoneNumber"
-            value={profile.phoneNumber}
-            onChange={handleChange}
-            readOnly={!isEditing}
-          />
+          {/* Email */}
+          <div className="flex items-center">
+            <HiMail className="text-red-500 text-xl flex-shrink-0 mr-3" />
+            <input
+              name="email"
+              placeholder="Email"
+              value={formData.email}
+              onChange={handleChange}
+              readOnly={!isEditing}
+              className="w-full bg-gray-100 rounded-lg py-2 px-3"
+            />
+          </div>
 
-          <InputField
-            icon={<HiMail />}
-            label="Email"
-            name="email"
-            value={profile.email}
-            onChange={handleChange}
-            readOnly={!isEditing}
-            type="email"
-          />
+          {/* Số điện thoại */}
+          <div className="flex items-center">
+            <HiPhone className="text-red-500 text-xl flex-shrink-0 mr-3" />
+            <input
+              name="phoneNumber"
+              placeholder="Số điện thoại"
+              value={formData.phoneNumber}
+              onChange={handleChange}
+              readOnly={!isEditing}
+              className="w-full bg-gray-100 rounded-lg py-2 px-3"
+            />
+          </div>
 
+          {/* Địa chỉ */}
           <div className="flex items-start">
             <HiHome className="text-red-500 text-xl flex-shrink-0 mr-3 mt-2" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
-              <textarea
-                name="address"
-                value={profile.address}
-                onChange={handleChange}
-                readOnly={!isEditing}
-                rows={2}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"
-              />
-            </div>
+            <textarea
+              name="address"
+              placeholder="Địa chỉ"
+              value={formData.address}
+              onChange={handleChange}
+              readOnly={!isEditing}
+              rows={2}
+              className="w-full bg-gray-100 rounded-lg py-2 px-3 resize-none"
+            />
           </div>
 
-          <div className="pt-4">
-            <button
-              type="button"
-              onClick={handleToggleEdit}
-              className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 rounded-lg transition-colors"
-            >
-              {isEditing ? "Lưu thông tin" : "Chỉnh sửa thông tin"}
-            </button>
-          </div>
+          {/* Nút Chỉnh sửa / Lưu */}
+          <button
+            type="button"
+            onClick={handleToggle}
+            className={`w-full font-medium py-2 rounded-lg transition-colors ${
+              isEditing
+                ? "bg-green-500 hover:bg-green-600 text-white"
+                : "bg-red-500 hover:bg-red-600 text-white"
+            }`}
+          >
+            {isEditing ? "Lưu thông tin" : "Chỉnh sửa thông tin"}
+          </button>
         </form>
+
+        {message && <p className="text-center text-sm mt-4 text-red-600">{message}</p>}
       </div>
     </div>
   );
 };
-
-const InputField = ({ icon, label, name, value, onChange, readOnly, type = "text" }) => (
-  <div className="flex items-center">
-    <div className="text-red-500 text-xl flex-shrink-0 mr-3">{icon}</div>
-    <div className="w-full">
-      <label className="block text-sm font-medium text-gray-700 mb-1">{label}</label>
-      <input
-        type={type}
-        name={name}
-        value={value}
-        onChange={onChange}
-        readOnly={readOnly}
-        className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
-      />
-    </div>
-  </div>
-);
 
 export default Profile;
