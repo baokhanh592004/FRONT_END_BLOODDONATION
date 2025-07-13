@@ -14,6 +14,7 @@ import LoginPage from "../pages/LoginPage";
 import RegisterPage from "../pages/RegisterPage";
 import ForgotPasswordPage from "../pages/ForgotPasswordPage";
 import Profile from "../pages/Profile";
+import UpdateProfile from "../pages/UpdateProfile";
 import DonationRegistrationPage from "../pages/member/DonationRegistrationPage";
 import DonationQuestionnairePage from "../pages/member/DonationQuestionnairePage"; // ✅ rename đúng chuẩn
 import SuccessPage from "../pages/member/SuccessPage";
@@ -59,6 +60,7 @@ export default function AppRouters() {
         <Route path="/about" element={<About />} />
 
         <Route path="/profile" element={<Profile />} />
+        <Route path="/update-profile" element={<UpdateProfile/>} />
 
         {/* ✅ Trang đăng ký hiến máu (Step 1 & 2) */}
         <Route
