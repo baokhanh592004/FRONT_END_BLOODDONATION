@@ -21,11 +21,6 @@ import About from "../pages/About";
 
 // Staff Pages
 import StaffDashboard from "../pages/staff/StaffDashboard";
-import DonationManagementPage from "../pages/staff/DonationManagementPage";
-import BloodInventoryPage from "../pages/staff/BloodInventoryPage";
-
-import RequestApprovalPage from "../pages/staff/StaffPage";
-import NearbyDonorSearchPage from "../pages/staff/NearbyDonorSearchPage";
 import StaffRoute from "./StaffRoute";
 
 
@@ -96,11 +91,7 @@ export default function AppRouters() {
       >
 
         <Route path="dashboard" element={<StaffDashboard />} />
-        <Route path="donors" element={<DonationManagementPage />} />
-        <Route path="inventory" element={<BloodInventoryPage />} />
-        <Route path="notifications-broadcast" element={<SendDonorNotification/>} />
-        <Route path="bloodrequests" element={<RequestApprovalPage />} />
-        <Route path="search-nearby" element={<NearbyDonorSearchPage />} />
+
 
       </Route>
 
