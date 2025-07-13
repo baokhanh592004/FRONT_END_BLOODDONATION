@@ -36,7 +36,9 @@ import AdminRouter from './AdminRouter';
 import UserManagement from '../pages/admin/UserManagement';
 import HealthQuestion from '../pages/admin/HealthQuestion';
 import AdminDashboard from '../pages/admin/AdminDashboard';
+import BloodInventory from '../pages/admin/BloodInventory';
 import AdminPage from '../pages/admin/AdminPage';
+
 // Center Pagé
 import CenterRoute from './CenterRouter';
 import CenterLayout from '../layouts/CenterLayout';
@@ -48,6 +50,7 @@ import { AuthProvider } from '../auth/AuthProvider';
 
 
 import About from '../pages/About';
+
 
 
 export default function AppRouters() {
@@ -101,6 +104,8 @@ export default function AppRouters() {
 
         <Route path="healthquestion" element={<HealthQuestion />} />
         <Route path="requests" element={<AdminPage />} />
+        <Route path='bloodinventory' element={<BloodInventory />} />
+        
 
       </Route>
 
