@@ -44,6 +44,7 @@ import BloodInventory from '../pages/admin/BloodInventory';
 import CenterRoute from './CenterRouter';
 import CenterLayout from '../layouts/CenterLayout';
 import CenterPage from '../pages/center/CenterPage';
+import SendDonorNotification from "../pages/staff/SendDonorNotification";
 
 
 // Route Protectors

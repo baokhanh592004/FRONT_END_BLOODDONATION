@@ -1,74 +1,84 @@
-// import React from "react";
-// import { FaChartBar } from "react-icons/fa";
-
-// const bloodData = [
-//   { group: "O+", donors: 32, unitsLeft: 90 },
-//   { group: "A-", donors: 21, unitsLeft: 47 },
-//   { group: "B+", donors: 19, unitsLeft: 55 },
-//   { group: "AB+", donors: 11, unitsLeft: 33 },
-// ];
-
-// const StaffDashboard = () => {
-//   return (
-//     <div>
-//       <div className="mb-6">
-//         <h1 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-//           <FaChartBar className="text-blue-600" />
-//           Dashboard Báo cáo & Thống kê
-//         </h1>
-//       </div>
-
-//       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
-//         <div className="bg-green-500 text-white p-6 rounded-lg shadow-lg">
-//           <p className="text-sm">Tổng số người hiến</p>
-//           <p className="text-3xl font-bold">124</p>
-//         </div>
-//         <div className="bg-red-500 text-white p-6 rounded-lg shadow-lg">
-//           <p className="text-sm">Tổng đơn vị máu hiện có</p>
-//           <p className="text-3xl font-bold">380</p>
-//         </div>
-//         <div className="bg-cyan-500 text-white p-6 rounded-lg shadow-lg">
-//           <p className="text-sm">Yêu cầu đã đáp ứng</p>
-//           <p className="text-3xl font-bold">52</p>
-//         </div>
-//       </div>
-
-//       <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-//         <div className="bg-gray-700 text-white p-4 text-md font-semibold">
-//           Báo cáo theo nhóm máu
-//         </div>
-//         <div className="overflow-x-auto">
-//           <table className="min-w-full text-sm">
-//             <thead className="bg-gray-100">
-//               <tr>
-//                 <th className="px-6 py-3 text-left font-medium text-gray-600">Nhóm máu</th>
-//                 <th className="px-6 py-3 text-left font-medium text-gray-600">Số người hiến</th>
-//                 <th className="px-6 py-3 text-left font-medium text-gray-600">Số đơn vị còn lại</th>
-//               </tr>
-//             </thead>
-//             <tbody className="divide-y divide-gray-200">
-//               {bloodData.map((item, index) => (
-//                 <tr key={index}>
-//                   <td className="px-6 py-4 font-bold">{item.group}</td>
-//                   <td className="px-6 py-4">{item.donors}</td>
-//                   <td className="px-6 py-4">{item.unitsLeft}</td>
-//                 </tr>
-//               ))}
-//             </tbody>
-//           </table>
-//         </div>
-//       </div>
-//     </div>
-//   );
-// };
-
-// export default StaffDashboard;
-import React from 'react'
+import React, { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function StaffDashboard() {
+  const [stats, setStats] = useState(null);
+
+  useEffect(() => {
+    const fetchStats = async () => {
+      const token = localStorage.getItem("token");
+      try {
+        const res = await axios.get("http://localhost:8080/api/staff/dashboard/statistics", {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+        setStats(res.data);
+      } catch (error) {
+        console.error("Lỗi khi gọi API:", error);
+      }
+    };
+
+    fetchStats();
+  }, []);
+
   return (
-    <div>
-      STAFF DASHBOARD
+    <div style={styles.container}>
+      <h1 style={styles.header}>Bảng điều khiển</h1>
+
+      {/* === 4 Boxes === */}
+      <div style={styles.statGrid}>
+        <StatCard title="Tổng đơn vị máu" value={stats?.totalDonatedUnits || 0} color="#3f51b5" />
+        <StatCard title="Yêu cầu khẩn cấp" value={stats?.urgentRequestsCount || 0} color="#f44336" />
+        <StatCard title="Người hiến máu hôm nay" value={stats?.donorsTodayCount || 0} color="#4caf50" />
+        <StatCard title="Đơn vị máu sẵn có" value={stats?.availableBloodUnits || 0} color="#9c27b0" />
+      </div>
+
+      {/* Bạn có thể thêm phần biểu đồ & danh sách bên dưới đây */}
     </div>
-  )
+  );
 }
+
+function StatCard({ title, value, color }) {
+  return (
+    <div style={{ ...styles.card, backgroundColor: color }}>
+      <p style={styles.cardTitle}>{title}</p>
+      <h2 style={styles.cardValue}>{value}</h2>
+    </div>
+  );
+}
+
+const styles = {
+  container: {
+    padding: 30,
+    fontFamily: "Arial, sans-serif",
+    backgroundColor: "#f5f5f5",
+    minHeight: "100vh",
+  },
+  header: {
+    fontSize: 28,
+    marginBottom: 20,
+    color: "#222",
+  },
+  statGrid: {
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+    gap: 20,
+    marginBottom: 30,
+  },
+  card: {
+    color: "white",
+    padding: 20,
+    borderRadius: 12,
+    boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+    textAlign: "center",
+  },
+  cardTitle: {
+    fontSize: 16,
+    marginBottom: 8,
+  },
+  cardValue: {
+    fontSize: 28,
+    fontWeight: "bold",
+  },
+};
