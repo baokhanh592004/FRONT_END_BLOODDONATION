@@ -1,11 +1,12 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { FaUser, FaTachometerAlt, FaUsers, FaSyncAlt, FaTint, FaSearch, FaCheckSquare } from 'react-icons/fa';
+import { FaUser, FaTachometerAlt, FaSignOutAlt } from 'react-icons/fa';
 
 // Dữ liệu cho các link trên sidebar
 const navLinks = [
 
   { to: '/center/createrequest', icon: <FaTachometerAlt />, text: 'Tạo yêu cầu máu' },
+  { to: '/', icon: <FaSignOutAlt  />, text: 'Quay lại' },
   
 
   

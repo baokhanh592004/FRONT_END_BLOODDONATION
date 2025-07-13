@@ -37,12 +37,17 @@ import HealthQuestion from "../pages/admin/HealthQuestion";
 import AdminPage from "../pages/admin/AdminPage";
 import AdminDashboard from '../pages/admin/AdminDashboard';
 
-import CenterRoute from "./CenterRouter";
-import CenterLayout from "../layouts/CenterLayout";
-import CenterPage from "../pages/center/CenterPage";
-import SendDonorNotification from "../pages/staff/SendDonorNotification";
+import BloodInventory from '../pages/admin/BloodInventory';
+
+
+// Center Pagé
+import CenterRoute from './CenterRouter';
+import CenterLayout from '../layouts/CenterLayout';
+import CenterPage from '../pages/center/CenterPage';
+
 
 // Route Protectors
+
 
 
 
@@ -112,6 +117,12 @@ export default function AppRouters() {
         <Route path="usermanagement" element={<UserManagement />} />
         <Route path="healthquestion" element={<HealthQuestion />} />
         <Route path="requests" element={<AdminPage />} />
+
+        <Route path='bloodinventory' element={<BloodInventory />} />
+        
+
+
+
       </Route>
 
       <Route

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet } from 'react-router-dom';
-import { FaUser, FaTachometerAlt, FaUsers, FaClipboardList, FaTint, FaSignOutAlt} from 'react-icons/fa';
+import { FaUser, FaTachometerAlt, FaUsers, FaClipboardList, FaTint, FaHospital, FaSignOutAlt} from 'react-icons/fa';
 
 // Dữ liệu cho các link trên sidebar
 const navLinks = [
@@ -8,6 +8,7 @@ const navLinks = [
   { to: '/admin/usermanagement', icon: <FaUsers />, text: 'Quản Lý Người Dùng' },
   { to: '/admin/healthquestion', icon: <FaClipboardList />, text: 'Tạo Câu hỏi' },
   { to: '/admin/requests', icon: <FaTint />, text: 'Yêu cầu máu' },
+  { to: '/admin/bloodinventory', icon: <FaHospital />, text: 'Kho máu' },
   { to: '/', icon: <FaSignOutAlt  />, text: 'Quay lại' },
   
 ];

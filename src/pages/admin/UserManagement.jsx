@@ -230,7 +230,7 @@ const UserManagement = () => {
                 <option value="STAFF">STAFF</option>
                 <option value="MEMBER">MEMBER</option>
                 <option value="GUEST">GUEST</option>
-                <option value="CENTER">CENTER</option>
+                <option value="TREATMENT_CENTER">TREATMENT_CENTER</option>
               </select>
             </div>
             <div className="mt-4 flex flex-wrap gap-3">
