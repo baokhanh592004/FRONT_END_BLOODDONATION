@@ -45,6 +45,7 @@ import CenterRoute from './CenterRouter';
 import CenterLayout from '../layouts/CenterLayout';
 import CenterPage from '../pages/center/CenterPage';
 import SendDonorNotification from "../pages/staff/SendDonorNotification";
+import BlogPage from "../pages/staff/BlogPage";
 
 
 // Route Protectors
@@ -102,6 +103,8 @@ export default function AppRouters() {
         <Route path="notifications-broadcast" element={<SendDonorNotification/>} />
         <Route path="bloodrequests" element={<RequestApprovalPage />} />
         <Route path="search-nearby" element={<NearbyDonorSearchPage />} />
+        <Route path="blog" element={<BlogPage/>} />
+
 
       </Route>
 
