@@ -4,7 +4,7 @@ import { FaUser, FaTachometerAlt, FaUsers, FaClipboardList, FaTint, FaHospital, 
 
 // Dữ liệu cho các link trên sidebar
 const navLinks = [
-  { to: '/admin/dashboard', icon: <FaTachometerAlt />, text: 'Dashboard' },
+  { to: '/admin/dashboard', icon: <FaTachometerAlt />, text: 'Quản lý chung' },
   { to: '/admin/usermanagement', icon: <FaUsers />, text: 'Quản Lý Người Dùng' },
   { to: '/admin/healthquestion', icon: <FaClipboardList />, text: 'Tạo Câu hỏi' },
   { to: '/admin/requests', icon: <FaTint />, text: 'Yêu cầu máu' },

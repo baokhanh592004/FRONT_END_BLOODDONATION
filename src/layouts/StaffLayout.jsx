@@ -3,7 +3,7 @@ import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { FaUser, FaTachometerAlt, FaUsers, FaSyncAlt, FaTint, FaSearch, FaCheckSquare, FaSignOutAlt } from 'react-icons/fa';
 
 const navLinks = [
-  { to: '/staff/dashboard', icon: <FaTachometerAlt />, text: 'Dashboard' },
+  { to: '/staff/dashboard', icon: <FaTachometerAlt />, text: 'Quản lý chung' },
   { to: '/staff/donors', icon: <FaUsers />, text: 'Danh sách đăng ký hiến máu' },
   { to: '/staff/inventory', icon: <FaTint />, text: 'Quản lý kho máu' },
   { to: '/staff/notifications-broadcast', icon: <FaSyncAlt />, text: 'Gửi yêu cầu hiến máu khẩn cấp' },
