@@ -149,9 +149,9 @@ const styles = {
     loginBox: {
     position: 'absolute',
     top: '50%',
-    left: '40%',
+    left: '47%',
     transform: 'translateY(-50%)',
-    width: '30%',
+    width: '29%',
     backgroundColor: 'rgba(255, 255, 255)',
     padding: 40,
     borderRadius: 16,
@@ -195,7 +195,7 @@ const styles = {
     topRightText: {
     position: 'absolute',
     top: 310,
-    left: 95,
+    left: 85,
     fontSize: 50,
     fontWeight: 'bold',
     padding: '5px 10px',
@@ -205,7 +205,7 @@ const styles = {
   description: {
     position: 'absolute',
     top: 370,
-    left: 160,
+    left: 140,
     fontSize: 35,
     fontWeight: 'bold',
     padding: '5px 10px',
