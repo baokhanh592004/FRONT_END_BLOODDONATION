@@ -1,207 +1,94 @@
-
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import { HiUser, HiOutlineUserCircle, HiPhone, HiMail, HiHome } from "react-icons/hi";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
-import {
-  HiUser,
-  HiCalendar,
-  HiOutlineUserCircle,
-  HiPhone,
-  HiMail,
-  HiHome,
-} from "react-icons/hi";
-import { MdBloodtype } from "react-icons/md";
 
 const Profile = () => {
-  const [profile, setProfile] = useState({
+  const [formData, setFormData] = useState({
     fullName: "",
+    gender: "",
     email: "",
     phoneNumber: "",
-    address: "",
-    gender: "",
-    bloodType: "",
+    address: ""
   });
+  const [message, setMessage] = useState("");
+  const navigate = useNavigate();
+  const location = useLocation();
 
-  const [isEditing, setIsEditing] = useState(false);
-
-  // Lấy dữ liệu từ backend
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await axios.get("/api/user/profile");
-        setProfile(response.data);
-      } catch (error) {
-        console.error("Lỗi khi lấy hồ sơ:", error);
-      }
-    };
-
-    fetchProfile();
-  }, []);
-
-  // Cập nhật dữ liệu khi thay đổi form
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setProfile((prev) => ({
-      ...prev,
-      [name]: value,
-    }));
-  };
-
-  // Gửi dữ liệu lên backend hoặc bật chế độ chỉnh sửa
-  const handleToggleEdit = async () => {
-    if (isEditing) {
-      try {
-        await axios.put("/api/user/profile", profile);
-        console.log("Cập nhật thành công");
-      } catch (error) {
-        console.error("Lỗi khi cập nhật:", error);
-      }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      navigate("/login");
+      return;
     }
-    setIsEditing(!isEditing);
+
+    axios
+      .get("http://localhost:8080/api/user/profile", {
+        headers: { Authorization: `Bearer ${token}` }
+      })
+      .then((res) => {
+        const data = res.data;
+        setFormData({
+          fullName:   data.fullName   || "",
+          gender:     data.gender     || "",
+          email:      data.email      || "",
+          phoneNumber:data.phoneNumber|| "",
+          address:    data.address    || ""
+        });
+        setMessage("");
+      })
+      .catch((err) => {
+        console.error("Lỗi khi tải hồ sơ:", err);
+        setMessage("Không thể tải thông tin hồ sơ.");
+      });
+  }, [location.state, navigate]);
+
+  const goToUpdate = () => {
+    navigate("/profile/update");
   };
 
   return (
     <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
         <h2 className="text-2xl font-semibold text-center mb-6">Hồ Sơ Cá Nhân</h2>
-
-        <div className="flex justify-center mb-6">
-          <img
-            src="https://i.pravatar.cc/150?u=NguyenVanA"
-            alt="Avatar"
-            className="w-24 h-24 rounded-full border-4 border-red-500 object-cover"
-          />
+        <div className="space-y-4">
+          <Field icon={<HiUser />} label={formData.fullName} />
+          <Field icon={<HiOutlineUserCircle />} label={formData.gender} />
+          <Field icon={<HiMail />} label={formData.email} />
+          <Field icon={<HiPhone />} label={formData.phoneNumber} />
+          <Field icon={<HiHome />} label={formData.address} multiline />
         </div>
 
-        <form className="space-y-4">
-          {/* Họ và tên */}
-          <div className="flex items-center">
-            <HiUser className="text-red-500 text-xl flex-shrink-0 mr-3" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Họ và tên</label>
-              <input
-                type="text"
-                name="name"
-                value={profile.fullName}
-                onChange={handleChange}
-                readOnly={!isEditing}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
-              />
-            </div>
-          </div>
+        <button
+          onClick={goToUpdate}
+          className="w-full bg-blue-500 hover:bg-blue-600 text-white font-medium py-2 rounded-lg mt-6"
+        >
+          Chỉnh sửa thông tin
+        </button>
 
-          {/* Ngày sinh
-          <div className="flex items-center">
-            <HiCalendar className="text-red-500 text-xl flex-shrink-0 mr-3" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Ngày sinh</label>
-              <input
-                type="date"
-                name="dob"
-                value={profile.dob}
-                onChange={handleChange}
-                readOnly={!isEditing}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
-              />
-            </div>
-          </div> */}
-
-          {/* Giới tính */}
-          <div className="flex items-center">
-            <HiOutlineUserCircle className="text-red-500 text-xl flex-shrink-0 mr-3" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Giới tính</label>
-              <select
-                name="gender"
-                value={profile.gender}
-                onChange={handleChange}
-                disabled={!isEditing}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
-              >
-                <option>Nam</option>
-                <option>Nữ</option>
-                <option>Khác</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Số điện thoại */}
-          <div className="flex items-center">
-            <HiPhone className="text-red-500 text-xl flex-shrink-0 mr-3" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
-              <input
-                type="tel"
-                name="phone"
-                value={profile.phoneNumber}
-                onChange={handleChange}
-                readOnly={!isEditing}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
-              />
-            </div>
-          </div>
-
-          {/* Email */}
-          <div className="flex items-center">
-            <HiMail className="text-red-500 text-xl flex-shrink-0 mr-3" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-              <input
-                type="email"
-                name="email"
-                value={profile.email}
-                onChange={handleChange}
-                readOnly={!isEditing}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
-              />
-            </div>
-          </div>
-
-          {/* Địa chỉ */}
-          <div className="flex items-start">
-            <HiHome className="text-red-500 text-xl flex-shrink-0 mr-3 mt-2" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
-              <textarea
-                name="address"
-                value={profile.address}
-                onChange={handleChange}
-                readOnly={!isEditing}
-                rows={3}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300 resize-none"
-              />
-            </div>
-          </div>
-          
-          {/* Nhóm máu */}
-          <div className="flex items-center">
-            <MdBloodtype className="text-red-500 text-xl flex-shrink-0 mr-3" />
-            <div className="w-full">
-              <label className="block text-sm font-medium text-gray-700 mb-1">Nhóm máu</label>
-              <input
-                type="text"
-                name="bloodType"
-                value={profile.bloodType}
-                onChange={handleChange}
-                readOnly={!isEditing}
-                className="w-full bg-gray-100 text-gray-800 rounded-lg py-2 px-3 focus:outline-none focus:ring-2 focus:ring-red-300"
-              />
-            </div>
-          </div>
-
-          {/* Nút chỉnh sửa / lưu */}
-          <div className="pt-4">
-            <button
-              type="button"
-              onClick={handleToggleEdit}
-              className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 rounded-lg transition-colors"
-            >
-              {isEditing ? "Lưu thông tin" : "Chỉnh sửa thông tin"}
-            </button>
-          </div>
-        </form>
+        {message && <p className="text-center text-sm mt-4 text-red-600">{message}</p>}
       </div>
     </div>
   );
 };
+
+const Field = ({ icon, label, multiline }) => (
+  <div className="flex items-start">
+    <div className="text-red-500 text-xl mr-3 mt-1">{icon}</div>
+    {multiline ? (
+      <textarea
+        readOnly
+        value={label}
+        className="w-full bg-gray-100 rounded-lg py-2 px-3 resize-none"
+      />
+    ) : (
+      <input
+        readOnly
+        value={label}
+        className="w-full bg-gray-100 rounded-lg py-2 px-3"
+      />
+    )}
+  </div>
+);
 
 export default Profile;
