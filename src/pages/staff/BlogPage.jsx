@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Thêm useEffect
 import axios from "axios";
 
-// Thêm một icon nhỏ để trang trí cho phần upload file
+// (Icon không thay đổi)
 const UploadIcon = () => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
@@ -23,15 +23,39 @@ export default function BlogPage() {
     type: "BLOG",
     image: null,
   });
-  const [isHovered, setIsHovered] = useState(false); // State cho hiệu ứng hover của button
+  
+  // --- THÊM MỚI: State để lưu URL xem trước của ảnh ---
+  const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
 
+  const [isHovered, setIsHovered] = useState(false);
   const [message, setMessage] = useState(null);
   const [error, setError] = useState(null);
+
+  // --- THÊM MỚI: Dọn dẹp URL cũ để tránh rò rỉ bộ nhớ ---
+  useEffect(() => {
+    // Hàm cleanup này sẽ được gọi khi component unmount
+    // hoặc trước khi effect chạy lại
+    return () => {
+      if (imagePreviewUrl) {
+        URL.revokeObjectURL(imagePreviewUrl);
+      }
+    };
+  }, [imagePreviewUrl]); // Chỉ chạy lại khi imagePreviewUrl thay đổi
 
   const handleChange = e => {
     const { name, value, files } = e.target;
     if (name === "image") {
-      setFormData(prev => ({ ...prev, image: files[0] }));
+      const file = files[0];
+      setFormData(prev => ({ ...prev, image: file }));
+
+      // --- CẬP NHẬT: Tạo và set URL xem trước ---
+      if (file) {
+        // Tạo một URL tạm thời cho file ảnh
+        const newPreviewUrl = URL.createObjectURL(file);
+        setImagePreviewUrl(newPreviewUrl);
+      } else {
+        setImagePreviewUrl(null); // Nếu người dùng hủy chọn file
+      }
     } else {
       setFormData(prev => ({ ...prev, [name]: value }));
     }
@@ -65,7 +89,10 @@ export default function BlogPage() {
       });
       setMessage("Tạo bài viết thành công!");
       setFormData({ title: "", content: "", type: "BLOG", image: null });
-      // Xóa input file sau khi submit
+      
+      // --- CẬP NHẬT: Xóa ảnh xem trước sau khi submit thành công ---
+      setImagePreviewUrl(null);
+      
       document.getElementById("image-input").value = "";
     } catch (err) {
       setError(err.response?.data?.message || "Lỗi khi tạo bài viết");
@@ -77,43 +104,18 @@ export default function BlogPage() {
       <div style={styles.container}>
         <h2 style={styles.header}>Tạo Bài Viết Mới</h2>
         <form onSubmit={handleSubmit} style={styles.form}>
+          {/* Các input khác giữ nguyên */}
           <div style={styles.formGroup}>
             <label htmlFor="title" style={styles.label}>Tiêu đề</label>
-            <input
-              id="title"
-              type="text"
-              name="title"
-              placeholder="Nhập tiêu đề bài viết..."
-              value={formData.title}
-              onChange={handleChange}
-              required
-              style={styles.input}
-            />
+            <input id="title" type="text" name="title" placeholder="Nhập tiêu đề bài viết..." value={formData.title} onChange={handleChange} required style={styles.input} />
           </div>
-
           <div style={styles.formGroup}>
             <label htmlFor="content" style={styles.label}>Nội dung</label>
-            <textarea
-              id="content"
-              name="content"
-              placeholder="Soạn thảo nội dung của bạn tại đây..."
-              value={formData.content}
-              onChange={handleChange}
-              required
-              rows={8}
-              style={{ ...styles.input, resize: "vertical", height: 'auto' }}
-            />
+            <textarea id="content" name="content" placeholder="Soạn thảo nội dung của bạn tại đây..." value={formData.content} onChange={handleChange} required rows={8} style={{ ...styles.input, resize: "vertical", height: 'auto' }} />
           </div>
-
           <div style={styles.formGroup}>
             <label htmlFor="type" style={styles.label}>Thể loại</label>
-            <select
-              id="type"
-              name="type"
-              value={formData.type}
-              onChange={handleChange}
-              style={styles.input}
-            >
+            <select id="type" name="type" value={formData.type} onChange={handleChange} style={styles.input}>
               <option value="BLOG">BLOG</option>
               <option value="NEWS">NEWS</option>
               <option value="GUIDE">GUIDE</option>
@@ -121,8 +123,15 @@ export default function BlogPage() {
           </div>
 
           <div style={styles.formGroup}>
-            <label htmlFor="image" style={styles.label}>Ảnh bìa</label>
-            {/* Custom File Input */}
+            <label htmlFor="image-input" style={styles.label}>Ảnh bìa</label>
+            
+            {/* --- THÊM MỚI: Khu vực hiển thị ảnh xem trước --- */}
+            {imagePreviewUrl && (
+              <div style={styles.imagePreviewContainer}>
+                <img src={imagePreviewUrl} alt="Xem trước ảnh bìa" style={styles.imagePreview} />
+              </div>
+            )}
+            
             <label htmlFor="image-input" style={styles.fileInputLabel}>
               <UploadIcon />
               <span>{formData.image ? formData.image.name : "Chọn một tệp ảnh"}</span>
@@ -133,7 +142,7 @@ export default function BlogPage() {
               name="image"
               accept="image/*"
               onChange={handleChange}
-              style={styles.fileInput} // Ẩn input mặc định
+              style={styles.fileInput}
             />
           </div>
 
@@ -154,7 +163,7 @@ export default function BlogPage() {
 }
 
 const colors = {
-    primary: '#d32f2f', // Một màu đỏ đậm hơn, chuyên nghiệp hơn
+    primary: '#d32f2f',
     primaryLight: '#e57373',
     background: '#f7f7f7',
     text: '#333',
@@ -165,6 +174,7 @@ const colors = {
 };
 
 const styles = {
+  // các styles khác giữ nguyên
   pageContainer: {
     backgroundColor: colors.background,
     padding: '40px 20px',
@@ -210,9 +220,8 @@ const styles = {
     outline: 'none',
     transition: 'border-color 0.2s, box-shadow 0.2s',
   },
-  // Custom style cho file input
   fileInput: {
-    display: 'none', // Ẩn đi input file gốc
+    display: 'none',
   },
   fileInputLabel: {
     display: 'flex',
@@ -226,7 +235,19 @@ const styles = {
     color: colors.textLight,
     transition: 'border-color 0.2s, color 0.2s',
   },
-  // Nút submit chính
+  // --- THÊM MỚI: Style cho khu vực xem trước ảnh ---
+  imagePreviewContainer: {
+    marginBottom: '10px', // Khoảng cách với nút chọn file bên dưới
+    textAlign: 'center',
+  },
+  imagePreview: {
+    maxWidth: '100%',
+    maxHeight: '250px',
+    borderRadius: '8px',
+    border: `1px solid ${colors.border}`,
+    objectFit: 'cover', // Đảm bảo ảnh không bị méo
+  },
+  // ---------------------------------------------------
   button: {
     backgroundColor: colors.primary,
     color: "white",
@@ -245,7 +266,6 @@ const styles = {
     backgroundColor: colors.primaryLight,
     transform: 'translateY(-2px)',
   },
-  // Styles cho các thông báo
   alert: {
     padding: 15,
     marginTop: 20,
