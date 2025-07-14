@@ -1,43 +1,50 @@
 import React, { useEffect, useState } from "react";
 import { HiUser, HiOutlineUserCircle, HiPhone, HiMail, HiHome } from "react-icons/hi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import axios from "axios";
 
 const Profile = () => {
   const [formData, setFormData] = useState({
     fullName: "",
+    gender: "",
     email: "",
     phoneNumber: "",
-    address: "",
-    gender: ""
+    address: ""
   });
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    const storedUser = JSON.parse(localStorage.getItem("user"));
     const token = localStorage.getItem("token");
-
-    if (!storedUser?.userId || !token) {
+    if (!token) {
       navigate("/login");
       return;
     }
 
     axios
-      .get(`http://localhost:8080/api/user/${storedUser.userId}/profile`, {
+      .get("http://localhost:8080/api/user/profile", {
         headers: { Authorization: `Bearer ${token}` }
       })
       .then((res) => {
-        setFormData(res.data);
+        const data = res.data;
+        setFormData({
+          fullName:   data.fullName   || "",
+          gender:     data.gender     || "",
+          email:      data.email      || "",
+          phoneNumber:data.phoneNumber|| "",
+          address:    data.address    || ""
+        });
+        setMessage("");
       })
       .catch((err) => {
-        console.error(err);
+        console.error("Lỗi khi tải hồ sơ:", err);
         setMessage("Không thể tải thông tin hồ sơ.");
       });
-  }, []);
+  }, [location.state, navigate]);
 
   const goToUpdate = () => {
-    navigate("/update-profile");
+    navigate("/profile/update");
   };
 
   return (

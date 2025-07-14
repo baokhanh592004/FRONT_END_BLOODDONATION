@@ -60,7 +60,7 @@ export default function AppRouters() {
         <Route path="/about" element={<About />} />
 
         <Route path="/profile" element={<Profile />} />
-        <Route path="/update-profile" element={<UpdateProfile/>} />
+        <Route path="/profile/update" element={<UpdateProfile/>} />
 
         {/* ✅ Trang đăng ký hiến máu (Step 1 & 2) */}
         <Route
