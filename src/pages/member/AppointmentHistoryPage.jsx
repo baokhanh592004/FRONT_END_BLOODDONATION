@@ -40,6 +40,16 @@ const AppointmentHistoryPage = () => {
   
   const today = new Date();
 
+  const formatStatusBackground = (status) =>{
+   switch(status) {
+    case 'APPROVED':
+      return "bg-green-100 text-green-800";
+    case 'REJECTED':
+      return "bg-red-100 text-red-800";
+   }
+    }
+  
+
   // Lọc theo trạng thái
   const filteredAppointments = appointments.filter(app => 
     filterStatus === 'ALL' || app.status === filterStatus
@@ -92,7 +102,8 @@ const AppointmentHistoryPage = () => {
                     <div className="mt-2 space-y-1 text-sm">
                       <p><span className="font-medium text-gray-700">Ngày đăng ký:</span> {formatDate(today)}</p>
                       <p><span className="font-medium text-gray-700">Ngày hẹn:</span>{' '}  {formatDate(appointment.scheduledDate)}</p>
-                      <p><span className="font-medium text-gray-700">Trạng thái:</span> {appointment.status || 'Không rõ'}</p>
+                      <p><span className="font-medium text-gray-700">Trạng thái: </span>
+                       <span className={`font-semibold ${formatStatusBackground(appointment.status)}`}>{appointment.status || 'Không rõ'}</span></p>
                     </div>
                   </li>
                 );
