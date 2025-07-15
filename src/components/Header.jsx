@@ -261,12 +261,22 @@ export default function Header() {
                         >
                           Tài Khoản Của Tôi
                         </Link>
+
+                        {user.role === "MEMBER" &&
+                          <Link
+                            to="/member/dashboard" // Link đến trang đăng ký hiến máu
+                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
+                          >
+                            Quản Lý Chung
+                          </Link>
+                        }
+
                         {user.role === "STAFF" && (
                           <Link
                             to="/staff/dashboard"
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
                           >
-                            Quản lý chung
+                            Quản Lý Chung
                           </Link>
                         )}
                         {user.role === "ADMIN" && (
@@ -277,6 +287,7 @@ export default function Header() {
                             Quản Lý Chung
                           </Link>
                         )}
+
                         {user.role === "TREATMENT_CENTER" && (
                           <Link
                             to="/center/createrequest"
