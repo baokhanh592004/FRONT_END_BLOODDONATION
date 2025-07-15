@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
+import { Tooltip } from 'recharts';
 
 const AppointmentHistoryPage = () => {
   const [appointments, setAppointments] = useState([]);
@@ -43,9 +44,21 @@ const AppointmentHistoryPage = () => {
   const formatStatusBackground = (status) =>{
    switch(status) {
     case 'APPROVED':
-      return "bg-green-100 text-green-800";
+      return {
+        className: "bg-green-100 text-green-800",
+        label: "ĐÃ DUYỆT",
+      };
     case 'REJECTED':
-      return "bg-red-100 text-red-800";
+      return {
+        className: "bg-red-100 text-red-800",
+        label: "BỊ TỪ CHỐI",
+      };
+    case 'PENDING':
+    default:
+      return {
+        className: "text-gray-800",
+        label: "ĐANG CHỜ DUYỆT",
+      };
    }
     }
   
@@ -96,6 +109,7 @@ const AppointmentHistoryPage = () => {
             <ul className="space-y-4">
               {currentItems.map((appointment, index) => {
                 const center = appointment.center || {};
+                const {className, label} = formatStatusBackground(appointment.status);
                 return (
                   <li key={index} className="border rounded-lg p-4 shadow-sm bg-gray-50">
                     <p className="text-lg font-semibold text-blue-700">{center.name || 'Không có tên trung tâm'}</p>
@@ -103,7 +117,7 @@ const AppointmentHistoryPage = () => {
                       <p><span className="font-medium text-gray-700">Ngày đăng ký:</span> {formatDate(today)}</p>
                       <p><span className="font-medium text-gray-700">Ngày hẹn:</span>{' '}  {formatDate(appointment.scheduledDate)}</p>
                       <p><span className="font-medium text-gray-700">Trạng thái: </span>
-                       <span className={`font-semibold ${formatStatusBackground(appointment.status)}`}>{appointment.status || 'Không rõ'}</span></p>
+                       <span className={`font-semibold ${className}`}>{label || 'Không rõ'}</span></p>
                     </div>
                   </li>
                 );
