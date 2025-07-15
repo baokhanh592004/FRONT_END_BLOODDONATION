@@ -1,8 +1,16 @@
-// src/pages/staff/BlogPage.jsx
-
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import AuthenticatedImage from "../../components/AuthenticatedImage"; // Đảm bảo đường dẫn này đúng
+import AuthenticatedImage from "../../components/AuthenticatedImage";
+
+// =======================================================
+// THAY ĐỔI 1: THÊM ICON THÙNG RÁC
+// =======================================================
+const TrashIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/>
+        <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/>
+    </svg>
+);
 
 const UploadIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" style={{ marginRight: 8 }}>
@@ -11,7 +19,61 @@ const UploadIcon = () => (
     </svg>
 );
 
+const CloseIcon = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16">
+        <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8 2.146 2.854Z"/>
+    </svg>
+);
+
+
 const API_URL = "http://localhost:8080";
+
+// THAY ĐỔI: TRUYỀN HÀM ONDELETE VÀO MODAL
+const PostDetailModal = ({ post, isLoading, error, onClose, onDelete }) => {
+    const handleOverlayClick = (e) => {
+        if (e.target === e.currentTarget) {
+            onClose();
+        }
+    };
+
+    return (
+        <div style={styles.modalOverlay} onClick={handleOverlayClick}>
+            <div style={styles.modalContent}>
+                <button style={styles.modalCloseButton} onClick={onClose}>
+                    <CloseIcon />
+                </button>
+                {isLoading && <p>Đang tải bài viết...</p>}
+                {error && <div style={{ ...styles.alert, ...styles.alertError }}>{error}</div>}
+                {post && !isLoading && (
+                    <>
+                        <h2 style={styles.modalTitle}>{post.title}</h2>
+                        <p style={styles.modalMeta}>
+                            bởi <strong>{post.authorName}</strong> - {new Date(post.createdAt).toLocaleString('vi-VN')}
+                        </p>
+                        {post.image && (
+                            <AuthenticatedImage 
+                                src={post.image} 
+                                alt={post.title} 
+                                style={styles.modalImage} 
+                            />
+                        )}
+                        <div style={styles.modalBody}>{post.content}</div>
+                        {/* THAY ĐỔI: THÊM NÚT XÓA TRONG MODAL */}
+                        <div style={styles.modalActions}>
+                            <button 
+                                style={styles.deleteButtonModal} 
+                                onClick={() => onDelete(post.postId)}
+                            >
+                                <TrashIcon /> Xóa bài viết này
+                            </button>
+                        </div>
+                    </>
+                )}
+            </div>
+        </div>
+    );
+};
+
 
 export default function BlogPage() {
     const [formData, setFormData] = useState({ title: "", content: "", type: "BLOG", image: null });
@@ -24,9 +86,11 @@ export default function BlogPage() {
     const [loadingPosts, setLoadingPosts] = useState(true);
     const [fetchError, setFetchError] = useState(null);
 
-    // =======================================================
-    // THAY ĐỔI 1: TÁCH HÀM LẤY DỮ LIỆU RA RIÊNG
-    // =======================================================
+    const [selectedPost, setSelectedPost] = useState(null);
+    const [loadingSelectedPost, setLoadingSelectedPost] = useState(false);
+    const [fetchDetailError, setFetchDetailError] = useState(null);
+
+
     const fetchPosts = async () => {
         setLoadingPosts(true);
         setFetchError(null);
@@ -45,12 +109,10 @@ export default function BlogPage() {
         }
     };
 
-    // Gọi hàm này khi component được tải lần đầu
     useEffect(() => {
         fetchPosts();
     }, []);
 
-    // Effect dọn dẹp URL ảnh xem trước
     useEffect(() => {
         return () => {
             if (imagePreviewUrl) {
@@ -100,13 +162,8 @@ export default function BlogPage() {
             });
 
             setMessage("Tạo bài viết thành công!");
-            
-            // =======================================================
-            // THAY ĐỔI 2: GỌI LẠI HÀM FETCHPOSTS ĐỂ LÀM MỚI DANH SÁCH
-            // =======================================================
             await fetchPosts();
 
-            // Reset form
             setFormData({ title: "", content: "", type: "BLOG", image: null });
             setImagePreviewUrl(null);
             if(document.getElementById("image-input")) {
@@ -116,13 +173,70 @@ export default function BlogPage() {
             setError(err.response?.data?.message || "Lỗi khi tạo bài viết");
         }
     };
+    
+    // =======================================================
+    // THAY ĐỔI 2: TẠO HÀM XỬ LÝ VIỆC XÓA BÀI VIẾT
+    // =======================================================
+    const handleDeletePost = async (postId) => {
+        // Hỏi xác nhận trước khi xóa
+        if (!window.confirm("Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác.")) {
+            return;
+        }
+
+        const token = localStorage.getItem("token");
+        try {
+            await axios.delete(`${API_URL}/api/blog/${postId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            setMessage("Đã xóa bài viết thành công!");
+            setError(null);
+
+            // Cập nhật lại danh sách bài viết
+            await fetchPosts();
+
+            // Nếu bài viết đang được xem trong modal thì đóng modal lại
+            if (selectedPost && selectedPost.postId === postId) {
+                handleCloseModal();
+            }
+
+        } catch (err) {
+            setError(err.response?.data || "Lỗi khi xóa bài viết.");
+            setMessage(null);
+            console.error("Delete post error:", err);
+        }
+    };
+
+    const handlePostClick = async (postId) => {
+        setLoadingSelectedPost(true);
+        setFetchDetailError(null);
+        setSelectedPost(null); 
+        const token = localStorage.getItem("token");
+        try {
+            const response = await axios.get(`${API_URL}/api/blog/${postId}`, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+            setSelectedPost(response.data);
+        } catch (err) {
+            setFetchDetailError("Không thể tải chi tiết bài viết.");
+            console.error("Fetch post detail error:", err);
+        } finally {
+            setLoadingSelectedPost(false);
+        }
+    };
+    
+    const handleCloseModal = () => {
+        setSelectedPost(null);
+        setFetchDetailError(null);
+    };
 
     return (
         <div style={styles.pageContainer}>
-            {/* Phần tạo bài viết không đổi */}
+            {/* Phần tạo bài viết */}
             <div style={styles.container}>
                 <h2 style={styles.header}>Tạo Bài Viết Mới</h2>
                 <form onSubmit={handleSubmit} style={styles.form}>
+                    {/* ... các input form giữ nguyên ... */}
                     <div style={styles.formGroup}>
                         <label htmlFor="title" style={styles.label}>Tiêu đề</label>
                         <input id="title" type="text" name="title" placeholder="Nhập tiêu đề bài viết..." value={formData.title} onChange={handleChange} required style={styles.input} />
@@ -167,28 +281,55 @@ export default function BlogPage() {
                 
                 <div style={styles.postsGrid}>
                     {posts.map(post => (
+                        // =======================================================
+                        // THAY ĐỔI 3: THÊM NÚT XÓA VÀO CARD BÀI VIẾT
+                        // =======================================================
                         <div key={post.postId} style={styles.postCard}>
-                            <AuthenticatedImage 
-                                src={post.image}
-                                alt={post.title} 
-                                style={styles.postImage} 
-                            />
-                            <div style={styles.postCardContent}>
-                                <span style={styles.postType}>{post.type}</span>
-                                <h3 style={styles.postTitle}>{post.title}</h3>
-                                <p style={styles.postAuthor}>
-                                    bởi {post.authorName} - {new Date(post.createdAt).toLocaleDateString('vi-VN')}
-                                </p>
+                            {/* Nút xóa */}
+                            <button
+                                style={styles.deleteButtonCard}
+                                onClick={(e) => {
+                                    e.stopPropagation(); // Ngăn việc mở modal khi click nút xóa
+                                    handleDeletePost(post.postId);
+                                }}
+                            >
+                                <TrashIcon />
+                            </button>
+
+                            {/* Nội dung card */}
+                            <div onClick={() => handlePostClick(post.postId)} style={{ cursor: 'pointer' }}>
+                                <AuthenticatedImage 
+                                    src={post.image}
+                                    alt={post.title} 
+                                    style={styles.postImage} 
+                                />
+                                <div style={styles.postCardContent}>
+                                    <span style={styles.postType}>{post.type}</span>
+                                    <h3 style={styles.postTitle}>{post.title}</h3>
+                                    <p style={styles.postAuthor}>
+                                        bởi {post.authorName} - {new Date(post.createdAt).toLocaleDateString('vi-VN')}
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     ))}
                 </div>
             </div>
+
+            {/* THAY ĐỔI: TRUYỀN HÀM XÓA VÀO MODAL */}
+            {(loadingSelectedPost || selectedPost || fetchDetailError) && (
+                <PostDetailModal
+                    post={selectedPost}
+                    isLoading={loadingSelectedPost}
+                    error={fetchDetailError}
+                    onClose={handleCloseModal}
+                    onDelete={handleDeletePost}
+                />
+            )}
         </div>
     );
 }
 
-// Giữ nguyên toàn bộ đối tượng styles
 const colors = {
     primary: '#d32f2f',
     primaryLight: '#e57373',
@@ -200,7 +341,11 @@ const colors = {
     error: '#d32f2f',
 };
 
+// =======================================================
+// THAY ĐỔI 4: THÊM STYLES CHO CÁC NÚT XÓA
+// =======================================================
 const styles = {
+    // ... các styles cũ giữ nguyên
     pageContainer: {
         backgroundColor: colors.background,
         padding: '40px 20px',
@@ -325,6 +470,7 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         transition: 'transform 0.2s, box-shadow 0.2s',
+        position: 'relative', // Cần thiết để định vị nút xóa
     },
     postImage: {
         width: '100%',
@@ -367,4 +513,99 @@ const styles = {
         paddingTop: '10px',
         borderTop: `1px solid ${colors.border}`,
     },
+    modalOverlay: {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+    },
+    modalContent: {
+        backgroundColor: '#fff',
+        padding: '30px 40px',
+        borderRadius: '12px',
+        maxWidth: '800px',
+        width: '90%',
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        position: 'relative',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
+    },
+    modalCloseButton: {
+        position: 'absolute',
+        top: '15px',
+        right: '15px',
+        background: 'transparent',
+        border: 'none',
+        cursor: 'pointer',
+        fontSize: '24px',
+        color: '#888',
+    },
+    modalTitle: {
+        color: colors.primary,
+        marginBottom: '10px',
+        fontSize: '2rem',
+    },
+    modalMeta: {
+        color: colors.textLight,
+        fontSize: '14px',
+        marginBottom: '20px',
+        borderBottom: `1px solid ${colors.border}`,
+        paddingBottom: '15px',
+    },
+    modalImage: {
+        width: '100%',
+        maxHeight: '400px',
+        objectFit: 'cover',
+        borderRadius: '8px',
+        marginBottom: '25px',
+    },
+    modalBody: {
+        fontSize: '16px',
+        lineHeight: 1.7,
+        color: colors.text,
+        whiteSpace: 'pre-wrap',
+    },
+    // Styles mới cho nút xóa
+    deleteButtonCard: {
+        position: 'absolute',
+        top: '10px',
+        right: '10px',
+        zIndex: 2,
+        backgroundColor: 'rgba(255, 255, 255, 0.8)',
+        border: '1px solid #ddd',
+        borderRadius: '50%',
+        width: '32px',
+        height: '32px',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        cursor: 'pointer',
+        color: colors.error,
+        transition: 'background-color 0.2s, color 0.2s',
+    },
+    modalActions: {
+        marginTop: '30px',
+        paddingTop: '20px',
+        borderTop: `1px solid ${colors.border}`,
+        textAlign: 'right',
+    },
+    deleteButtonModal: {
+        backgroundColor: '#fff0f0',
+        color: colors.error,
+        border: `1px solid ${colors.error}`,
+        padding: '10px 20px',
+        borderRadius: '8px',
+        cursor: 'pointer',
+        fontWeight: 'bold',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '8px',
+        transition: 'background-color 0.2s',
+    }
 };
