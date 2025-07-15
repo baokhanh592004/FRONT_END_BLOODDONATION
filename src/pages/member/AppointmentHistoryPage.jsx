@@ -30,7 +30,15 @@ const AppointmentHistoryPage = () => {
     fetchAppointments();
   }, []);
 
-  const today = new Date().toLocaleDateString("vi-VN");
+  const formatDate = (dateStr) => {
+    return new Intl.DateTimeFormat("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }).format(new Date(dateStr));
+  };
+  
+  const today = new Date();
 
   // Lọc theo trạng thái
   const filteredAppointments = appointments.filter(app => 
@@ -81,10 +89,9 @@ const AppointmentHistoryPage = () => {
                 return (
                   <li key={index} className="border rounded-lg p-4 shadow-sm bg-gray-50">
                     <p className="text-lg font-semibold text-blue-700">{center.name || 'Không có tên trung tâm'}</p>
-                    <p className="text-sm text-gray-600 italic">{center.address || 'Không có địa chỉ'}</p>
                     <div className="mt-2 space-y-1 text-sm">
-                      <p><span className="font-medium text-gray-700">Ngày đăng ký:</span> {today}</p>
-                      <p><span className="font-medium text-gray-700">Ngày hẹn:</span> {appointment.scheduledDate}</p>
+                      <p><span className="font-medium text-gray-700">Ngày đăng ký:</span> {formatDate(today)}</p>
+                      <p><span className="font-medium text-gray-700">Ngày hẹn:</span>{' '}  {formatDate(appointment.scheduledDate)}</p>
                       <p><span className="font-medium text-gray-700">Trạng thái:</span> {appointment.status || 'Không rõ'}</p>
                     </div>
                   </li>
