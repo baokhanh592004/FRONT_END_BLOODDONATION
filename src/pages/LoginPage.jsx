@@ -3,10 +3,12 @@ import axios from "axios";
 // Import thêm useNavigate và Link để xử lý sau khi đăng nhập
 import { Link  } from "react-router-dom";
 import heartImage from '../assets/a.jpg';
+import { FaRegEye, FaRegEyeSlash } from "react-icons/fa";
 
 export default function LoginPage() {
   // Khởi tạo hook useNavigate để chuyển trang
 
+  const [showPass, setShowPass] = useState(false);
 
   const [formData, setFormData] = useState({
     login: "",
@@ -79,15 +81,23 @@ const handleSubmit = async e => {
           style={styles.input}
           required
         />
-        <input
+        <div style={styles.passwordWrapper}>
+          <input
           name="password"
-          type="password"
+          type= {showPass ? "text" : "password"}
           placeholder="Mật khẩu"
           value={formData.password}
           onChange={handleChange}
-          style={styles.input}
+          style={{ ...styles.input, paddingRight: 50 }}
           required
         />
+        <button type="button" 
+        onClick={() => setShowPass(prev => !prev)}
+        style={styles.togglePasswordBtn}>
+          {showPass ? <FaRegEye/> : <FaRegEyeSlash/>}
+        </button>
+        </div>
+        
         <label style={styles.label}>
           <input
             name="remember"
@@ -212,4 +222,21 @@ const styles = {
     borderRadius: 8,
     zIndex: 2,
   },
+  passwordWrapper: {
+    position: "relative",
+  },
+  
+  togglePasswordBtn: {
+    position: "absolute",
+    right: 10,
+    top: "50%",
+    transform: "translateY(-50%)",
+    background: "none",
+    border: "none",
+    cursor: "pointer",
+    fontSize: 18,
+    padding: 0,
+    zIndex: 3
+  },
+  
 };
