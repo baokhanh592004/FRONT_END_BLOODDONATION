@@ -1,3 +1,5 @@
+// src/pages/staff/DonationManagementPage.jsx
+
 import React, { useState, useEffect, forwardRef } from 'react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
@@ -41,16 +43,15 @@ export default function DonationManagementPage() {
     const [isScreeningModalOpen, setIsScreeningModalOpen] = useState(false);
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const [isRecordDonationModalOpen, setIsRecordDonationModalOpen] = useState(false);
-    // =======================================================
-    // FIX 1: THÊM DÒNG KHAI BÁO STATE CÒN THIẾU
-    // =======================================================
-    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false); 
+    const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
     const [donationHistory, setDonationHistory] = useState([]);
 
     useEffect(() => {
         const initialFetch = async () => {
             setLoading(true);
             try {
+                // Tải danh sách nhóm máu ngay từ đầu để sẵn sàng sử dụng
+                await fetchBloodTypes();
                 await fetchAllAppointments();
             } catch (err) {
                  setError("Không thể tải dữ liệu ban đầu. Vui lòng thử lại.");
@@ -146,7 +147,8 @@ export default function DonationManagementPage() {
             alert('Ghi nhận ca hiến máu thành công!');
             handleCloseAllModals();
             await fetchAllAppointments();
-        } catch (err) {
+        } catch (err)
+ {
             const errorMessage = err.response?.data?.message || "Có lỗi xảy ra khi ghi nhận hiến máu.";
             alert(`Lỗi: ${errorMessage}`);
         } finally {
@@ -157,9 +159,11 @@ export default function DonationManagementPage() {
     const handleOpenModal = async (modalType, appointment) => {
         setCurrentAppointment(appointment);
         const token = localStorage.getItem('token');
+        
+        // Luôn đảm bảo đã tải danh sách nhóm máu
+        await fetchBloodTypes();
 
         if (modalType === 'screening') {
-            await fetchBloodTypes();
             setIsScreeningModalOpen(true);
         } 
         else if (modalType === 'history') {
@@ -203,6 +207,21 @@ export default function DonationManagementPage() {
         setIsProfileModalOpen(false);
         setCurrentAppointment(null);
         setCurrentUserProfile(null);
+    };
+
+    // =======================================================
+    // MỚI: HÀM NÀY SẼ ĐƯỢC GỌI KHI CẬP NHẬT HỒ SƠ THÀNH CÔNG
+    // =======================================================
+    const handleProfileUpdate = async () => {
+        handleCloseAllModals();
+        setLoading(true);
+        try {
+            await fetchAllAppointments(); // Tải lại danh sách lịch hẹn để cập nhật trạng thái/thông tin
+        } catch (err) {
+            setError("Không thể làm mới dữ liệu sau khi cập nhật.");
+        } finally {
+            setLoading(false);
+        }
     };
     
     const handleReset = async () => {
@@ -272,9 +291,17 @@ export default function DonationManagementPage() {
             {isRecordDonationModalOpen && <RecordDonationModal appointment={currentAppointment} userProfile={currentUserProfile} onClose={handleCloseAllModals} onSubmit={handleRecordDonationSubmit} isSubmitting={isSubmitting} />}
             
             {/* ======================================================= */}
-            {/* FIX 2: SỬA LẠI ĐIỀU KIỆN RENDER CHO ĐÚNG */}
+            {/* MỚI: TRUYỀN THÊM PROPS CHO USER PROFILE MODAL */}
             {/* ======================================================= */}
-            {isProfileModalOpen && <UserProfileModal userProfile={currentUserProfile} onClose={handleCloseAllModals} />}
+            {isProfileModalOpen && (
+                <UserProfileModal 
+                appointment={currentAppointment} 
+                userProfile={currentUserProfile} 
+                onClose={handleCloseAllModals}
+                bloodTypes={bloodTypes}
+                onProfileUpdate={handleProfileUpdate}
+                />
+            )}
         </div>
     );
 }
