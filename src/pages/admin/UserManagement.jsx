@@ -5,11 +5,14 @@ import {
   updateUserRole,
   updateUserStatus,
   deleteUserById,
-  createUser
+  createUser,
 } from '../../api/userApi';
 
-const UserManagement = () => {
+const PAGE_SIZE = 10;
+
+export default function UserManagement() {
   const [users, setUsers] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
   const [editingUserId, setEditingUserId] = useState(null);
   const [isCreating, setIsCreating] = useState(false);
   const [showFormModal, setShowFormModal] = useState(false);
@@ -22,19 +25,17 @@ const UserManagement = () => {
     gender: '',
     address: '',
     role: '',
-    status: 'Active'
+    status: 'Active',
   });
 
   const loadUsers = async () => {
     try {
       const res = await fetchAllUsers();
-      if (res && res.data && res.data.success) {
+      if (res?.data?.success) {
         setUsers(res.data.data);
-      } else {
-        console.error('Lỗi API:', res?.data?.message || 'Không có thông báo lỗi');
       }
     } catch (err) {
-      console.error('Lỗi khi gọi API:', err);
+      console.error('Lỗi khi tải danh sách người dùng:', err);
     }
   };
 
@@ -42,10 +43,16 @@ const UserManagement = () => {
     loadUsers();
   }, []);
 
+  const totalPages = Math.ceil(users.length / PAGE_SIZE);
+  const currentUsers = users.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+
+  const handleInputChange = (e) => {
+    setFormData((prev) => ({ ...prev, [e.target.name]: e.target.value }));
+  };
+
   const handleEditClick = (user) => {
     setEditingUserId(user.userId);
     setIsCreating(false);
-    setShowFormModal(true);
     setFormData({
       username: user.username,
       password: 'Password@123',
@@ -55,23 +62,19 @@ const UserManagement = () => {
       gender: user.gender,
       address: user.address,
       role: user.role,
-      status: user.status
+      status: user.status,
     });
-  };
-
-  const handleInputChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    setShowFormModal(true);
   };
 
   const handleSave = async () => {
     try {
       await updateUserById(editingUserId, formData);
-      alert('Cập nhật thông tin thành công!');
-      setEditingUserId(null);
+      alert('Đã cập nhật thành công!');
       setShowFormModal(false);
       loadUsers();
     } catch (err) {
-      alert('Lỗi khi cập nhật thông tin!');
+      alert('Lỗi cập nhật!');
       console.error(err);
     }
   };
@@ -79,33 +82,32 @@ const UserManagement = () => {
   const handleUpdateRole = async () => {
     try {
       await updateUserRole(editingUserId, formData.role);
-      alert('Cập nhật vai trò thành công!');
+      alert('Đã cập nhật vai trò!');
       loadUsers();
     } catch (err) {
-      alert('Lỗi khi cập nhật vai trò!');
+      alert('Lỗi cập nhật vai trò!');
       console.error(err);
     }
   };
 
   const handleUpdateStatus = async () => {
+    const newStatus = formData.status === 'Active' ? 'Inactive' : 'Active';
     try {
-      const newStatus = formData.status === 'Active' ? 'Inactive' : 'Active';
       await updateUserStatus(editingUserId, newStatus);
-      alert(`Trạng thái đã được cập nhật thành ${newStatus}`);
-      setFormData({ ...formData, status: newStatus });
+      setFormData((prev) => ({ ...prev, status: newStatus }));
+      alert('Đã cập nhật trạng thái!');
       loadUsers();
     } catch (err) {
-      alert('Lỗi khi cập nhật trạng thái!');
+      alert('Lỗi cập nhật trạng thái!');
       console.error(err);
     }
   };
 
   const handleDeleteUser = async () => {
-    if (window.confirm('Bạn có chắc chắn muốn xóa người dùng này không?')) {
+    if (window.confirm('Bạn có chắc muốn xóa người dùng này?')) {
       try {
         await deleteUserById(editingUserId);
-        alert('Xóa người dùng thành công!');
-        setEditingUserId(null);
+        alert('Xóa thành công!');
         setShowFormModal(false);
         loadUsers();
       } catch (err) {
@@ -115,86 +117,77 @@ const UserManagement = () => {
     }
   };
 
-  const handleCreateUser = async () => {
+  const handleCreate = async () => {
     try {
       await createUser(formData);
       alert('Tạo người dùng thành công!');
-      setIsCreating(false);
       setShowFormModal(false);
-      setFormData({
-        username: '',
-        password: '',
-        fullName: '',
-        email: '',
-        phoneNumber: '',
-        gender: '',
-        address: '',
-        role: '',
-        status: 'Active'
-      });
       loadUsers();
     } catch (err) {
-      alert('Lỗi khi tạo người dùng!');
+      alert('Lỗi tạo người dùng!');
       console.error(err);
     }
   };
 
+  const handleNewUserClick = () => {
+    setFormData({
+      username: '',
+      password: '',
+      fullName: '',
+      email: '',
+      phoneNumber: '',
+      gender: '',
+      address: '',
+      role: '',
+      status: 'Active',
+    });
+    setIsCreating(true);
+    setEditingUserId(null);
+    setShowFormModal(true);
+  };
+
   return (
-    <div className="p-6 relative">
-      <h2 className="text-2xl font-bold mb-4">Quản lý người dùng</h2>
+    <div className="p-6">
+      <h2 className="text-2xl font-bold text-indigo-700 mb-4">Quản lý người dùng</h2>
 
       <button
-        onClick={() => {
-          setIsCreating(true);
-          setEditingUserId(null);
-          setShowFormModal(true);
-          setFormData({
-            username: '',
-            password: '',
-            fullName: '',
-            email: '',
-            phoneNumber: '',
-            gender: '',
-            address: '',
-            role: '',
-            status: 'Active'
-          });
-        }}
-        className="mb-4 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+        onClick={handleNewUserClick}
+        className="mb-4 px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700"
       >
         + Tạo người dùng mới
       </button>
 
-      <div className="overflow-x-auto">
-        <table className="min-w-full table-auto border border-gray-200">
-          <thead className="bg-gray-100">
+      {/* Table */}
+      <div className="overflow-x-auto bg-white rounded shadow">
+        <table className="min-w-full">
+          <thead className="bg-gray-100 text-sm text-gray-700">
             <tr>
-              <th className="px-4 py-2 border">ID</th>
-              <th className="px-4 py-2 border">Họ tên</th>
-              <th className="px-4 py-2 border">Email</th>
-              <th className="px-4 py-2 border">Username</th>
-              <th className="px-4 py-2 border">Giới tính</th>
-              <th className="px-4 py-2 border">Vai trò</th>
-              <th className="px-4 py-2 border">Trạng thái</th>
-              <th className="px-4 py-2 border">Điện thoại</th>
-              <th className="px-4 py-2 border">Hành động</th>
+              <th className="py-2 px-4 text-left">ID</th>
+              <th className="py-2 px-4 text-left">Họ tên</th>
+              <th className="py-2 px-4 text-left">Email</th>
+              <th className="py-2 px-4 text-left">Username</th>
+              <th className="py-2 px-4 text-left">Giới tính</th>
+              <th className="py-2 px-4 text-left">Vai trò</th>
+              <th className="py-2 px-4 text-left">Trạng thái</th>
+              <th className="py-2 px-4 text-left">Điện thoại</th>
+              <th className="py-2 px-4 text-center">Hành động</th>
             </tr>
           </thead>
-          <tbody>
-            {users.map((u, index) => (
-              <tr key={u.userId || index} className="hover:bg-gray-50">
-                <td className="px-4 py-2 border text-sm">{u.userId}</td>
-                <td className="px-4 py-2 border text-sm">{u.fullName}</td>
-                <td className="px-4 py-2 border text-sm">{u.email}</td>
-                <td className="px-4 py-2 border text-sm">{u.username}</td>
-                <td className="px-4 py-2 border text-sm">{u.gender}</td>
-                <td className="px-4 py-2 border text-sm">{u.role}</td>
-                <td className="px-4 py-2 border text-sm">{u.status}</td>
-                <td className="px-4 py-2 border text-sm">{u.phoneNumber}</td>
-                <td className="px-4 py-2 border">
+          <tbody className="text-sm">
+            {currentUsers.map((user) => (
+              <tr key={user.userId} className="border-t hover:bg-gray-50">
+                <td className="py-2 px-4">{user.userId}</td>
+                <td className="py-2 px-4">{user.fullName}</td>
+                <td className="py-2 px-4">{user.email}</td>
+                <td className="py-2 px-4">{user.username}</td>
+                <td className="py-2 px-4">{user.gender}</td>
+                <td className="py-2 px-4">{user.role}</td>
+                <td className="py-2 px-4">{user.status}</td>
+                <td className="py-2 px-4">{user.phoneNumber}</td>
+                <td className="py-2 px-4 text-center">
                   <button
-                    onClick={() => handleEditClick(u)}
-                    className="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 text-sm"
+                    onClick={() => handleEditClick(user)}
+                    className="text-white bg-blue-500 hover:bg-blue-600 px-3 py-1 rounded text-sm"
                   >
                     Sửa
                   </button>
@@ -205,26 +198,56 @@ const UserManagement = () => {
         </table>
       </div>
 
-      {/* Modal hiển thị form */}
-      {(editingUserId || isCreating) && showFormModal && (
+      {/* Pagination */}
+      <div className="mt-4 flex justify-center gap-2">
+        <button
+          onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+          disabled={currentPage === 1}
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Trước
+        </button>
+        {Array.from({ length: totalPages }, (_, i) => (
+          <button
+            key={i}
+            onClick={() => setCurrentPage(i + 1)}
+            className={`px-3 py-1 rounded ${
+              currentPage === i + 1 ? 'bg-indigo-600 text-white' : 'bg-gray-200'
+            }`}
+          >
+            {i + 1}
+          </button>
+        ))}
+        <button
+          onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+          disabled={currentPage === totalPages}
+          className="px-3 py-1 bg-gray-200 rounded disabled:opacity-50"
+        >
+          Sau
+        </button>
+      </div>
+
+      {/* Modal */}
+      {showFormModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white p-6 rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-xl">
+          <div className="bg-white p-6 rounded w-full max-w-3xl shadow-lg max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-semibold mb-4">
               {isCreating ? 'Tạo người dùng' : 'Chỉnh sửa người dùng'}
             </h3>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <input name="username" value={formData.username} onChange={handleInputChange} placeholder="Tên tài khoản" className="border px-3 py-2 rounded" />
-              <input name="password" value={formData.password} onChange={handleInputChange} placeholder="Mật khẩu" className="border px-3 py-2 rounded" />
-              <input name="fullName" value={formData.fullName} onChange={handleInputChange} placeholder="Họ và tên" className="border px-3 py-2 rounded" />
-              <input name="email" value={formData.email} onChange={handleInputChange} placeholder="Email" className="border px-3 py-2 rounded" />
-              <input name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} placeholder="Số điện thoại" className="border px-3 py-2 rounded" />
-              <select name="gender" value={formData.gender} onChange={handleInputChange} className="border px-3 py-2 rounded">
+              <input name="username" value={formData.username} onChange={handleInputChange} placeholder="Tên tài khoản" className="border p-2 rounded" />
+              <input name="password" value={formData.password} onChange={handleInputChange} placeholder="Mật khẩu" className="border p-2 rounded" />
+              <input name="fullName" value={formData.fullName} onChange={handleInputChange} placeholder="Họ và tên" className="border p-2 rounded" />
+              <input name="email" value={formData.email} onChange={handleInputChange} placeholder="Email" className="border p-2 rounded" />
+              <input name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} placeholder="Số điện thoại" className="border p-2 rounded" />
+              <select name="gender" value={formData.gender} onChange={handleInputChange} className="border p-2 rounded">
                 <option value="">-- Chọn giới tính --</option>
                 <option value="Nam">Nam</option>
                 <option value="Nữ">Nữ</option>
               </select>
-              <input name="address" value={formData.address} onChange={handleInputChange} placeholder="Địa chỉ" className="border px-3 py-2 rounded" />
-              <select name="role" value={formData.role} onChange={handleInputChange} className="border px-3 py-2 rounded">
+              <input name="address" value={formData.address} onChange={handleInputChange} placeholder="Địa chỉ" className="border p-2 rounded" />
+              <select name="role" value={formData.role} onChange={handleInputChange} className="border p-2 rounded">
                 <option value="">-- Chọn vai trò --</option>
                 <option value="ADMIN">ADMIN</option>
                 <option value="STAFF">STAFF</option>
@@ -233,11 +256,11 @@ const UserManagement = () => {
                 <option value="TREATMENT_CENTER">TREATMENT_CENTER</option>
               </select>
             </div>
+
             <div className="mt-4 flex flex-wrap gap-3">
               {isCreating ? (
                 <>
-                  <button onClick={handleCreateUser} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Tạo</button>
-                  <button onClick={() => { setIsCreating(false); setShowFormModal(false); }} className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Hủy</button>
+                  <button onClick={handleCreate} className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Tạo</button>
                 </>
               ) : (
                 <>
@@ -247,15 +270,22 @@ const UserManagement = () => {
                     {formData.status === 'Active' ? 'Vô hiệu hóa' : 'Kích hoạt'}
                   </button>
                   <button onClick={handleDeleteUser} className="bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700">Xóa</button>
-                  <button onClick={() => { setEditingUserId(null); setShowFormModal(false); }} className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400">Hủy</button>
                 </>
               )}
+              <button
+                onClick={() => {
+                  setShowFormModal(false);
+                  setIsCreating(false);
+                  setEditingUserId(null);
+                }}
+                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400"
+              >
+                Hủy
+              </button>
             </div>
           </div>
         </div>
       )}
     </div>
   );
-};
-
-export default UserManagement;
+}
