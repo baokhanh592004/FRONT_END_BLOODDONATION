@@ -150,6 +150,11 @@ export default function Header() {
             {/* ...Các link điều hướng giữ nguyên... */}
             <Link to="/" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Trang chủ</Link>
             <Link to="/about" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Giới thiệu</Link>
+            
+            {/* === PHẦN ĐƯỢC THÊM VÀO === */}
+            <Link to="/forum" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Diễn đàn</Link>
+            {/* ========================== */}
+
             <Link to="/register-donation" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Đăng ký hiến máu</Link>
             <Link to="/Thong_tin_nhom_mau" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Thông tin nhóm máu</Link>
             <Link to="/Yeu_cau_mau_khan_cap" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Yêu cầu máu khẩn cấp</Link>
@@ -323,6 +328,3 @@ export default function Header() {
   );
 
 }
-
-
-

@@ -43,8 +43,11 @@ import UserManagement from "../pages/admin/UserManagement";
 import HealthQuestion from "../pages/admin/HealthQuestion";
 import AdminPage from "../pages/admin/AdminPage";
 import AdminDashboard from "../pages/admin/AdminDashboard";
-
+import ForumManagementPage from "../pages/admin/ForumManagementPage";
+import ForumTopicDetailPage from "../pages/admin/ForumTopicDetailPage";
 import BloodInventory from "../pages/admin/BloodInventory";
+import ForumPage from "../pages/forum/ForumPage";
+import TopicDetailPage from "../pages/forum/TopicDetailPage";
 
 // Center Pagé
 import CenterRoute from "./CenterRouter";
@@ -69,6 +72,8 @@ export default function AppRouters() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/profile/update" element={<UpdateProfile />} />
 
+        <Route path="/forum" element={<ForumPage />} />
+        <Route path="/forum/topic/:topicId" element={<TopicDetailPage />} />
         {/* ✅ Trang đăng ký hiến máu (Step 1 & 2) */}
         <Route
           path="/register-donation"
@@ -78,10 +83,10 @@ export default function AppRouters() {
         {/* ĐỊNH NGHĨA ROUTE CHO TRANG TIN TỨC */}
         {/* Route này sẽ khớp với "/blog" */}
         <Route path="/blog" element={<NewBlogPost />} />
-        
+
         {/* Route này sẽ khớp với "/blog/1", "/blog/23", v.v. */}
         <Route path="/blog/:postId" element={<NewBlogPost />} />
-        
+
         <Route
           path="/member/donation-questionnaire"
           element={<DonationQuestionnairePage />}
@@ -108,7 +113,6 @@ export default function AppRouters() {
         <Route path="history" element={<DonationHistoryPage />} />
         <Route path="appointments" element={<AppointmentHistoryPage />} />
         <Route path="certificate" element={<CertificatePage />} />
-        
       </Route>
 
       {/* ===== Staff Routes (Protected) ===== */}
@@ -146,7 +150,11 @@ export default function AppRouters() {
         <Route path="usermanagement" element={<UserManagement />} />
         <Route path="healthquestion" element={<HealthQuestion />} />
         <Route path="requests" element={<AdminPage />} />
-
+        <Route path="forum" element={<ForumManagementPage />} />
+        <Route
+          path="forum/topics/:topicId"
+          element={<ForumTopicDetailPage />}
+        />
         <Route path="bloodinventory" element={<BloodInventory />} />
       </Route>
 
