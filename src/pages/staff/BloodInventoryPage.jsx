@@ -45,7 +45,7 @@ const BloodInventoryPage = () => {
         }, {});
 
         const componentMap = componentTypesData.reduce((map, item) => {
-          map[item.id] = item.description.split(',')[0].trim();
+          map[item.id] = item.name.split(',')[0].trim();
           return map;
         }, {});
 
