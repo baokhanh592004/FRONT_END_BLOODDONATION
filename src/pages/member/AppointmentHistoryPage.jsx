@@ -9,35 +9,47 @@ const AppointmentHistoryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-  useEffect(() => {
-    const fetchAppointments = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('Vui lòng đăng nhập để xem lịch hẹn.');
-        return;
-      }
 
-      try {
-        const res = await axios.get('http://localhost:8080/api/user/appointments', {
-          headers: { Authorization: `Bearer ${token}` },
+  // Hàm fetch dữ liệu và gán ngày đăng ký tạm
+  const fetchAppointments = async () => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('Vui lòng đăng nhập để xem lịch hẹn.');
+      return;
+    }
+
+    try {
+      const res = await axios.get('http://localhost:8080/api/user/appointments', {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const sortedAppointments = res.data
+        .sort((a, b) => new Date(b.scheduledDate) - new Date(a.scheduledDate)) // Sắp xếp theo ngày hẹn
+
+        // Gán ngày đăng ký giả lập (mới nhất → hôm nay, cũ hơn → lùi về trước)
+        .map((item, index) => {
+          const fakeCreatedDate = new Date();
+          fakeCreatedDate.setMinutes(fakeCreatedDate.getMinutes() - index); // mỗi lịch cách nhau 1 phút
+          return { ...item, fakeCreatedDate };
         });
-        // Thêm "fakeCreatedDate" là ngày hiện tại
-      const now = new Date();
-      const appointmentsWithDate = res.data.map((item, index) => ({
-        ...item,
-        fakeCreatedDate: new Date(now.getTime() - index * 1000), // lùi mỗi item 1 giây để tránh trùng
-      }));
-
-      // Sắp theo id giảm dần (mới nhất trước)
-      const sortedAppointments = appointmentsWithDate.sort((a, b) => b.id - a.id);
+      
       setAppointments(sortedAppointments);
-      } catch (err) {
-        console.error('Lỗi khi lấy lịch hẹn:', err);
-        setError('Không thể tải danh sách lịch hẹn. Vui lòng thử lại sau.');
-      }
-    };
 
+    } catch (err) {
+      console.error('Lỗi khi lấy lịch hẹn:', err);
+      setError('Không thể tải danh sách lịch hẹn. Vui lòng thử lại sau.');
+    }
+  };
+
+  // Tự động làm mới mỗi 30s
+  useEffect(() => {
     fetchAppointments();
+
+    const interval = setInterval(() => {
+      fetchAppointments();
+    }, 30000); // 30 giây
+
+    return () => clearInterval(interval); // clear interval khi unmount
   }, []);
 
   const formatDate = (dateStr) => {
@@ -47,35 +59,37 @@ const AppointmentHistoryPage = () => {
       year: "numeric"
     }).format(new Date(dateStr));
   };
-  
-  const formatStatusBackground = (status) =>{
-   switch(status) {
-    case 'APPROVED':
-      return {
-        className: "bg-green-100 text-green-800",
-        label: "ĐÃ DUYỆT",
-      };
-    case 'REJECTED':
-      return {
-        className: "bg-red-100 text-red-800",
-        label: "BỊ TỪ CHỐI",
-      };
-    case 'PENDING':
-    default:
-      return {
-        className: "text-gray-800",
-        label: "ĐANG CHỜ DUYỆT",
-      };
-   }
-    }
-  
 
-  // Lọc theo trạng thái
-  const filteredAppointments = appointments.filter(app => 
+  const formatStatusBackground = (status) => {
+    switch (status) {
+      case 'APPROVED':
+        return {
+          className: "bg-yellow-100 text-yellow-800",
+          label: "ĐÃ DUYỆT",
+        };
+      case 'REJECTED':
+        return {
+          className: "bg-red-100 text-red-800",
+          label: "BỊ TỪ CHỐI",
+        };
+      case 'COMPLETED':
+        return {
+          className: "bg-green-100 text-green-800",
+          label: "HOÀN THÀNH",
+        };
+      default:
+        return {
+          className: "text-gray-800",
+          label: "ĐANG CHỜ DUYỆT",
+        };
+    }
+  };
+
+  // Lọc và phân trang
+  const filteredAppointments = appointments.filter(app =>
     filterStatus === 'ALL' || app.status === filterStatus
   );
 
-  // Phân trang
   const indexOfLast = currentPage * itemsPerPage;
   const indexOfFirst = indexOfLast - itemsPerPage;
   const currentItems = filteredAppointments.slice(indexOfFirst, indexOfLast);
@@ -104,6 +118,7 @@ const AppointmentHistoryPage = () => {
             <option value="PENDING">Đang chờ</option>
             <option value="APPROVED">Đã duyệt</option>
             <option value="REJECTED">Bị từ chối</option>
+            <option value="COMPLETED">Hoàn thành</option>
           </select>
         </div>
 
@@ -116,15 +131,16 @@ const AppointmentHistoryPage = () => {
             <ul className="space-y-4">
               {currentItems.map((appointment, index) => {
                 const center = appointment.center || {};
-                const {className, label} = formatStatusBackground(appointment.status);
+                const { className, label } = formatStatusBackground(appointment.status);
                 return (
                   <li key={index} className="border rounded-lg p-4 shadow-sm bg-gray-50">
                     <p className="text-lg font-semibold text-blue-700">{center.name || 'Không có tên trung tâm'}</p>
                     <div className="mt-2 space-y-1 text-sm">
                       <p><span className="font-medium text-gray-700">Ngày đăng ký:</span> {formatDate(appointment.fakeCreatedDate)}</p>
-                      <p><span className="font-medium text-gray-700">Ngày hẹn:</span>{' '}  {formatDate(appointment.scheduledDate)}</p>
-                      <p><span className="font-medium text-gray-700">Trạng thái: </span>
-                       <span className={`font-semibold ${className}`}>{label || 'Không rõ'}</span></p>
+                      <p><span className="font-medium text-gray-700">Ngày hẹn:</span> {formatDate(appointment.scheduledDate)}</p>
+                      <p><span className="font-medium text-gray-700">Trạng thái:</span>{' '}
+                        <span className={`font-semibold ${className}`}>{label || 'Không rõ'}</span>
+                      </p>
                     </div>
                   </li>
                 );
@@ -137,11 +153,10 @@ const AppointmentHistoryPage = () => {
                 <button
                   key={i}
                   onClick={() => setCurrentPage(i + 1)}
-                  className={`px-3 py-1 rounded ${
-                    currentPage === i + 1
-                      ? 'bg-blue-500 text-white'
-                      : 'bg-gray-200 text-gray-800'
-                  }`}
+                  className={`px-3 py-1 rounded ${currentPage === i + 1
+                    ? 'bg-blue-500 text-white'
+                    : 'bg-gray-200 text-gray-800'
+                    }`}
                 >
                   {i + 1}
                 </button>
