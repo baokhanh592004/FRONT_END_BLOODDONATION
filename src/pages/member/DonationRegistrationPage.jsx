@@ -5,6 +5,18 @@ import { useNavigate } from 'react-router-dom';
 import Calendar from 'react-calendar';
 import axios from 'axios';
 
+// --- HÀM TRỢ GIÚP MỚI ---
+// Hàm này định dạng đối tượng Date thành chuỗi 'YYYY-MM-DD' mà không bị ảnh hưởng bởi múi giờ.
+const formatDateToYYYYMMDD = (date) => {
+  const year = date.getFullYear();
+  // getMonth() trả về từ 0-11, nên cần +1.
+  // padStart(2, '0') để đảm bảo tháng và ngày luôn có 2 chữ số (ví dụ: 01, 09, 12).
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  
+  return `${year}-${month}-${day}`;
+};
+
 // --- COMPONENT CON ---
 
 const StyledCalendar = ({ onChange, value }) => {
@@ -134,7 +146,10 @@ export default function DonationRegistrationPage() {
     const registrationData = {
       userId: user.userId,
       centerId: parseInt(selectedCenter, 10),
-      scheduledDate: selectedDate.toISOString().split('T')[0],
+      // <<< THAY ĐỔI CHÍNH Ở ĐÂY >>>
+      // Dòng cũ bị lỗi múi giờ: scheduledDate: selectedDate.toISOString().split('T')[0],
+      // Dòng mới đã sửa, sử dụng hàm trợ giúp để không bị lỗi lùi ngày:
+      scheduledDate: formatDateToYYYYMMDD(selectedDate),
     };
 
     // Lưu để backup nếu user F5 ở bước tiếp theo
