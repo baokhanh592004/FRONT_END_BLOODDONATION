@@ -14,6 +14,9 @@ const AdminPage = () => {
   const [staffs, setStaffs] = useState([]);
   const [selectedStaffs, setSelectedStaffs] = useState({});
   const [modal, setModal] = useState({ show: false, id: null, action: null, label: "" });
+  const [currentPage, setCurrentPage] = useState(1);
+  const requestsPerPage = 10;
+
   const clientRef = useRef(null);
   const typeLabels = {
     NORMAL: "Bình thường",
@@ -121,6 +124,16 @@ const AdminPage = () => {
     setSelectedStaffs((prev) => ({ ...prev, [reqId]: staffId }));
   };
 
+  // Pagination logic
+  const totalPages = Math.ceil(requests.length / requestsPerPage);
+  const indexOfLastRequest = currentPage * requestsPerPage;
+  const indexOfFirstRequest = indexOfLastRequest - requestsPerPage;
+  const currentRequests = requests.slice(indexOfFirstRequest, indexOfLastRequest);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  }, [currentPage]);
+
   return (
     <div className="min-h-screen bg-[#fdfdfd] p-6">
       {modal.show && (
@@ -152,11 +165,11 @@ const AdminPage = () => {
           🩸 Danh sách yêu cầu từ các trung tâm y tế
         </h2>
 
-        {requests.length === 0 ? (
+        {currentRequests.length === 0 ? (
           <p className="text-gray-600 text-lg">Chưa có yêu cầu nào.</p>
         ) : (
           <div className="space-y-6">
-            {requests.map((req) => (
+            {currentRequests.map((req) => (
               <div
                 key={req.id}
                 className="bg-[#fff] border border-gray-200 rounded-xl shadow p-6 hover:shadow-md transition"
@@ -240,7 +253,27 @@ const AdminPage = () => {
             ))}
           </div>
         )}
+
+        {/* Pagination */}
+        {totalPages > 1 && (
+          <div className="flex justify-center mt-10 space-x-2">
+            {[...Array(totalPages)].map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentPage(index + 1)}
+                className={`px-4 py-2 rounded-md border ${
+                  currentPage === index + 1
+                    ? "bg-red-600 text-white"
+                    : "bg-white text-gray-700"
+                } hover:bg-red-500 hover:text-white`}
+              >
+                {index + 1}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
+
       <ToastContainer />
     </div>
   );
