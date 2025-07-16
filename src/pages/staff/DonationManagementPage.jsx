@@ -87,7 +87,7 @@ export default function DonationManagementPage() {
     // const [groupedAppointments, setGroupedAppointments] = useState({}); // Đã thay thế
     const [appointments, setAppointments] = useState([]); // State mới: lưu danh sách phẳng
     const [currentPage, setCurrentPage] = useState(1);     // State mới: quản lý trang hiện tại
-    const [itemsPerPage] = useState(15);                   // State mới: số mục mỗi trang
+    const [itemsPerPage] = useState(10);                   // State mới: số mục mỗi trang
 
     const [selectedDate, setSelectedDate] = useState(null);
     const [loading, setLoading] = useState(true);
