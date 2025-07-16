@@ -1,45 +1,62 @@
-import React, { useState } from "react";
-import { FaSearch, FaCalendarAlt, FaDownload, FaTimes } from "react-icons/fa";
+import React, { useState, useEffect } from "react";
+import { FaSearch } from "react-icons/fa";
 import { format } from "date-fns";
+import axios from "axios";
 
 const DonationHistoryPage = () => {
+  const [donationHistory, setDonationHistory] = useState([]);
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
-  const [selectedBloodType, setSelectedBloodType] = useState("");
+  const [componentTypeFilter, setComponentTypeFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
-  const mockData = [
-    {
-      id: 1,
-      date: "2024-01-15",
-      bloodType: "A+",
-      units: 2,
-      facility: "Bệnh viện Chợ Rẫy",
-      status: "Hoàn thành"
-    },
-    {
-      id: 2,
-      date: "2024-01-01",
-      bloodType: "O-",
-      units: 1,
-      facility: "Bệnh viện Đa khoa Thủ Đức",
-      status: "Đang chờ"
-    },
-    {
-      id: 3,
-      date: "2023-12-25",
-      bloodType: "B+",
-      units: 2,
-      facility: "Bệnh viện 115",
-      status: "Đã hủy"
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+
+    axios
+      .get("/api/user/donation-history", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((res) => {
+        setDonationHistory(res.data);
+      })
+      .catch((err) => {
+        console.error("Error fetching donation history:", err);
+      });
+  }, []);
+
+  const filteredData = donationHistory.filter((donation) => {
+    const matchesSearch = donation.centerName?.toLowerCase().includes(searchQuery.toLowerCase());
+    const matchesComponentType =
+      !componentTypeFilter || donation.componentType === componentTypeFilter;
+    const matchesStartDate =
+      !dateRange.start || new Date(donation.donationDate) >= new Date(dateRange.start);
+    const matchesEndDate =
+      !dateRange.end || new Date(donation.donationDate) <= new Date(dateRange.end);
+
+    return matchesSearch && matchesComponentType && matchesStartDate && matchesEndDate;
+  });
+
+  const getComponentTypeLabel = (type) => {
+    switch (type) {
+      case "WHOLE":
+        return "Máu toàn phần";
+      case "PLASMA":
+        return "Huyết tương";
+      case "PLATELET":
+        return "Tiểu cầu";
+      case "RBC":
+        return "Hồng cầu";
+      default:
+        return type;
     }
-  ];
+  };
 
   const getStatusColor = (status) => {
     switch (status) {
       case "Hoàn thành":
         return "bg-green-100 text-green-800";
-      case "Đang chờ":
-        return "bg-yellow-100 text-yellow-800";
       case "Đã hủy":
         return "bg-gray-100 text-gray-800";
       default:
@@ -47,11 +64,16 @@ const DonationHistoryPage = () => {
     }
   };
 
-  const filteredData = mockData.filter((donation) => {
-    const matchesSearch = donation.facility.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesBloodType = !selectedBloodType || donation.bloodType === selectedBloodType;
-    return matchesSearch && matchesBloodType;
-  });
+  // Format status cho từng donation
+  const formatStatus = (donation) => {
+    // Nếu có ngày hiến (donationDate != null) thì là hoàn thành
+    if (donation.donationDate) {
+      return "Hoàn thành";
+    } else {
+      return "Đã hủy";
+    }
+  };
+
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-inter">
@@ -62,7 +84,9 @@ const DonationHistoryPage = () => {
         <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Tìm kiếm cơ sở y tế</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Tìm kiếm cơ sở y tế
+              </label>
               <div className="relative">
                 <input
                   type="text"
@@ -76,26 +100,26 @@ const DonationHistoryPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Nhóm máu</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Thành phần máu
+              </label>
               <select
                 className="w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
-                value={selectedBloodType}
-                onChange={(e) => setSelectedBloodType(e.target.value)}
+                value={componentTypeFilter}
+                onChange={(e) => setComponentTypeFilter(e.target.value)}
               >
                 <option value="">Tất cả</option>
-                <option value="A+">A+</option>
-                <option value="A-">A-</option>
-                <option value="B+">B+</option>
-                <option value="B-">B-</option>
-                <option value="O+">O+</option>
-                <option value="O-">O-</option>
-                <option value="AB+">AB+</option>
-                <option value="AB-">AB-</option>
+                <option value="WHOLE">Máu toàn phần</option>
+                <option value="PLASMA">Huyết tương</option>
+                <option value="PLATELET">Tiểu cầu</option>
+                <option value="RBC">Hồng cầu</option>
               </select>
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Khoảng thời gian</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Khoảng thời gian
+              </label>
               <div className="flex space-x-2">
                 <input
                   type="date"
@@ -117,15 +141,12 @@ const DonationHistoryPage = () => {
             <button
               onClick={() => {
                 setSearchQuery("");
-                setSelectedBloodType("");
+                setComponentTypeFilter("");
                 setDateRange({ start: "", end: "" });
               }}
               className="px-4 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
             >
               Xóa bộ lọc
-            </button>
-            <button className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500">
-              Áp dụng
             </button>
           </div>
         </div>
@@ -136,42 +157,45 @@ const DonationHistoryPage = () => {
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Ngày hiến
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Loại nhóm máu
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Nhóm máu
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Số lượng đơn vị
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Thành phần
                   </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Số đơn vị
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                     Cơ sở y tế
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Trạng thái
-                  </th>
-                  <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Chi tiết
                   </th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredData.map((donation) => (
-                  <tr key={donation.id} className="hover:bg-gray-50">
+                  <tr key={donation.donationId} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {format(new Date(donation.date), "dd/MM/yyyy")}
+                      {format(new Date(donation.donationDate), "dd/MM/yyyy")}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{donation.bloodType}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{donation.units}</td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{donation.facility}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {donation.bloodType}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {getComponentTypeLabel(donation.componentType)}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {donation.units}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                      {donation.centerName}
+                    </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(donation.status)}`}>
-                        {donation.status}
+                      <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(formatStatus(donation))}`}>
+                        {formatStatus(donation)}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      <button className="text-red-600 hover:text-red-800">Xem chi tiết</button>
                     </td>
                   </tr>
                 ))}
@@ -185,44 +209,9 @@ const DonationHistoryPage = () => {
             </div>
           )}
         </div>
-
-        {/* Pagination */}
-        <div className="mt-4 flex items-center justify-between">
-          <div className="flex-1 flex justify-between sm:hidden">
-            <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-              Trước
-            </button>
-            <button className="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-              Sau
-            </button>
-          </div>
-          <div className="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm text-gray-700">
-                Hiển thị <span className="font-medium">1</span> đến <span className="font-medium">3</span> trong số{" "}
-                <span className="font-medium">3</span> kết quả
-              </p>
-            </div>
-            <div>
-              <nav className="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                <button className="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                  Trước
-                </button>
-                <button className="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">
-                  1
-                </button>
-                <button className="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                  Sau
-                </button>
-              </nav>
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );
 };
 
 export default DonationHistoryPage;
-
-

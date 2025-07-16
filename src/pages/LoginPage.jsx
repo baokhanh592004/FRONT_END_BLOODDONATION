@@ -222,6 +222,7 @@ const styles = {
     borderRadius: 8,
     zIndex: 2,
   },
+  //passwordWrapper với togglePasswordBtn để ẩn hoặc hiện khi nhập mật khẩu
   passwordWrapper: {
     position: "relative",
   },

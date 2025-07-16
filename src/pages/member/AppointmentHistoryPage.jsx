@@ -21,7 +21,16 @@ const AppointmentHistoryPage = () => {
         const res = await axios.get('http://localhost:8080/api/user/appointments', {
           headers: { Authorization: `Bearer ${token}` },
         });
-        setAppointments(res.data);
+        // Thêm "fakeCreatedDate" là ngày hiện tại
+      const now = new Date();
+      const appointmentsWithDate = res.data.map((item, index) => ({
+        ...item,
+        fakeCreatedDate: new Date(now.getTime() - index * 1000), // lùi mỗi item 1 giây để tránh trùng
+      }));
+
+      // Sắp theo id giảm dần (mới nhất trước)
+      const sortedAppointments = appointmentsWithDate.sort((a, b) => b.id - a.id);
+      setAppointments(sortedAppointments);
       } catch (err) {
         console.error('Lỗi khi lấy lịch hẹn:', err);
         setError('Không thể tải danh sách lịch hẹn. Vui lòng thử lại sau.');
@@ -39,8 +48,6 @@ const AppointmentHistoryPage = () => {
     }).format(new Date(dateStr));
   };
   
-  const today = new Date();
-
   const formatStatusBackground = (status) =>{
    switch(status) {
     case 'APPROVED':
@@ -114,7 +121,7 @@ const AppointmentHistoryPage = () => {
                   <li key={index} className="border rounded-lg p-4 shadow-sm bg-gray-50">
                     <p className="text-lg font-semibold text-blue-700">{center.name || 'Không có tên trung tâm'}</p>
                     <div className="mt-2 space-y-1 text-sm">
-                      <p><span className="font-medium text-gray-700">Ngày đăng ký:</span> {formatDate(today)}</p>
+                      <p><span className="font-medium text-gray-700">Ngày đăng ký:</span> {formatDate(appointment.fakeCreatedDate)}</p>
                       <p><span className="font-medium text-gray-700">Ngày hẹn:</span>{' '}  {formatDate(appointment.scheduledDate)}</p>
                       <p><span className="font-medium text-gray-700">Trạng thái: </span>
                        <span className={`font-semibold ${className}`}>{label || 'Không rõ'}</span></p>
