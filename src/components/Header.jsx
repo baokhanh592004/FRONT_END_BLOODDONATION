@@ -17,8 +17,18 @@ export default function Header() {
   const [notifications, setNotifications] = useState([]);
   const [hasUnread, setHasUnread] = useState(false);
 
-  // --- CODE MỚI: State để theo dõi các thông báo đã được chấp nhận ---
-  const [acceptedNotifications, setAcceptedNotifications] = useState([]);
+  // --- SỬA ĐỔI 1: Khởi tạo state từ localStorage ---
+  // Đọc danh sách ID đã chấp nhận từ localStorage khi component tải lần đầu.
+  // `?? '[]'` để đảm bảo nếu không có gì trong localStorage, ta sẽ dùng một mảng rỗng.
+  const [acceptedNotifications, setAcceptedNotifications] = useState(() => {
+    try {
+      const saved = localStorage.getItem("acceptedNotifications");
+      return saved ? JSON.parse(saved) : [];
+    } catch (error) {
+      console.error("Lỗi khi đọc acceptedNotifications từ localStorage:", error);
+      return [];
+    }
+  });
 
   // Hàm fetch thông báo từ API
   const fetchNotifications = async () => {
@@ -50,7 +60,6 @@ export default function Header() {
     }
   };
 
-  // --- HÀM XỬ LÝ ĐỒNG Ý HIẾN MÁU (ĐÃ CẬP NHẬT) ---
   const handleAcceptNotification = async (notificationId) => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -71,10 +80,15 @@ export default function Header() {
 
       alert(response.data);
 
-      // --- CẬP NHẬT MỚI: Thêm ID vào state đã chấp nhận để thay đổi UI ngay lập tức ---
-      setAcceptedNotifications((prev) => [...prev, notificationId]);
+      // --- SỬA ĐỔI 2: Lưu state vào localStorage sau khi cập nhật ---
+      setAcceptedNotifications((prev) => {
+        const newAccepted = [...prev, notificationId];
+        // Lưu mảng ID mới vào localStorage
+        localStorage.setItem("acceptedNotifications", JSON.stringify(newAccepted));
+        return newAccepted;
+      });
 
-      // fetchNotifications(); // có thể dùng nếu muốn refetch
+      // không cần fetch lại để giữ UI ổn định
     } catch (error) {
       const errorMessage =
         error.response?.data || "Có lỗi xảy ra khi xác nhận.";
@@ -94,13 +108,15 @@ export default function Header() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
+    // --- BỔ SUNG: Xóa luôn trạng thái đã chấp nhận khi đăng xuất ---
+    localStorage.removeItem("acceptedNotifications");
     setUser(null);
     window.location.href = "/login";
   };
 
   return (
     <>
-      {/* ...Phần Header trên giữ nguyên... */}
+      {/* Top bar */}
       <div className="bg-red-600 text-white text-sm py-1">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <div className="flex items-center gap-1 sm:flex">
@@ -121,6 +137,7 @@ export default function Header() {
         </div>
       </div>
 
+      {/* Main Header */}
       <header className="bg-white shadow-sm sticky top-0 z-50">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <Link
@@ -147,7 +164,7 @@ export default function Header() {
               menuOpen ? "block" : "hidden"
             } lg:flex lg:items-center lg:gap-6 font-medium mt-4 lg:mt-0 w-full lg:w-auto`}
           >
-            {/* ...Các link điều hướng giữ nguyên... */}
+            {/* Navigation Links */}
             <Link to="/" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Trang chủ</Link>
             <Link to="/about" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Giới thiệu</Link>
             <Link to="/register-donation" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Đăng ký hiến máu</Link>
@@ -155,6 +172,7 @@ export default function Header() {
             <Link to="/Yeu_cau_mau_khan_cap" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Yêu cầu máu khẩn cấp</Link>
             <Link to="/blog" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Tin tức</Link>
 
+            {/* User Section */}
             <div className="flex items-center gap-4 mt-4 lg:mt-0">
               {user ? (
                 <>
@@ -195,7 +213,7 @@ export default function Header() {
                                 ).toLocaleString("vi-VN")}
                               </p>
 
-                              {/* === LOGIC MỚI CHO NÚT BẤM === */}
+                              {/* Logic nút bấm không thay đổi, nó sẽ hoạt động đúng với state đã được khôi phục */}
                               {notif.type === "DONATION_REQUEST" && (
                                 <div className="mt-2 text-right">
                                   {acceptedNotifications.includes(
@@ -264,7 +282,7 @@ export default function Header() {
 
                         {user.role === "MEMBER" &&
                           <Link
-                            to="/member/dashboard" // Link đến trang đăng ký hiến máu
+                            to="/member/dashboard"
                             className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
                           >
                             Quản Lý Chung
@@ -321,8 +339,4 @@ export default function Header() {
       </header>
     </>
   );
-
 }
-
-
-
