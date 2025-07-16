@@ -3,7 +3,7 @@ import axios from "axios";
 import AuthenticatedImage from "../../components/AuthenticatedImage";
 
 // =======================================================
-// THAY ĐỔI 1: THÊM ICON THÙNG RÁC
+// CÁC ICON (Không thay đổi)
 // =======================================================
 const TrashIcon = () => (
     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
@@ -28,8 +28,8 @@ const CloseIcon = () => (
 
 const API_URL = "http://localhost:8080";
 
-// THAY ĐỔI: TRUYỀN HÀM ONDELETE VÀO MODAL
 const PostDetailModal = ({ post, isLoading, error, onClose, onDelete }) => {
+    // ... Component này giữ nguyên
     const handleOverlayClick = (e) => {
         if (e.target === e.currentTarget) {
             onClose();
@@ -58,7 +58,6 @@ const PostDetailModal = ({ post, isLoading, error, onClose, onDelete }) => {
                             />
                         )}
                         <div style={styles.modalBody}>{post.content}</div>
-                        {/* THAY ĐỔI: THÊM NÚT XÓA TRONG MODAL */}
                         <div style={styles.modalActions}>
                             <button 
                                 style={styles.deleteButtonModal} 
@@ -74,8 +73,31 @@ const PostDetailModal = ({ post, isLoading, error, onClose, onDelete }) => {
     );
 };
 
+// =======================================================
+// THAY ĐỔI 1: TẠO COMPONENT CONFIRMATIONMODAL MỚI
+// =======================================================
+const ConfirmationModal = ({ onConfirm, onCancel, title, message }) => {
+    return (
+        <div style={styles.modalOverlay}>
+            <div style={styles.confirmModalContent}>
+                <h3 style={styles.confirmModalTitle}>{title}</h3>
+                <p style={styles.confirmModalMessage}>{message}</p>
+                <div style={styles.confirmModalActions}>
+                    <button style={styles.confirmButtonCancel} onClick={onCancel}>
+                        Hủy
+                    </button>
+                    <button style={styles.confirmButtonConfirm} onClick={onConfirm}>
+                        OK
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 export default function BlogPage() {
+    // ... các state cũ giữ nguyên ...
     const [formData, setFormData] = useState({ title: "", content: "", type: "BLOG", image: null });
     const [imagePreviewUrl, setImagePreviewUrl] = useState(null);
     const [isHovered, setIsHovered] = useState(false);
@@ -90,8 +112,17 @@ export default function BlogPage() {
     const [loadingSelectedPost, setLoadingSelectedPost] = useState(false);
     const [fetchDetailError, setFetchDetailError] = useState(null);
 
+    // =======================================================
+    // THAY ĐỔI 2: THÊM STATE ĐỂ QUẢN LÝ MODAL XÁC NHẬN
+    // =======================================================
+    const [confirmState, setConfirmState] = useState({
+        isOpen: false,
+        postIdToDelete: null,
+    });
+
 
     const fetchPosts = async () => {
+        // ... hàm này giữ nguyên
         setLoadingPosts(true);
         setFetchError(null);
         const token = localStorage.getItem("token");
@@ -122,6 +153,7 @@ export default function BlogPage() {
     }, [imagePreviewUrl]);
 
     const handleChange = e => {
+        // ... hàm này giữ nguyên
         const { name, value, files } = e.target;
         if (name === "image") {
             const file = files[0];
@@ -138,6 +170,7 @@ export default function BlogPage() {
     };
 
     const handleSubmit = async e => {
+        // ... hàm này giữ nguyên
         e.preventDefault();
         setError(null);
         setMessage(null);
@@ -175,13 +208,23 @@ export default function BlogPage() {
     };
     
     // =======================================================
-    // THAY ĐỔI 2: TẠO HÀM XỬ LÝ VIỆC XÓA BÀI VIẾT
+    // THAY ĐỔI 3: CẬP NHẬT LOGIC XÓA BÀI VIẾT
     // =======================================================
-    const handleDeletePost = async (postId) => {
-        // Hỏi xác nhận trước khi xóa
-        if (!window.confirm("Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác.")) {
-            return;
-        }
+
+    // Hàm này được gọi khi bấm nút thùng rác, nó sẽ mở modal xác nhận
+    const handleDeleteRequest = (postId) => {
+        setConfirmState({ isOpen: true, postIdToDelete: postId });
+    };
+
+    // Hàm này được gọi khi người dùng bấm nút "Cancel" trên modal
+    const handleCancelDelete = () => {
+        setConfirmState({ isOpen: false, postIdToDelete: null });
+    };
+
+    // Hàm này được gọi khi người dùng bấm nút "OK" để xác nhận xóa
+    const handleConfirmDelete = async () => {
+        const postId = confirmState.postIdToDelete;
+        if (!postId) return;
 
         const token = localStorage.getItem("token");
         try {
@@ -191,11 +234,8 @@ export default function BlogPage() {
 
             setMessage("Đã xóa bài viết thành công!");
             setError(null);
-
-            // Cập nhật lại danh sách bài viết
             await fetchPosts();
 
-            // Nếu bài viết đang được xem trong modal thì đóng modal lại
             if (selectedPost && selectedPost.postId === postId) {
                 handleCloseModal();
             }
@@ -204,10 +244,15 @@ export default function BlogPage() {
             setError(err.response?.data || "Lỗi khi xóa bài viết.");
             setMessage(null);
             console.error("Delete post error:", err);
+        } finally {
+            // Đóng modal xác nhận sau khi hoàn tất
+            handleCancelDelete();
         }
     };
 
+
     const handlePostClick = async (postId) => {
+        // ... hàm này giữ nguyên
         setLoadingSelectedPost(true);
         setFetchDetailError(null);
         setSelectedPost(null); 
@@ -226,6 +271,7 @@ export default function BlogPage() {
     };
     
     const handleCloseModal = () => {
+        // ... hàm này giữ nguyên
         setSelectedPost(null);
         setFetchDetailError(null);
     };
@@ -234,9 +280,9 @@ export default function BlogPage() {
         <div style={styles.pageContainer}>
             {/* Phần tạo bài viết */}
             <div style={styles.container}>
+                 {/* ... form giữ nguyên ... */}
                 <h2 style={styles.header}>Tạo Bài Viết Mới</h2>
                 <form onSubmit={handleSubmit} style={styles.form}>
-                    {/* ... các input form giữ nguyên ... */}
                     <div style={styles.formGroup}>
                         <label htmlFor="title" style={styles.label}>Tiêu đề</label>
                         <input id="title" type="text" name="title" placeholder="Nhập tiêu đề bài viết..." value={formData.title} onChange={handleChange} required style={styles.input} />
@@ -281,16 +327,13 @@ export default function BlogPage() {
                 
                 <div style={styles.postsGrid}>
                     {posts.map(post => (
-                        // =======================================================
-                        // THAY ĐỔI 3: THÊM NÚT XÓA VÀO CARD BÀI VIẾT
-                        // =======================================================
                         <div key={post.postId} style={styles.postCard}>
-                            {/* Nút xóa */}
+                            {/* THAY ĐỔI 4: GỌI HÀM MỚI KHI CLICK NÚT XÓA */}
                             <button
                                 style={styles.deleteButtonCard}
                                 onClick={(e) => {
-                                    e.stopPropagation(); // Ngăn việc mở modal khi click nút xóa
-                                    handleDeletePost(post.postId);
+                                    e.stopPropagation(); 
+                                    handleDeleteRequest(post.postId);
                                 }}
                             >
                                 <TrashIcon />
@@ -316,14 +359,27 @@ export default function BlogPage() {
                 </div>
             </div>
 
-            {/* THAY ĐỔI: TRUYỀN HÀM XÓA VÀO MODAL */}
+            {/* Modal chi tiết bài viết */}
             {(loadingSelectedPost || selectedPost || fetchDetailError) && (
                 <PostDetailModal
                     post={selectedPost}
                     isLoading={loadingSelectedPost}
                     error={fetchDetailError}
                     onClose={handleCloseModal}
-                    onDelete={handleDeletePost}
+                    // THAY ĐỔI 4 (tiếp): GỌI HÀM MỚI KHI CLICK NÚT XÓA TRONG MODAL
+                    onDelete={handleDeleteRequest}
+                />
+            )}
+
+            {/* ======================================================= */}
+            {/* THAY ĐỔI 5: RENDER MODAL XÁC NHẬN MỚI */}
+            {/* ======================================================= */}
+            {confirmState.isOpen && (
+                <ConfirmationModal
+                    title="Xác nhận xóa"
+                    message="Bạn có chắc chắn muốn xóa bài viết này không? Hành động này không thể hoàn tác."
+                    onConfirm={handleConfirmDelete}
+                    onCancel={handleCancelDelete}
                 />
             )}
         </div>
@@ -331,6 +387,7 @@ export default function BlogPage() {
 }
 
 const colors = {
+    // ... object colors giữ nguyên
     primary: '#d32f2f',
     primaryLight: '#e57373',
     background: '#f7f7f7',
@@ -339,10 +396,13 @@ const colors = {
     border: '#ddd',
     success: '#2e7d32',
     error: '#d32f2f',
+    secondary: '#6c757d', // Thêm màu phụ cho nút cancel
+    secondaryLight: '#f8f9fa', // Thêm màu sáng cho nút cancel
+    confirmBlue: '#007bff', // Thêm màu xanh cho nút OK
 };
 
 // =======================================================
-// THAY ĐỔI 4: THÊM STYLES CHO CÁC NÚT XÓA
+// THAY ĐỔI 6: THÊM STYLES CHO CONFIRMATIONMODAL
 // =======================================================
 const styles = {
     // ... các styles cũ giữ nguyên
@@ -470,7 +530,7 @@ const styles = {
         display: 'flex',
         flexDirection: 'column',
         transition: 'transform 0.2s, box-shadow 0.2s',
-        position: 'relative', // Cần thiết để định vị nút xóa
+        position: 'relative',
     },
     postImage: {
         width: '100%',
@@ -519,11 +579,12 @@ const styles = {
         left: 0,
         right: 0,
         bottom: 0,
-        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         zIndex: 1000,
+        backdropFilter: 'blur(3px)', // Thêm hiệu ứng blur cho nền
     },
     modalContent: {
         backgroundColor: '#fff',
@@ -571,7 +632,6 @@ const styles = {
         color: colors.text,
         whiteSpace: 'pre-wrap',
     },
-    // Styles mới cho nút xóa
     deleteButtonCard: {
         position: 'absolute',
         top: '10px',
@@ -606,6 +666,57 @@ const styles = {
         display: 'inline-flex',
         alignItems: 'center',
         gap: '8px',
+        transition: 'background-color 0.2s',
+    },
+
+    // Styles mới cho Confirmation Modal
+    confirmModalContent: {
+        backgroundColor: '#fff',
+        padding: '25px 30px',
+        borderRadius: '12px',
+        boxShadow: '0 5px 25px rgba(0,0,0,0.15)',
+        width: '90%',
+        maxWidth: '400px',
+        textAlign: 'center',
+        animation: 'fadeIn 0.2s ease-out'
+    },
+    confirmModalTitle: {
+        margin: '0 0 10px 0',
+        color: colors.text,
+        fontSize: '20px',
+        fontWeight: '600',
+    },
+    confirmModalMessage: {
+        margin: '0 0 25px 0',
+        color: colors.textLight,
+        fontSize: '16px',
+        lineHeight: '1.5',
+    },
+    confirmModalActions: {
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '15px',
+    },
+    confirmButtonCancel: {
+        padding: '10px 25px',
+        fontSize: '15px',
+        fontWeight: '600',
+        borderRadius: '8px',
+        border: `1px solid ${colors.border}`,
+        backgroundColor: colors.secondaryLight,
+        color: colors.secondary,
+        cursor: 'pointer',
+        transition: 'background-color 0.2s',
+    },
+    confirmButtonConfirm: {
+        padding: '10px 25px',
+        fontSize: '15px',
+        fontWeight: '600',
+        borderRadius: '8px',
+        border: 'none',
+        backgroundColor: colors.confirmBlue,
+        color: '#fff',
+        cursor: 'pointer',
         transition: 'background-color 0.2s',
     }
 };
