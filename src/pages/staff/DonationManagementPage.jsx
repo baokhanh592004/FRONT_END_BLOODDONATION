@@ -1,6 +1,4 @@
-// src/pages/staff/DonationManagementPage.jsx
-
-import React, { useState, useEffect, forwardRef } from 'react';
+import React, { useState, useEffect, forwardRef, useMemo } from 'react';
 import axios from 'axios';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
@@ -10,6 +8,7 @@ import DonationHistoryModal from '../../components/DonationHistoryModal';
 import RecordDonationModal from '../../components/RecordDonationModal';
 import UserProfileModal from '../../components/UserProfileModal';
 
+// Các hàm tiện ích không đổi
 const formatDateForDisplay = (dateString) => {
     if (!dateString) return '';
     const [year, month, day] = dateString.split('-');
@@ -30,8 +29,66 @@ const DatePickerCustomInput = forwardRef(({ value, onClick }, ref) => (
     </button>
 ));
 
+// =======================================================
+// MỚI: COMPONENT PHÂN TRANG
+// =======================================================
+const Pagination = ({ itemsPerPage, totalItems, paginate, currentPage }) => {
+    const pageNumbers = [];
+    const totalPages = Math.ceil(totalItems / itemsPerPage);
+
+    if (totalPages <= 1) return null; // Không hiển thị nếu chỉ có 1 trang
+
+    for (let i = 1; i <= totalPages; i++) {
+        pageNumbers.push(i);
+    }
+
+    return (
+        <nav className="mt-8 flex justify-center">
+            <ul className="inline-flex items-center -space-x-px">
+                <li>
+                    <button
+                        onClick={() => paginate(currentPage - 1)}
+                        disabled={currentPage === 1}
+                        className="py-2 px-3 ml-0 leading-tight text-gray-500 bg-white rounded-l-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Trước
+                    </button>
+                </li>
+                {pageNumbers.map(number => (
+                    <li key={number}>
+                        <button
+                            onClick={() => paginate(number)}
+                            className={`py-2 px-3 leading-tight border border-gray-300 ${
+                                currentPage === number
+                                    ? 'text-blue-600 bg-blue-50'
+                                    : 'text-gray-500 bg-white'
+                            } hover:bg-gray-100 hover:text-gray-700`}
+                        >
+                            {number}
+                        </button>
+                    </li>
+                ))}
+                <li>
+                    <button
+                        onClick={() => paginate(currentPage + 1)}
+                        disabled={currentPage === totalPages}
+                        className="py-2 px-3 leading-tight text-gray-500 bg-white rounded-r-lg border border-gray-300 hover:bg-gray-100 hover:text-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                        Tiếp
+                    </button>
+                </li>
+            </ul>
+        </nav>
+    );
+};
+
 export default function DonationManagementPage() {
-    const [groupedAppointments, setGroupedAppointments] = useState({});
+    // ---- THAY ĐỔI STATE ----
+    // const [groupedAppointments, setGroupedAppointments] = useState({}); // Đã thay thế
+    const [appointments, setAppointments] = useState([]); // State mới: lưu danh sách phẳng
+    const [currentPage, setCurrentPage] = useState(1);     // State mới: quản lý trang hiện tại
+    const [itemsPerPage] = useState(15);                   // State mới: số mục mỗi trang
+
     const [selectedDate, setSelectedDate] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -50,7 +107,6 @@ export default function DonationManagementPage() {
         const initialFetch = async () => {
             setLoading(true);
             try {
-                // Tải danh sách nhóm máu ngay từ đầu để sẵn sàng sử dụng
                 await fetchBloodTypes();
                 await fetchAllAppointments();
             } catch (err) {
@@ -75,19 +131,16 @@ export default function DonationManagementPage() {
         }
     };
 
+    // ---- CẬP NHẬT CÁC HÀM FETCH ----
     const fetchAllAppointments = async () => {
         setError(null);
         const token = localStorage.getItem('token');
         const response = await axios.get('http://localhost:8080/api/staff/appointments', {
             headers: { Authorization: `Bearer ${token}` }
         });
-        const grouped = response.data.reduce((acc, appointment) => {
-            const date = appointment.scheduledDate;
-            if (!acc[date]) acc[date] = [];
-            acc[date].push(appointment);
-            return acc;
-        }, {});
-        setGroupedAppointments(grouped);
+        const sortedData = response.data.sort((a, b) => new Date(b.scheduledDate) - new Date(a.scheduledDate));
+        setAppointments(sortedData); // Cập nhật danh sách phẳng
+        setCurrentPage(1); // Reset về trang đầu tiên
     };
 
     const handleSearchByDate = async () => {
@@ -101,16 +154,18 @@ export default function DonationManagementPage() {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { date: dateForApi }
             });
-            setGroupedAppointments({ [dateForApi]: response.data });
+            setAppointments(response.data); // Cập nhật danh sách đã lọc
+            setCurrentPage(1); // Reset về trang đầu tiên
         } catch (err) {
             setError("Không tìm thấy dữ liệu cho ngày đã chọn hoặc có lỗi xảy ra.");
-            setGroupedAppointments({});
+            setAppointments([]); // Xóa danh sách khi không tìm thấy
         } finally {
             setLoading(false);
         }
     };
     
     const handleScreeningSubmit = async (formData) => {
+        // ... không thay đổi ...
         if (!currentAppointment) return;
         setIsSubmitting(true);
         const { passed, remarks, weight, bloodTypeId, healthStatus } = formData;
@@ -137,6 +192,7 @@ export default function DonationManagementPage() {
     };
     
     const handleRecordDonationSubmit = async (formData) => {
+        // ... không thay đổi ...
         if (!currentAppointment) return;
         setIsSubmitting(true);
         try {
@@ -147,8 +203,7 @@ export default function DonationManagementPage() {
             alert('Ghi nhận ca hiến máu thành công!');
             handleCloseAllModals();
             await fetchAllAppointments();
-        } catch (err)
- {
+        } catch (err) {
             const errorMessage = err.response?.data?.message || "Có lỗi xảy ra khi ghi nhận hiến máu.";
             alert(`Lỗi: ${errorMessage}`);
         } finally {
@@ -157,10 +212,10 @@ export default function DonationManagementPage() {
     };
 
     const handleOpenModal = async (modalType, appointment) => {
+        // ... không thay đổi ...
         setCurrentAppointment(appointment);
         const token = localStorage.getItem('token');
         
-        // Luôn đảm bảo đã tải danh sách nhóm máu
         await fetchBloodTypes();
 
         if (modalType === 'screening') {
@@ -201,6 +256,7 @@ export default function DonationManagementPage() {
     };
     
     const handleCloseAllModals = () => {
+        // ... không thay đổi ...
         setIsScreeningModalOpen(false);
         setIsHistoryModalOpen(false);
         setIsRecordDonationModalOpen(false);
@@ -208,15 +264,13 @@ export default function DonationManagementPage() {
         setCurrentAppointment(null);
         setCurrentUserProfile(null);
     };
-
-    // =======================================================
-    // MỚI: HÀM NÀY SẼ ĐƯỢC GỌI KHI CẬP NHẬT HỒ SƠ THÀNH CÔNG
-    // =======================================================
+    
     const handleProfileUpdate = async () => {
+        // ... không thay đổi ...
         handleCloseAllModals();
         setLoading(true);
         try {
-            await fetchAllAppointments(); // Tải lại danh sách lịch hẹn để cập nhật trạng thái/thông tin
+            await fetchAllAppointments();
         } catch (err) {
             setError("Không thể làm mới dữ liệu sau khi cập nhật.");
         } finally {
@@ -235,8 +289,37 @@ export default function DonationManagementPage() {
             setLoading(false);
         }
     };
+    
+    // =======================================================
+    // MỚI: LOGIC PHÂN TRANG VÀ CHUẨN BỊ DỮ LIỆU HIỂN THỊ
+    // =======================================================
+    const { groupedAppointmentsOnPage, sortedDatesOnPage, totalPages } = useMemo(() => {
+        const indexOfLastItem = currentPage * itemsPerPage;
+        const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+        const currentItems = appointments.slice(indexOfFirstItem, indexOfLastItem);
 
-    const sortedDates = Object.keys(groupedAppointments).sort((a, b) => new Date(b) - new Date(a));
+        const grouped = currentItems.reduce((acc, appointment) => {
+            const date = appointment.scheduledDate;
+            if (!acc[date]) acc[date] = [];
+            acc[date].push(appointment);
+            return acc;
+        }, {});
+
+        const sorted = Object.keys(grouped).sort((a, b) => new Date(b) - new Date(a));
+        
+        return {
+            groupedAppointmentsOnPage: grouped,
+            sortedDatesOnPage: sorted,
+            totalPages: Math.ceil(appointments.length / itemsPerPage)
+        };
+    }, [appointments, currentPage, itemsPerPage]);
+
+    const paginate = (pageNumber) => {
+        if (pageNumber > 0 && pageNumber <= totalPages) {
+            setCurrentPage(pageNumber);
+        }
+    };
+
     const statusStyles = {
         PENDING: 'text-yellow-600 bg-yellow-100', APPROVED: 'text-green-600 bg-green-100',
         COMPLETED: 'text-indigo-600 bg-indigo-100', REJECTED: 'text-red-600 bg-red-100',
@@ -257,32 +340,43 @@ export default function DonationManagementPage() {
 
                 {loading ? <p className="text-center text-gray-500 py-10">Đang tải...</p> 
                 : error ? <p className="text-center text-red-500 py-10">{error}</p> 
-                : sortedDates.length > 0 ? (
-                    <div className="space-y-8">
-                        {sortedDates.map(date => (
-                            <div key={date}>
-                                <h3 className="text-lg font-semibold text-red-700 bg-red-100 px-4 py-2 rounded-t-lg">Ngày {formatDateForDisplay(date)}</h3>
-                                <ul className="bg-white rounded-b-lg shadow-md divide-y divide-gray-200">
-                                    {groupedAppointments[date]?.map(app => (
-                                        <li key={app.appointmentId} className="px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                                            <div className="flex-grow">
-                                                <p className="text-lg font-semibold text-gray-800">{app.user?.fullName || 'Không rõ tên'}</p>
-                                                <p className={`inline-block mt-1 px-2 py-0.5 text-sm font-medium rounded-full ${statusStyles[app.status] || ''}`}>{app.status}</p>
-                                            </div>
-                                            <div className="flex-shrink-0 flex flex-wrap gap-2 self-end sm:self-center">
-                                                <button onClick={() => handleOpenModal('history', app)} className="px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-md hover:bg-gray-600">Lịch sử</button>
-                                                {app.status !== 'PENDING' && (
-                                                    <button onClick={() => handleOpenModal('profile', app)} className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-md hover:bg-blue-600">Hồ sơ</button>
-                                                )}
-                                                {app.status === 'PENDING' && <button onClick={() => handleOpenModal('screening', app)} className="px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-md hover:bg-yellow-600">Sàng lọc</button>}
-                                                {app.status === 'APPROVED' && <button onClick={() => handleOpenModal('recordDonation', app)} className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700">Ghi nhận</button>}
-                                            </div>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))}
-                    </div>
+                : appointments.length > 0 ? (
+                    <>
+                        <div className="space-y-8">
+                            {/* CẬP NHẬT: SỬ DỤNG DỮ LIỆU ĐÃ PHÂN TRANG */}
+                            {sortedDatesOnPage.map(date => (
+                                <div key={date}>
+                                    <h3 className="text-lg font-semibold text-red-700 bg-red-100 px-4 py-2 rounded-t-lg">Ngày {formatDateForDisplay(date)}</h3>
+                                    <ul className="bg-white rounded-b-lg shadow-md divide-y divide-gray-200">
+                                        {groupedAppointmentsOnPage[date]?.map(app => (
+                                            <li key={app.appointmentId} className="px-6 py-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                                                <div className="flex-grow">
+                                                    <p className="text-lg font-semibold text-gray-800">{app.user?.fullName || 'Không rõ tên'}</p>
+                                                    <p className={`inline-block mt-1 px-2 py-0.5 text-sm font-medium rounded-full ${statusStyles[app.status] || ''}`}>{app.status}</p>
+                                                </div>
+                                                <div className="flex-shrink-0 flex flex-wrap gap-2 self-end sm:self-center">
+                                                    <button onClick={() => handleOpenModal('history', app)} className="px-4 py-2 bg-gray-500 text-white text-sm font-medium rounded-md hover:bg-gray-600">Lịch sử</button>
+                                                    {app.status !== 'PENDING' && (
+                                                        <button onClick={() => handleOpenModal('profile', app)} className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-md hover:bg-blue-600">Hồ sơ</button>
+                                                    )}
+                                                    {app.status === 'PENDING' && <button onClick={() => handleOpenModal('screening', app)} className="px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-md hover:bg-yellow-600">Sàng lọc</button>}
+                                                    {app.status === 'APPROVED' && <button onClick={() => handleOpenModal('recordDonation', app)} className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700">Ghi nhận</button>}
+                                                </div>
+                                            </li>
+                                        ))}
+                                    </ul>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* MỚI: HIỂN THỊ THANH PHÂN TRANG */}
+                        <Pagination 
+                            itemsPerPage={itemsPerPage}
+                            totalItems={appointments.length}
+                            paginate={paginate}
+                            currentPage={currentPage}
+                        />
+                    </>
                 ) : <div className="text-center py-16 bg-white rounded-lg shadow-sm"><p className="text-gray-500">Không có lịch hẹn nào.</p></div>}
             </div>
 
@@ -290,9 +384,6 @@ export default function DonationManagementPage() {
             {isHistoryModalOpen && <DonationHistoryModal isOpen={isHistoryModalOpen} onClose={handleCloseAllModals} donationHistory={donationHistory} />}
             {isRecordDonationModalOpen && <RecordDonationModal appointment={currentAppointment} userProfile={currentUserProfile} onClose={handleCloseAllModals} onSubmit={handleRecordDonationSubmit} isSubmitting={isSubmitting} />}
             
-            {/* ======================================================= */}
-            {/* MỚI: TRUYỀN THÊM PROPS CHO USER PROFILE MODAL */}
-            {/* ======================================================= */}
             {isProfileModalOpen && (
                 <UserProfileModal 
                 appointment={currentAppointment} 
