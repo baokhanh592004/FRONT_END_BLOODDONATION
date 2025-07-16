@@ -52,6 +52,7 @@ import CenterLayout from "../layouts/CenterLayout";
 import CenterPage from "../pages/center/CenterPage";
 import SendDonorNotification from "../pages/staff/SendDonorNotification";
 import BlogPage from "../pages/staff/BlogPage";
+import NewBlogPost from "../pages/NewBlogPost";
 
 // Route Protectors
 
@@ -73,6 +74,14 @@ export default function AppRouters() {
           path="/register-donation"
           element={<DonationRegistrationPage />}
         />
+
+        {/* ĐỊNH NGHĨA ROUTE CHO TRANG TIN TỨC */}
+        {/* Route này sẽ khớp với "/blog" */}
+        <Route path="/blog" element={<NewBlogPost />} />
+        
+        {/* Route này sẽ khớp với "/blog/1", "/blog/23", v.v. */}
+        <Route path="/blog/:postId" element={<NewBlogPost />} />
+        
         <Route
           path="/member/donation-questionnaire"
           element={<DonationQuestionnairePage />}
@@ -99,6 +108,7 @@ export default function AppRouters() {
         <Route path="history" element={<DonationHistoryPage />} />
         <Route path="appointments" element={<AppointmentHistoryPage />} />
         <Route path="certificate" element={<CertificatePage />} />
+        
       </Route>
 
       {/* ===== Staff Routes (Protected) ===== */}
