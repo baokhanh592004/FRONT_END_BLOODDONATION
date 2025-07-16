@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
-import { FaUser, FaTachometerAlt, FaUsers, FaSyncAlt, FaTint, FaSearch, FaCheckSquare, FaSignOutAlt } from 'react-icons/fa';
+import { FaUser, FaTachometerAlt, FaUsers, FaSyncAlt, FaTint, FaSearch, FaCheckSquare, FaSignOutAlt, FaArrowLeft } from 'react-icons/fa';
 import { BsArchive } from 'react-icons/bs';
 
 const navLinks = [
@@ -11,6 +11,7 @@ const navLinks = [
   { to: '/staff/blog', icon: <BsArchive/>, text: 'Gửi Blog Tin tức' },
   { to: '/staff/search-nearby', icon: <FaSearch />, text: 'Tìm người hiến gần' },
   { to: '/staff/bloodrequests', icon: <FaCheckSquare />, text: 'Yêu cầu máu' },
+  { to: '/', icon: <FaSignOutAlt  />, text: 'Quay lại' },
 ];
 
 const StaffLayout = () => {
