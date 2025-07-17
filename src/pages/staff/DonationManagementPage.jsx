@@ -289,6 +289,42 @@ export default function DonationManagementPage() {
             setLoading(false);
         }
     };
+
+        
+    const handleUserDidNotArrive = async (appointment) => {
+        // Hỏi xác nhận để tránh nhấn nhầm
+        if (!window.confirm(`Bạn có chắc chắn muốn đánh dấu lịch hẹn của "${appointment.user?.fullName}" là "Không đến"? Hành động này sẽ hủy lịch hẹn.`)) {
+            return;
+        }
+
+        setIsSubmitting(true); // Có thể dùng tạm state này để vô hiệu hóa các nút khác nếu cần
+        setError(null);
+
+        try {
+            const token = localStorage.getItem('token');
+            
+            // Chúng ta tái sử dụng endpoint "screening" nhưng gửi dữ liệu giả lập một ca sàng lọc không đạt
+            // Điều này giúp không cần thay đổi backend
+            const payload = {
+                passed: false,
+                remarks: 'Người dùng không đến (được ghi nhận bởi nhân viên).',
+            };
+
+            await axios.post(`http://localhost:8080/api/staff/appointments/${appointment.appointmentId}/screening`, payload, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            alert('Đã cập nhật trạng thái lịch hẹn thành công.');
+            await fetchAllAppointments(); // Tải lại danh sách để cập nhật giao diện
+
+        } catch (err) {
+            const errorMessage = err.response?.data?.message || "Có lỗi xảy ra khi cập nhật trạng thái.";
+            setError(errorMessage);
+            alert(`Lỗi: ${errorMessage}`);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
     
     // =======================================================
     // MỚI: LOGIC PHÂN TRANG VÀ CHUẨN BỊ DỮ LIỆU HIỂN THỊ
@@ -359,7 +395,25 @@ export default function DonationManagementPage() {
                                                     {app.status !== 'PENDING' && (
                                                         <button onClick={() => handleOpenModal('profile', app)} className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-md hover:bg-blue-600">Hồ sơ</button>
                                                     )}
-                                                    {app.status === 'PENDING' && <button onClick={() => handleOpenModal('screening', app)} className="px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-md hover:bg-yellow-600">Sàng lọc</button>}
+                                                    {app.status === 'PENDING' && (
+                                                        <>
+                                                            <button 
+                                                                onClick={() => handleOpenModal('screening', app)} 
+                                                                className="px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-md hover:bg-yellow-600"
+                                                                disabled={isSubmitting} // Thêm disabled để tránh double click
+                                                            >
+                                                                Sàng lọc
+                                                            </button>
+                                                            <button 
+                                                                onClick={() => handleUserDidNotArrive(app)} 
+                                                                className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-md hover:bg-red-600"
+                                                                disabled={isSubmitting} // Thêm disabled để tránh double click
+                                                            >
+                                                                Không đến
+                                                            </button>
+                                                        </>
+                                                    )}
+
                                                     {app.status === 'APPROVED' && <button onClick={() => handleOpenModal('recordDonation', app)} className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700">Ghi nhận</button>}
                                                 </div>
                                             </li>
