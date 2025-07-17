@@ -107,7 +107,11 @@ export default function NewBlogPost() {
           setPost(response.data);
         } else {
           const response = await api.get('/blog/all');
-          const sortedPosts = response.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+          const allowedTypes = ['BLOG', 'NEWS', 'GUIDE'];
+          const filteredPosts = response.data.filter(p => allowedTypes.includes(p.type));
+
+          const sortedPosts = filteredPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
           setPosts(sortedPosts);
         }
       } catch (err) {

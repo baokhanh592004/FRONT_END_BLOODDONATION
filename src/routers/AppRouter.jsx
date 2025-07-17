@@ -56,6 +56,7 @@ import CenterPage from "../pages/center/CenterPage";
 import SendDonorNotification from "../pages/staff/SendDonorNotification";
 import BlogPage from "../pages/staff/BlogPage";
 import NewBlogPost from "../pages/NewBlogPost";
+import EmergencyRequest from "../pages/EmergencyRequest";
 
 // Route Protectors
 
@@ -91,6 +92,8 @@ export default function AppRouters() {
           path="/member/donation-questionnaire"
           element={<DonationQuestionnairePage />}
         />
+
+        <Route path="emergencyRequest" element={<EmergencyRequest/>} />
         <Route path="/member/success" element={<SuccessPage />} />
       </Route>
 

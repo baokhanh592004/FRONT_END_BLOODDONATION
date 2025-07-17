@@ -174,7 +174,7 @@ export default function Header() {
 
             <Link to="/register-donation" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Đăng ký hiến máu</Link>
             <Link to="/Thong_tin_nhom_mau" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Thông tin nhóm máu</Link>
-            <Link to="/Yeu_cau_mau_khan_cap" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Yêu cầu máu khẩn cấp</Link>
+            <Link to="/emergencyRequest" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Yêu cầu máu khẩn cấp</Link>
             <Link to="/blog" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Tin tức</Link>
 
             {/* User Section */}

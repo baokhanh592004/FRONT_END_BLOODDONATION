@@ -295,8 +295,9 @@ export default function BlogPage() {
                         <label htmlFor="type" style={styles.label}>Thể loại</label>
                         <select id="type" name="type" value={formData.type} onChange={handleChange} style={styles.input}>
                             <option value="BLOG">BLOG</option>
-                            <option value="NEWS">NEWS</option>
-                            <option value="GUIDE">GUIDE</option>
+                            <option value="NEWS">Tin Tức</option>
+                            <option value="GUIDE">Hướng Dẫn</option>
+                            <option value="EMERGENCY_REQUEST">Yêu Cầu Máu Khẩn Cấp</option>
                         </select>
                     </div>
                     <div style={styles.formGroup}>
