@@ -7,6 +7,7 @@ import ScreeningModal from '../../components/ScreeningModal';
 import DonationHistoryModal from '../../components/DonationHistoryModal';
 import RecordDonationModal from '../../components/RecordDonationModal';
 import UserProfileModal from '../../components/UserProfileModal';
+import CancellationModal from '../../components/CancellationModal';
 
 // Các hàm tiện ích không đổi
 const formatDateForDisplay = (dateString) => {
@@ -22,6 +23,7 @@ const formatDateForApi = (dateObject) => {
     return adjustedDate.toISOString().split('T')[0];
 };
 
+// Component input tùy chỉnh cho DatePicker
 const DatePickerCustomInput = forwardRef(({ value, onClick }, ref) => (
     <button className="w-full sm:w-auto bg-white text-left text-gray-700 font-medium py-2 px-4 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 flex justify-between items-center" onClick={onClick} ref={ref}>
         {value || <span className="text-gray-400">Chọn một ngày</span>}
@@ -29,9 +31,7 @@ const DatePickerCustomInput = forwardRef(({ value, onClick }, ref) => (
     </button>
 ));
 
-// =======================================================
-// MỚI: COMPONENT PHÂN TRANG
-// =======================================================
+// Component Phân trang
 const Pagination = ({ itemsPerPage, totalItems, paginate, currentPage }) => {
     const pageNumbers = [];
     const totalPages = Math.ceil(totalItems / itemsPerPage);
@@ -83,12 +83,10 @@ const Pagination = ({ itemsPerPage, totalItems, paginate, currentPage }) => {
 };
 
 export default function DonationManagementPage() {
-    // ---- THAY ĐỔI STATE ----
-    // const [groupedAppointments, setGroupedAppointments] = useState({}); // Đã thay thế
-    const [appointments, setAppointments] = useState([]); // State mới: lưu danh sách phẳng
-    const [currentPage, setCurrentPage] = useState(1);     // State mới: quản lý trang hiện tại
-    const [itemsPerPage] = useState(10);                   // State mới: số mục mỗi trang
-
+    // State
+    const [appointments, setAppointments] = useState([]);
+    const [currentPage, setCurrentPage] = useState(1);
+    const [itemsPerPage] = useState(10);
     const [selectedDate, setSelectedDate] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -96,13 +94,16 @@ export default function DonationManagementPage() {
     const [currentAppointment, setCurrentAppointment] = useState(null);
     const [bloodTypes, setBloodTypes] = useState([]);
     const [currentUserProfile, setCurrentUserProfile] = useState(null);
+    const [donationHistory, setDonationHistory] = useState([]);
 
+    // State quản lý các modal
     const [isScreeningModalOpen, setIsScreeningModalOpen] = useState(false);
     const [isHistoryModalOpen, setIsHistoryModalOpen] = useState(false);
     const [isRecordDonationModalOpen, setIsRecordDonationModalOpen] = useState(false);
     const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
-    const [donationHistory, setDonationHistory] = useState([]);
+    const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
 
+    // Hooks
     useEffect(() => {
         const initialFetch = async () => {
             setLoading(true);
@@ -118,6 +119,7 @@ export default function DonationManagementPage() {
         initialFetch();
     }, []);
 
+    // Các hàm xử lý dữ liệu
     const fetchBloodTypes = async () => {
         if (bloodTypes.length > 0) return;
         try {
@@ -131,7 +133,6 @@ export default function DonationManagementPage() {
         }
     };
 
-    // ---- CẬP NHẬT CÁC HÀM FETCH ----
     const fetchAllAppointments = async () => {
         setError(null);
         const token = localStorage.getItem('token');
@@ -139,8 +140,8 @@ export default function DonationManagementPage() {
             headers: { Authorization: `Bearer ${token}` }
         });
         const sortedData = response.data.sort((a, b) => new Date(b.scheduledDate) - new Date(a.scheduledDate));
-        setAppointments(sortedData); // Cập nhật danh sách phẳng
-        setCurrentPage(1); // Reset về trang đầu tiên
+        setAppointments(sortedData);
+        setCurrentPage(1);
     };
 
     const handleSearchByDate = async () => {
@@ -154,18 +155,29 @@ export default function DonationManagementPage() {
                 headers: { Authorization: `Bearer ${token}` },
                 params: { date: dateForApi }
             });
-            setAppointments(response.data); // Cập nhật danh sách đã lọc
-            setCurrentPage(1); // Reset về trang đầu tiên
+            setAppointments(response.data);
+            setCurrentPage(1);
         } catch (err) {
             setError("Không tìm thấy dữ liệu cho ngày đã chọn hoặc có lỗi xảy ra.");
-            setAppointments([]); // Xóa danh sách khi không tìm thấy
+            setAppointments([]);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleReset = async () => {
+        setSelectedDate(null);
+        setLoading(true);
+        try {
+            await fetchAllAppointments();
+        } catch(err) {
+             setError("Không thể tải lại dữ liệu.");
         } finally {
             setLoading(false);
         }
     };
     
     const handleScreeningSubmit = async (formData) => {
-        // ... không thay đổi ...
         if (!currentAppointment) return;
         setIsSubmitting(true);
         const { passed, remarks, weight, bloodTypeId, healthStatus } = formData;
@@ -192,7 +204,6 @@ export default function DonationManagementPage() {
     };
     
     const handleRecordDonationSubmit = async (formData) => {
-        // ... không thay đổi ...
         if (!currentAppointment) return;
         setIsSubmitting(true);
         try {
@@ -211,16 +222,56 @@ export default function DonationManagementPage() {
         }
     };
 
+    const handleCancelAppointmentSubmit = async (remark) => {
+        if (!currentAppointment) return;
+
+        setIsSubmitting(true);
+        setError(null);
+
+        try {
+            const token = localStorage.getItem('token');
+            const payload = {
+                passed: false,
+                remarks: remark,
+            };
+
+            await axios.post(`http://localhost:8080/api/staff/appointments/${currentAppointment.appointmentId}/screening`, payload, {
+                headers: { Authorization: `Bearer ${token}` }
+            });
+
+            alert('Đã hủy lịch hẹn thành công.');
+            handleCloseAllModals();
+            await fetchAllAppointments();
+
+        } catch (err) {
+            const errorMessage = err.response?.data?.message || "Có lỗi xảy ra khi hủy lịch hẹn.";
+            setError(errorMessage);
+            alert(`Lỗi: ${errorMessage}`);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+    
+    const handleProfileUpdate = async () => {
+        handleCloseAllModals();
+        setLoading(true);
+        try {
+            await fetchAllAppointments();
+        } catch (err) {
+            setError("Không thể làm mới dữ liệu sau khi cập nhật.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // Các hàm quản lý Modal
     const handleOpenModal = async (modalType, appointment) => {
-        // ... không thay đổi ...
         setCurrentAppointment(appointment);
         const token = localStorage.getItem('token');
-        
         await fetchBloodTypes();
 
-        if (modalType === 'screening') {
-            setIsScreeningModalOpen(true);
-        } 
+        if (modalType === 'screening') setIsScreeningModalOpen(true);
+        else if (modalType === 'cancel') setIsCancelModalOpen(true);
         else if (modalType === 'history') {
             try {
                 const response = await axios.get(`http://localhost:8080/api/staff/donation-history/user/${appointment.user.userId}`, { headers: { Authorization: `Bearer ${token}` } });
@@ -256,79 +307,16 @@ export default function DonationManagementPage() {
     };
     
     const handleCloseAllModals = () => {
-        // ... không thay đổi ...
         setIsScreeningModalOpen(false);
         setIsHistoryModalOpen(false);
         setIsRecordDonationModalOpen(false);
         setIsProfileModalOpen(false);
+        setIsCancelModalOpen(false);
         setCurrentAppointment(null);
         setCurrentUserProfile(null);
     };
     
-    const handleProfileUpdate = async () => {
-        // ... không thay đổi ...
-        handleCloseAllModals();
-        setLoading(true);
-        try {
-            await fetchAllAppointments();
-        } catch (err) {
-            setError("Không thể làm mới dữ liệu sau khi cập nhật.");
-        } finally {
-            setLoading(false);
-        }
-    };
-    
-    const handleReset = async () => {
-        setSelectedDate(null);
-        setLoading(true);
-        try {
-            await fetchAllAppointments();
-        } catch(err) {
-             setError("Không thể tải lại dữ liệu.");
-        } finally {
-            setLoading(false);
-        }
-    };
-
-        
-    const handleUserDidNotArrive = async (appointment) => {
-        // Hỏi xác nhận để tránh nhấn nhầm
-        if (!window.confirm(`Bạn có chắc chắn muốn đánh dấu lịch hẹn của "${appointment.user?.fullName}" là "Không đến"? Hành động này sẽ hủy lịch hẹn.`)) {
-            return;
-        }
-
-        setIsSubmitting(true); // Có thể dùng tạm state này để vô hiệu hóa các nút khác nếu cần
-        setError(null);
-
-        try {
-            const token = localStorage.getItem('token');
-            
-            // Chúng ta tái sử dụng endpoint "screening" nhưng gửi dữ liệu giả lập một ca sàng lọc không đạt
-            // Điều này giúp không cần thay đổi backend
-            const payload = {
-                passed: false,
-                remarks: 'Người dùng không đến (được ghi nhận bởi nhân viên).',
-            };
-
-            await axios.post(`http://localhost:8080/api/staff/appointments/${appointment.appointmentId}/screening`, payload, {
-                headers: { Authorization: `Bearer ${token}` }
-            });
-
-            alert('Đã cập nhật trạng thái lịch hẹn thành công.');
-            await fetchAllAppointments(); // Tải lại danh sách để cập nhật giao diện
-
-        } catch (err) {
-            const errorMessage = err.response?.data?.message || "Có lỗi xảy ra khi cập nhật trạng thái.";
-            setError(errorMessage);
-            alert(`Lỗi: ${errorMessage}`);
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-    
-    // =======================================================
-    // MỚI: LOGIC PHÂN TRANG VÀ CHUẨN BỊ DỮ LIỆU HIỂN THỊ
-    // =======================================================
+    // Logic phân trang và chuẩn bị dữ liệu
     const { groupedAppointmentsOnPage, sortedDatesOnPage, totalPages } = useMemo(() => {
         const indexOfLastItem = currentPage * itemsPerPage;
         const indexOfFirstItem = indexOfLastItem - itemsPerPage;
@@ -362,6 +350,7 @@ export default function DonationManagementPage() {
         CANCELLED: 'text-gray-600 bg-gray-100',
     };
 
+    // Render JSX
     return (
         <div className="bg-gray-50 min-h-full p-4 sm:p-6 lg:p-8">
             <div className="max-w-7xl mx-auto">
@@ -379,7 +368,6 @@ export default function DonationManagementPage() {
                 : appointments.length > 0 ? (
                     <>
                         <div className="space-y-8">
-                            {/* CẬP NHẬT: SỬ DỤNG DỮ LIỆU ĐÃ PHÂN TRANG */}
                             {sortedDatesOnPage.map(date => (
                                 <div key={date}>
                                     <h3 className="text-lg font-semibold text-red-700 bg-red-100 px-4 py-2 rounded-t-lg">Ngày {formatDateForDisplay(date)}</h3>
@@ -400,20 +388,19 @@ export default function DonationManagementPage() {
                                                             <button 
                                                                 onClick={() => handleOpenModal('screening', app)} 
                                                                 className="px-4 py-2 bg-yellow-500 text-white text-sm font-medium rounded-md hover:bg-yellow-600"
-                                                                disabled={isSubmitting} // Thêm disabled để tránh double click
+                                                                disabled={isSubmitting}
                                                             >
                                                                 Sàng lọc
                                                             </button>
                                                             <button 
-                                                                onClick={() => handleUserDidNotArrive(app)} 
+                                                                onClick={() => handleOpenModal('cancel', app)} 
                                                                 className="px-4 py-2 bg-red-500 text-white text-sm font-medium rounded-md hover:bg-red-600"
-                                                                disabled={isSubmitting} // Thêm disabled để tránh double click
+                                                                disabled={isSubmitting}
                                                             >
-                                                                Không đến
+                                                                Hủy đơn
                                                             </button>
                                                         </>
                                                     )}
-
                                                     {app.status === 'APPROVED' && <button onClick={() => handleOpenModal('recordDonation', app)} className="px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-md hover:bg-green-700">Ghi nhận</button>}
                                                 </div>
                                             </li>
@@ -422,8 +409,7 @@ export default function DonationManagementPage() {
                                 </div>
                             ))}
                         </div>
-
-                        {/* MỚI: HIỂN THỊ THANH PHÂN TRANG */}
+                        
                         <Pagination 
                             itemsPerPage={itemsPerPage}
                             totalItems={appointments.length}
@@ -434,19 +420,12 @@ export default function DonationManagementPage() {
                 ) : <div className="text-center py-16 bg-white rounded-lg shadow-sm"><p className="text-gray-500">Không có lịch hẹn nào.</p></div>}
             </div>
 
+            {/* Render các Modal */}
             {isScreeningModalOpen && <ScreeningModal appointment={currentAppointment} onClose={handleCloseAllModals} onSubmit={handleScreeningSubmit} isSubmitting={isSubmitting} bloodTypes={bloodTypes} />}
             {isHistoryModalOpen && <DonationHistoryModal isOpen={isHistoryModalOpen} onClose={handleCloseAllModals} donationHistory={donationHistory} />}
             {isRecordDonationModalOpen && <RecordDonationModal appointment={currentAppointment} userProfile={currentUserProfile} onClose={handleCloseAllModals} onSubmit={handleRecordDonationSubmit} isSubmitting={isSubmitting} />}
-            
-            {isProfileModalOpen && (
-                <UserProfileModal 
-                appointment={currentAppointment} 
-                userProfile={currentUserProfile} 
-                onClose={handleCloseAllModals}
-                bloodTypes={bloodTypes}
-                onProfileUpdate={handleProfileUpdate}
-                />
-            )}
+            {isProfileModalOpen && <UserProfileModal appointment={currentAppointment} userProfile={currentUserProfile} onClose={handleCloseAllModals} bloodTypes={bloodTypes} onProfileUpdate={handleProfileUpdate} />}
+            {isCancelModalOpen && <CancellationModal isOpen={isCancelModalOpen} onClose={handleCloseAllModals} onSubmit={handleCancelAppointmentSubmit} isSubmitting={isSubmitting} />}
         </div>
     );
 }

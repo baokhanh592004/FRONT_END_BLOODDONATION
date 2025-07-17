@@ -253,4 +253,4 @@ export default function DonationRegistrationPage() {
       </div>
     </div>
   );
-}
+} 
