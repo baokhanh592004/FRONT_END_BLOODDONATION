@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
-import AuthenticatedImage from '../components/AuthenticatedImage'; // Giả sử bạn có thể dùng lại component này
+import axiosClient from '../api/axiosClient'; // ✅ Đổi từ axios sang axiosClient
+import AuthenticatedImage from '../components/AuthenticatedImage';
 
 const API_URL = "http://localhost:8080";
 
@@ -22,16 +22,12 @@ export default function EmergencyRequest() {
             }
 
             try {
-                const response = await axios.get(`${API_URL}/api/blog/all`, {
+                const response = await axiosClient.get(`${API_URL}/api/blog/all`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
-                
-                // Lọc để chỉ lấy các yêu cầu khẩn cấp
+
                 const emergencyPosts = response.data.filter(post => post.type === 'EMERGENCY_REQUEST');
-                
-                // Sắp xếp từ mới nhất đến cũ nhất
                 const sortedRequests = emergencyPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
-                
                 setRequests(sortedRequests);
             } catch (err) {
                 setError("Không thể tải danh sách yêu cầu khẩn cấp.");
@@ -47,11 +43,11 @@ export default function EmergencyRequest() {
     return (
         <div style={styles.pageContainer}>
             <h1 style={styles.header}>Danh Sách Yêu Cầu Khẩn Cấp</h1>
-            
+
             {loading && <p style={styles.message}>Đang tải dữ liệu...</p>}
-            
+
             {error && <p style={styles.errorMessage}>{error}</p>}
-            
+
             {!loading && !error && requests.length === 0 && (
                 <p style={styles.message}>Hiện không có yêu cầu khẩn cấp nào.</p>
             )}
@@ -60,7 +56,7 @@ export default function EmergencyRequest() {
                 {requests.map(req => (
                     <div key={req.postId} style={styles.card}>
                         {req.image && (
-                            <AuthenticatedImage 
+                            <AuthenticatedImage
                                 src={req.image}
                                 alt={req.title}
                                 style={styles.cardImage}
@@ -114,7 +110,7 @@ const styles = {
         backgroundColor: '#ffebee',
         padding: '15px',
         borderRadius: '8px',
-        border: `1px solid ${colors.primary}`
+        border: `1px solid ${colors.primary}`,
     },
     listContainer: {
         display: 'flex',
@@ -152,6 +148,6 @@ const styles = {
         fontSize: '1rem',
         lineHeight: 1.6,
         color: colors.text,
-        whiteSpace: 'pre-wrap', // Giữ nguyên định dạng xuống dòng
+        whiteSpace: 'pre-wrap',
     },
 };

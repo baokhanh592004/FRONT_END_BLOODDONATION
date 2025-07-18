@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import axiosClient from "../api/axiosClient"; // ✅ Sử dụng axiosClient
 
 const UpdateProfile = () => {
   const [formData, setFormData] = useState({
@@ -21,18 +21,16 @@ const UpdateProfile = () => {
       return;
     }
 
-    axios
-      .get("http://localhost:8080/api/user/profile", {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+    axiosClient
+      .get("/api/user/profile")
       .then((res) => {
         const data = res.data;
         setFormData({
-          fullName:   data.fullName   || "",
-          gender:     data.gender     || "",
-          email:      data.email      || "",
-          phoneNumber:data.phoneNumber|| "",
-          address:    data.address    || ""
+          fullName:    data.fullName    || "",
+          gender:      data.gender      || "",
+          email:       data.email       || "",
+          phoneNumber: data.phoneNumber || "",
+          address:     data.address     || ""
         });
         setMessage("");
       })
@@ -61,18 +59,8 @@ const UpdateProfile = () => {
     }
 
     try {
-      await axios.patch(
-        "http://localhost:8080/api/user/profile",
-        formData,
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json"
-          }
-        }
-      );
+      await axiosClient.patch("/api/user/profile", formData);
       setMessage("✅ Cập nhật thành công!");
-      // Sau thành công, redirect và truyền state để Profile reload
       setTimeout(() => navigate("/profile", { state: { updated: true } }), 800);
     } catch (err) {
       console.error("Lỗi khi cập nhật:", err);
