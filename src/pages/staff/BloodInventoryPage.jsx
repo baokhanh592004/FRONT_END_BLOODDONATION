@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import axiosClient from "../api/axiosClient";
+import axiosClient from "../../api/axiosClient";
 
 const BloodInventoryPage = () => {
   const [inventory, setInventory] = useState([]);
