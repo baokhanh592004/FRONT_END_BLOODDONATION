@@ -26,7 +26,10 @@ const DonationHistoryPage = () => {
       });
   }, []);
 
-  const filteredData = donationHistory.filter((donation) => {
+  const filteredData = donationHistory
+  .slice() // tạo bản sao mảng gốc để tránh thay đổi state gốc
+  .sort((a, b) => new Date(b.donationDate) - new Date(a.donationDate)) // sắp xếp mới nhất trước
+  .filter((donation) => {
     const matchesSearch = donation.centerName?.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesComponentType =
       !componentTypeFilter || donation.componentType === componentTypeFilter;
@@ -37,6 +40,7 @@ const DonationHistoryPage = () => {
 
     return matchesSearch && matchesComponentType && matchesStartDate && matchesEndDate;
   });
+
 
   const getComponentTypeLabel = (type) => {
     switch (type) {
@@ -178,9 +182,9 @@ const DonationHistoryPage = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredData.map((donation) => (
-                  <tr key={donation.donationId} className="hover:bg-gray-50">
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                {filteredData.map((donation, index) => (
+                  <tr key={donation.donationId} className={index % 2 === 1 ? "bg-gray-100" : ""}>
+                    <td className= "px-6 py-4 whitespace-nowrap text-sm text-gray-900">
                       {format(new Date(donation.donationDate), "dd/MM/yyyy")}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">

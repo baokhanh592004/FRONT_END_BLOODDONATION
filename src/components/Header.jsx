@@ -172,8 +172,12 @@ export default function Header() {
             <Link to="/forum" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Diễn đàn</Link>
             {/* ========================== */}
 
-            <Link to="/register-donation" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Đăng ký hiến máu</Link>
-            
+            {["MEMBER", "ADMIN"].includes(user?.role) && (
+              <Link to="/register-donation" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
+                Đăng ký hiến máu
+              </Link>
+            )}
+
             <Link to="/emergencyRequest" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Yêu cầu máu khẩn cấp</Link>
             <Link to="/blog" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Tin tức</Link>
 
