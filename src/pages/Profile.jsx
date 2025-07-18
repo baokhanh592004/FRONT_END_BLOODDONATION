@@ -23,7 +23,7 @@ const Profile = () => {
     }
 
     axiosClient
-      .get("/api/user/profile")
+      .get("user/profile")
       .then((res) => {
         const data = res.data;
         setFormData({
