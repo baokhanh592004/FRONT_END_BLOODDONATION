@@ -22,7 +22,7 @@ export default function EmergencyRequest() {
             }
 
             try {
-                const response = await axiosClient.get(`${API_URL}/api/blog/all`, {
+                const response = await axiosClient.get(`${API_URL}/blog/all`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
 

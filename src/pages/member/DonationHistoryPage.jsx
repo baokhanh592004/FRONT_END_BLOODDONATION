@@ -13,7 +13,7 @@ const DonationHistoryPage = () => {
     const token = localStorage.getItem("token");
 
     axiosClient
-      .get("/api/user/donation-history", {
+      .get("user/donation-history", {
         headers: {
           Authorization: `Bearer ${token}`,
         },

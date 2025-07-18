@@ -23,7 +23,7 @@ const HealthQuestion = () => {
     if (!token) return setError('Token không hợp lệ.');
 
     axiosClient
-      .get('/api/health/questions', {
+      .get('health/questions', {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setQuestions(res.data))
@@ -42,7 +42,7 @@ const HealthQuestion = () => {
 
     if (isEditing) {
       axiosClient
-        .put('/api/health/questions', { ...data, id: editId }, config)
+        .put('health/questions', { ...data, id: editId }, config)
         .then((res) => {
           setQuestions((prev) => prev.map((q) => (q.id === editId ? res.data : q)));
           resetForm();
@@ -50,7 +50,7 @@ const HealthQuestion = () => {
         .catch(() => setError('Lỗi cập nhật.'));
     } else {
       axiosClient
-        .post('/api/health/questions', data, config)
+        .post('health/questions', data, config)
         .then((res) => {
           setQuestions((prev) => [...prev, res.data]);
           resetForm();
@@ -73,7 +73,7 @@ const HealthQuestion = () => {
     if (!window.confirm('Bạn có chắc muốn xóa?')) return;
     const token = localStorage.getItem('token');
     axiosClient
-      .delete(`/api/health/questions/${id}`, {
+      .delete(`health/questions/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then(() => {

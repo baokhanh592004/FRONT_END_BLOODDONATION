@@ -83,10 +83,10 @@ export default function NewBlogPost() {
 
       try {
         if (postId) {
-          const response = await axiosClient.get(`/api/blog/${postId}`);
+          const response = await axiosClient.get(`blog/${postId}`);
           setPost(response.data);
         } else {
-          const response = await axiosClient.get('/api/blog/all');
+          const response = await axiosClient.get('blog/all');
           const allowedTypes = ['BLOG', 'NEWS', 'GUIDE'];
           const filteredPosts = response.data.filter(p => allowedTypes.includes(p.type));
           const sortedPosts = filteredPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
