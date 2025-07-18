@@ -1,8 +1,16 @@
 // src/api/axiosClient.js
 import axios from 'axios';
 
+// const axiosClient = axios.create({
+//   baseURL: 'http://localhost:8080/api',
+//   headers: {
+//     'Content-Type': 'application/json',
+//   },
+// });
+
+// Đọc biến môi trường với tiền tố VITE_
 const axiosClient = axios.create({
-  baseURL: 'http://localhost:8080/api',
+  baseURL: import.meta.env.VITE_API_URL, // Vite dùng `import.meta.env`
   headers: {
     'Content-Type': 'application/json',
   },
