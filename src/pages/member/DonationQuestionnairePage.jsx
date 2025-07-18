@@ -56,7 +56,7 @@ const DonationQuestionnairePage = () => {
     }
     const fetchQuestions = async () => {
       try {
-        const response = await axiosClient.get("/api/health/questions", {
+        const response = await axiosClient.get("health/questions", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setQuestions(response.data);
@@ -107,12 +107,12 @@ const DonationQuestionnairePage = () => {
 
     try {
       await axiosClient.post(
-        "/api/health/answers",
+        "health/answers",
         { answers },
         { headers: { Authorization: `Bearer ${token}` } }
       );
       await axiosClient.post(
-        "/api/user/appointments/register",
+        "user/appointments/register",
         {
           userId: registrationData.userId,
           centerId: registrationData.centerId,

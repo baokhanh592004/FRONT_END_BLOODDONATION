@@ -109,12 +109,12 @@ export default function DonationRegistrationPage() {
 
       try {
         const storedUser = JSON.parse(storedUserJSON);
-        const userResponse = await axiosClient.get(`/api/user/${storedUser.userId}/info`, {
+        const userResponse = await axiosClient.get(`user/${storedUser.userId}/info`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser({ ...storedUser, ...userResponse.data });
 
-        const centersResponse = await axiosClient.get('/api/user/donation-center/names', {
+        const centersResponse = await axiosClient.get('user/donation-center/names', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setDonationCenters(centersResponse.data);

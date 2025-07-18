@@ -16,7 +16,7 @@ const AppointmentHistoryPage = () => {
     }
 
     try {
-      const res = await axiosClient.get('/api/user/appointments', {
+      const res = await axiosClient.get('user/appointments', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
