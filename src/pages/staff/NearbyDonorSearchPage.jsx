@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import axiosClient from "../api/axiosClient";
+import axiosClient from "../../api/axiosClient";
 
 const NearbyDonorSearchPage = () => {
   const [radiusKm, setRadiusKm] = useState(5);
