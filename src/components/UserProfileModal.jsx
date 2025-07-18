@@ -1,7 +1,7 @@
 // src/components/UserProfileModal.jsx
 
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosClient from '../api/axiosClient';
 
 // Tiện ích định dạng ngày tháng
 const formatDate = (dateString) => {
@@ -13,7 +13,6 @@ const formatDate = (dateString) => {
     return `${day}/${month}/${year}`;
 };
 
-// Component hiển thị một dòng thông tin
 const InfoRow = ({ label, value, highlight = false }) => (
     <div className="py-3 sm:grid sm:grid-cols-3 sm:gap-4">
         <dt className="text-sm font-medium text-gray-500">{label}</dt>
@@ -27,7 +26,6 @@ const InfoRow = ({ label, value, highlight = false }) => (
     </div>
 );
 
-// Component chính: UserProfileModal
 export default function UserProfileModal({
     appointment,
     userProfile,
@@ -78,7 +76,7 @@ export default function UserProfileModal({
         };
 
         try {
-            await axios.post('http://localhost:8080/api/staff/user-profile', payload, {
+            await axiosClient.post('/staff/user-profile', payload, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             alert('Cập nhật hồ sơ thành công!');
@@ -103,12 +101,7 @@ export default function UserProfileModal({
                 </div>
 
                 <div className="p-5">
-                    {/* ======================================================= */}
-                    {/* SỬA: Thay thế hàm ModalContent bằng logic render trực tiếp */}
-                    {/* Đây là thay đổi quan trọng nhất để sửa lỗi typing */}
-                    {/* ======================================================= */}
                     {isEditing ? (
-                        // Chế độ chỉnh sửa
                         <form onSubmit={handleSave}>
                             <dl className="divide-y divide-gray-200">
                                 <div className="py-3 sm:grid sm:grid-cols-3 sm:gap-4 items-center">
@@ -160,7 +153,6 @@ export default function UserProfileModal({
                             </dl>
                         </form>
                     ) : (
-                        // Chế độ xem
                         <dl className="divide-y divide-gray-200">
                             <InfoRow label="Nhóm máu" value={userProfile.bloodType?.type || 'N/A'} highlight={true} />
                             <InfoRow label="Cân nặng" value={`${userProfile.weight || 'N/A'} kg`} />

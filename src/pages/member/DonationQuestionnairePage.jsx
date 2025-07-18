@@ -1,88 +1,33 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import axios from "axios";
-
-// --- Các icon SVG để làm đẹp giao diện (bạn có thể đặt chúng ở file riêng) ---
+import axiosClient from "../../api/axiosClient"; // ✅ Đã đổi axios -> axiosClient
 
 const ClipboardIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-10 w-10 text-red-500 mb-4"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth={2}
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
   </svg>
 );
 
 const ArrowRightIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-5 w-5 ml-2"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M17 8l4 4m0 0l-4 4m4-4H3"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
   </svg>
 );
 
 const LoadingSpinner = () => (
-  <svg
-    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
-    xmlns="http://www.w3.org/2000/svg"
-    fill="none"
-    viewBox="0 0 24 24"
-  >
-    <circle
-      className="opacity-25"
-      cx="12"
-      cy="12"
-      r="10"
-      stroke="currentColor"
-      strokeWidth="4"
-    ></circle>
-    <path
-      className="opacity-75"
-      fill="currentColor"
-      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-    ></path>
+  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
   </svg>
 );
 
 const AlertIcon = () => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6 text-red-600 mr-3"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-    strokeWidth="2"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-    />
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-red-600 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
   </svg>
 );
 
-
-// --- Component chính ---
-
 const DonationQuestionnairePage = () => {
-  // --- TOÀN BỘ LOGIC GIỮ NGUYÊN ---
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -111,7 +56,7 @@ const DonationQuestionnairePage = () => {
     }
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get("/api/health/questions", {
+        const response = await axiosClient.get("/api/health/questions", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setQuestions(response.data);
@@ -161,12 +106,12 @@ const DonationQuestionnairePage = () => {
     }
 
     try {
-      await axios.post(
+      await axiosClient.post(
         "/api/health/answers",
         { answers },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-      await axios.post(
+      await axiosClient.post(
         "/api/user/appointments/register",
         {
           userId: registrationData.userId,
@@ -197,14 +142,11 @@ const DonationQuestionnairePage = () => {
       setIsSubmitting(false);
     }
   };
-  // --- KẾT THÚC PHẦN LOGIC ---
 
-  // --- PHẦN GIAO DIỆN (JSX) ĐƯỢC THIẾT KẾ LẠI ---
   return (
     <div className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
       <div className="container mx-auto max-w-3xl">
         <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
-          {/* Header */}
           <div className="text-center mb-10">
             <div className="flex justify-center">
               <ClipboardIcon />
@@ -217,7 +159,6 @@ const DonationQuestionnairePage = () => {
             </p>
           </div>
 
-          {/* Alert/Error Display */}
           {error && (
             <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md mb-8 flex items-start" role="alert">
               <AlertIcon />
@@ -239,7 +180,6 @@ const DonationQuestionnairePage = () => {
             </div>
           )}
 
-          {/* Questions List */}
           <div className="space-y-8">
             {questions.map((q, index) => (
               <div key={q.id} className="border-b border-gray-200 pb-8 last:border-b-0 last:pb-0">
@@ -247,15 +187,10 @@ const DonationQuestionnairePage = () => {
                   <span className="text-red-600 font-bold mr-2">{index + 1}.</span>
                   {q.questionText}
                 </p>
-                
-                {/* Custom Radio Buttons */}
+
                 <div className="flex flex-col sm:flex-row gap-4">
-                  {[
-                    { label: "Có", value: true },
-                    { label: "Không", value: false },
-                  ].map((option) => (
-                    <label
-                      key={option.label}
+                  {[{ label: "Có", value: true }, { label: "Không", value: false }].map((option) => (
+                    <label key={option.label}
                       className={`flex-1 flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
                         answers.find(ans => ans.questionId === q.id)?.answerValue === option.value
                           ? 'border-red-500 bg-red-50 shadow-md'
@@ -267,14 +202,14 @@ const DonationQuestionnairePage = () => {
                         name={`question-${q.id}`}
                         checked={answers.find(ans => ans.questionId === q.id)?.answerValue === option.value}
                         onChange={() => handleAnswerChange(q.id, option.value)}
-                        className="sr-only peer" // Hide the default radio but keep it for accessibility
+                        className="sr-only peer"
                       />
                       <span className={`w-5 h-5 rounded-full flex items-center justify-center border-2 transition-colors duration-200 ${
                         answers.find(ans => ans.questionId === q.id)?.answerValue === option.value
                           ? 'border-red-600 bg-red-600'
                           : 'border-gray-400'
                       }`}>
-                         <span className="w-2 h-2 rounded-full bg-white"></span>
+                        <span className="w-2 h-2 rounded-full bg-white"></span>
                       </span>
                       <span className={`font-semibold ${
                         answers.find(ans => ans.questionId === q.id)?.answerValue === option.value
@@ -288,7 +223,6 @@ const DonationQuestionnairePage = () => {
             ))}
           </div>
 
-          {/* Submit Button */}
           <div className="mt-10 pt-6 border-t border-gray-200 text-center">
             <button
               onClick={handleSubmit}
