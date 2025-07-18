@@ -1,84 +1,88 @@
-// src/pages/member/DonationQuestionnairePage.js
-
 import React, { useEffect, useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import axios from "axios";
-// --- THÊM MỚI: Import icons ---
-import { FaCheckCircle, FaTimesCircle, FaRegArrowAltCircleRight } from 'react-icons/fa';
-import { BsPatchQuestionFill } from 'react-icons/bs';
 
-// --- COMPONENT CON (MỚI) ---
-// Component để hiển thị từng câu hỏi một cách trực quan
-const QuestionCard = ({ question, answer, onAnswerChange }) => {
-  const isAnswered = answer !== undefined;
-  const selectedValue = answer?.answerValue;
+// --- Các icon SVG để làm đẹp giao diện (bạn có thể đặt chúng ở file riêng) ---
 
-  return (
-    <div className={`bg-white p-6 rounded-lg shadow-sm border transition-all duration-300 ${isAnswered ? 'border-red-300' : 'border-gray-200'}`}>
-      <div className="flex items-start gap-4">
-        <BsPatchQuestionFill className="text-red-500 text-2xl mt-1 flex-shrink-0" />
-        <div className="flex-grow">
-          <p className="text-lg font-medium text-gray-800 mb-3">{question.questionText}</p>
-          <div className="flex flex-col sm:flex-row gap-4">
-            {/* Lựa chọn CÓ */}
-            <label 
-              className={`flex items-center gap-3 w-full p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${selectedValue === true ? 'bg-red-50 border-red-500' : 'hover:bg-gray-50'}`}
-            >
-              <input
-                type="radio"
-                name={`question-${question.id}`}
-                value="true"
-                checked={selectedValue === true}
-                onChange={() => onAnswerChange(question.id, true)}
-                className="form-radio h-5 w-5 text-red-600 focus:ring-red-500" // Cần plugin @tailwindcss/forms
-              />
-              <span className={`font-semibold ${selectedValue === true ? 'text-red-700' : 'text-gray-700'}`}>Có</span>
-            </label>
-            {/* Lựa chọn KHÔNG */}
-            <label 
-              className={`flex items-center gap-3 w-full p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${selectedValue === false ? 'bg-red-50 border-red-500' : 'hover:bg-gray-50'}`}
-            >
-              <input
-                type="radio"
-                name={`question-${question.id}`}
-                value="false"
-                checked={selectedValue === false}
-                onChange={() => onAnswerChange(question.id, false)}
-                className="form-radio h-5 w-5 text-red-600 focus:ring-red-500"
-              />
-              <span className={`font-semibold ${selectedValue === false ? 'text-red-700' : 'text-gray-700'}`}>Không</span>
-            </label>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-};
+const ClipboardIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-10 w-10 text-red-500 mb-4"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth={2}
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"
+    />
+  </svg>
+);
 
-// Component để hiển thị thông báo lỗi/thành công
-const AlertMessage = ({ message, type, onActionClick, actionText }) => {
-  const isError = type === 'error';
-  return (
-    <div className={`p-4 rounded-lg flex flex-col sm:flex-row items-center justify-between gap-4 mb-6 ${isError ? 'bg-red-100 text-red-800' : 'bg-yellow-100 text-yellow-800'}`}>
-      <div className="flex items-center gap-3">
-        {isError ? <FaTimesCircle size={20} /> : <FaCheckCircle size={20} />}
-        <p className="font-medium text-center sm:text-left">{message}</p>
-      </div>
-      {onActionClick && (
-        <button
-          onClick={onActionClick}
-          className={`px-6 py-2 rounded-md font-semibold transition-colors duration-200 whitespace-nowrap ${isError ? 'bg-red-600 hover:bg-red-700 text-white' : 'bg-gray-600 hover:bg-gray-700 text-white'}`}
-        >
-          {actionText}
-        </button>
-      )}
-    </div>
-  );
-}
+const ArrowRightIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-5 w-5 ml-2"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={2}
+      d="M17 8l4 4m0 0l-4 4m4-4H3"
+    />
+  </svg>
+);
+
+const LoadingSpinner = () => (
+  <svg
+    className="animate-spin -ml-1 mr-3 h-5 w-5 text-white"
+    xmlns="http://www.w3.org/2000/svg"
+    fill="none"
+    viewBox="0 0 24 24"
+  >
+    <circle
+      className="opacity-25"
+      cx="12"
+      cy="12"
+      r="10"
+      stroke="currentColor"
+      strokeWidth="4"
+    ></circle>
+    <path
+      className="opacity-75"
+      fill="currentColor"
+      d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+    ></path>
+  </svg>
+);
+
+const AlertIcon = () => (
+  <svg
+    xmlns="http://www.w3.org/2000/svg"
+    className="h-6 w-6 text-red-600 mr-3"
+    fill="none"
+    viewBox="0 0 24 24"
+    stroke="currentColor"
+    strokeWidth="2"
+  >
+    <path
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+    />
+  </svg>
+);
 
 
-// --- COMPONENT CHÍNH (ĐÃ CẬP NHẬT TOÀN BỘ) ---
+// --- Component chính ---
+
 const DonationQuestionnairePage = () => {
+  // --- TOÀN BỘ LOGIC GIỮ NGUYÊN ---
   const location = useLocation();
   const navigate = useNavigate();
 
@@ -88,35 +92,29 @@ const DonationQuestionnairePage = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showBackHome, setShowBackHome] = useState(false);
 
-  // Logic lấy registrationData giữ nguyên
   const registrationData = (() => {
     const state = location.state;
     const stored = localStorage.getItem("registrationData");
     return state || (stored ? JSON.parse(stored) : null);
   })();
 
-  // Logic useEffect giữ nguyên
   useEffect(() => {
     const token = localStorage.getItem("token");
-
     if (!registrationData?.userId || !registrationData?.centerId || !registrationData?.scheduledDate) {
-      navigate('/member/donation-registration'); // Chuyển về trang đăng ký lịch
+      navigate("/register-donation");
       return;
     }
-
     if (!token) {
-      navigate('/login');
+      setError("Vui lòng đăng nhập để tiếp tục.");
+      navigate("/login");
       return;
     }
-
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get("http://localhost:8080/api/health/questions", {
+        const response = await axios.get("/api/health/questions", {
           headers: { Authorization: `Bearer ${token}` },
         });
         setQuestions(response.data);
-        // Khởi tạo answers state để mỗi câu hỏi có một mục, tránh lỗi khi check length
-        setAnswers(response.data.map(q => ({ questionId: q.id, answerValue: undefined })));
       } catch (err) {
         console.error("Lỗi khi tải câu hỏi:", err);
         setError("Không thể tải câu hỏi sàng lọc. Vui lòng thử lại.");
@@ -126,11 +124,16 @@ const DonationQuestionnairePage = () => {
   }, [registrationData, navigate]);
 
   const handleAnswerChange = (questionId, value) => {
-    setAnswers((prev) =>
-      prev.map((ans) =>
-        ans.questionId === questionId ? { ...ans, answerValue: value } : ans
-      )
-    );
+    setAnswers((prev) => {
+      const existing = prev.find((ans) => ans.questionId === questionId);
+      if (existing) {
+        return prev.map((ans) =>
+          ans.questionId === questionId ? { ...ans, answerValue: value } : ans
+        );
+      } else {
+        return [...prev, { questionId, answerValue: value }];
+      }
+    });
   };
 
   const handleSubmit = async () => {
@@ -139,33 +142,32 @@ const DonationQuestionnairePage = () => {
     setIsSubmitting(true);
     const token = localStorage.getItem("token");
 
-    // Kiểm tra xem tất cả câu hỏi đã được trả lời chưa
-    const allAnswered = answers.every(ans => ans.answerValue !== undefined);
-    if (!allAnswered) {
-      setError("Vui lòng trả lời tất cả các câu hỏi để tiếp tục.");
+    if (answers.length !== questions.length) {
+      setError("Vui lòng trả lời tất cả câu hỏi.");
       setIsSubmitting(false);
       return;
     }
 
-    // Kiểm tra câu trả lời
     const incorrect = answers.some((ans) => {
       const question = questions.find((q) => q.id === ans.questionId);
-      // Giả sử correctAnswer là false (Không) cho tất cả các câu hỏi điều kiện
-      return question && ans.answerValue !== false;
+      return question && ans.answerValue !== question.correctAnswer;
     });
 
     if (incorrect) {
-      setError("Rất tiếc, bạn chưa đủ điều kiện hiến máu lần này. Cảm ơn bạn đã quan tâm. Mong sẽ gặp lại bạn trong lần tới!");
+      setError("Bạn không đủ điều kiện hiến máu. Hy vọng sẽ nhận được sự giúp đỡ của bạn lần sau!");
       setShowBackHome(true);
       setIsSubmitting(false);
       return;
     }
 
-    // Gửi dữ liệu nếu đủ điều kiện
     try {
-      // Đăng ký cuộc hẹn
       await axios.post(
-        "http://localhost:8080/api/user/appointments/register",
+        "/api/health/answers",
+        { answers },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      await axios.post(
+        "/api/user/appointments/register",
         {
           userId: registrationData.userId,
           centerId: registrationData.centerId,
@@ -173,84 +175,139 @@ const DonationQuestionnairePage = () => {
         },
         { headers: { Authorization: `Bearer ${token}` } }
       );
-
-      // Lưu câu trả lời (có thể gộp 2 API này lại ở backend để tối ưu)
-      const answeredPayload = { 
-        answers: answers.map(({ questionId, answerValue }) => ({ questionId, answerValue }))
-      };
-      await axios.post(
-        "http://localhost:8080/api/health/answers",
-        answeredPayload,
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      
       localStorage.removeItem("registrationData");
-      navigate("/member/success", { state: { ...registrationData } });
+      navigate("/member/success", {
+        state: {
+          userId: registrationData.userId,
+          centerId: registrationData.centerId,
+          scheduledDate: registrationData.scheduledDate,
+          answers,
+          questions,
+        },
+      });
     } catch (err) {
       console.error("Lỗi khi gửi:", err);
-      if (err.response?.data?.message) {
-         setError(err.response.data.message);
-      } else {
-         setError("Có lỗi xảy ra trong quá trình đăng ký. Vui lòng thử lại.");
-      }
-      if (err.response?.status >= 400 && err.response?.status < 500) {
+      if (err.response?.status === 400) {
+        setError("Bạn không đủ điều kiện hiến máu.");
         setShowBackHome(true);
+      } else {
+        setError("Có lỗi xảy ra. Vui lòng thử lại.");
       }
     } finally {
       setIsSubmitting(false);
     }
   };
-  
-  const allQuestionsAnswered = answers.every(ans => ans.answerValue !== undefined);
+  // --- KẾT THÚC PHẦN LOGIC ---
 
+  // --- PHẦN GIAO DIỆN (JSX) ĐƯỢC THIẾT KẾ LẠI ---
   return (
-    <div className="bg-red-50 min-h-screen py-12">
-      <div className="container mx-auto px-4">
-        <div className="text-center mb-10">
-            <h2 className="text-4xl font-extrabold text-gray-800">Bảng câu hỏi Sức khỏe</h2>
-            <p className="text-lg text-gray-600 mt-2">Vui lòng trả lời trung thực để đảm bảo an toàn cho chính bạn và người nhận máu.</p>
-        </div>
-        
-        <div className="max-w-3xl mx-auto">
-          {error && (
-            <AlertMessage
-              message={error}
-              type="error"
-              onActionClick={showBackHome ? () => navigate("/") : null}
-              actionText={showBackHome ? "Về trang chủ" : undefined}
-            />
-          )}
-
-          <div className="space-y-4">
-            {questions.length > 0 ? (
-              questions.map((q) => (
-                <QuestionCard
-                  key={q.id}
-                  question={q}
-                  answer={answers.find(a => a.questionId === q.id)}
-                  onAnswerChange={handleAnswerChange}
-                />
-              ))
-            ) : (
-              <p className="text-center text-gray-500">Đang tải câu hỏi...</p>
-            )}
+    <div className="bg-gray-50 min-h-screen py-12 px-4 sm:px-6 lg:px-8">
+      <div className="container mx-auto max-w-3xl">
+        <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12">
+          {/* Header */}
+          <div className="text-center mb-10">
+            <div className="flex justify-center">
+              <ClipboardIcon />
+            </div>
+            <h1 className="text-3xl md:text-4xl font-bold text-gray-800 mb-2">
+              Bảng câu hỏi sàng lọc sức khỏe
+            </h1>
+            <p className="text-gray-600 text-lg">
+              Vui lòng trả lời trung thực để đảm bảo an toàn cho sức khỏe của bạn.
+            </p>
           </div>
-          
-          {questions.length > 0 && (
-            <div className="text-center mt-8">
-              <button
-                onClick={handleSubmit}
-                disabled={isSubmitting || !allQuestionsAnswered}
-                className="w-full sm:w-auto flex items-center justify-center gap-3 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-12 rounded-lg transition duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed text-lg"
-              >
-                {isSubmitting ? "Đang xử lý..." : "Hoàn tất & Đăng ký"}
-                {!isSubmitting && <FaRegArrowAltCircleRight />}
-              </button>
-               {!allQuestionsAnswered && (
-                  <p className="text-sm text-gray-500 mt-2">Vui lòng trả lời hết các câu hỏi để tiếp tục.</p>
-              )}
+
+          {/* Alert/Error Display */}
+          {error && (
+            <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-md mb-8 flex items-start" role="alert">
+              <AlertIcon />
+              <div>
+                <p className="font-bold text-red-800">Thông báo quan trọng</p>
+                <p className="text-red-700">{error}</p>
+              </div>
             </div>
           )}
+
+          {showBackHome && (
+            <div className="text-center mb-8">
+              <button
+                onClick={() => navigate("/")}
+                className="bg-gray-600 hover:bg-gray-700 text-white px-8 py-3 rounded-full font-semibold transition-colors duration-300"
+              >
+                Trở về trang chủ
+              </button>
+            </div>
+          )}
+
+          {/* Questions List */}
+          <div className="space-y-8">
+            {questions.map((q, index) => (
+              <div key={q.id} className="border-b border-gray-200 pb-8 last:border-b-0 last:pb-0">
+                <p className="text-lg font-semibold text-gray-800 mb-4">
+                  <span className="text-red-600 font-bold mr-2">{index + 1}.</span>
+                  {q.questionText}
+                </p>
+                
+                {/* Custom Radio Buttons */}
+                <div className="flex flex-col sm:flex-row gap-4">
+                  {[
+                    { label: "Có", value: true },
+                    { label: "Không", value: false },
+                  ].map((option) => (
+                    <label
+                      key={option.label}
+                      className={`flex-1 flex items-center gap-3 p-4 border-2 rounded-lg cursor-pointer transition-all duration-200 ${
+                        answers.find(ans => ans.questionId === q.id)?.answerValue === option.value
+                          ? 'border-red-500 bg-red-50 shadow-md'
+                          : 'border-gray-300 bg-white hover:border-red-400'
+                      }`}
+                    >
+                      <input
+                        type="radio"
+                        name={`question-${q.id}`}
+                        checked={answers.find(ans => ans.questionId === q.id)?.answerValue === option.value}
+                        onChange={() => handleAnswerChange(q.id, option.value)}
+                        className="sr-only peer" // Hide the default radio but keep it for accessibility
+                      />
+                      <span className={`w-5 h-5 rounded-full flex items-center justify-center border-2 transition-colors duration-200 ${
+                        answers.find(ans => ans.questionId === q.id)?.answerValue === option.value
+                          ? 'border-red-600 bg-red-600'
+                          : 'border-gray-400'
+                      }`}>
+                         <span className="w-2 h-2 rounded-full bg-white"></span>
+                      </span>
+                      <span className={`font-semibold ${
+                        answers.find(ans => ans.questionId === q.id)?.answerValue === option.value
+                          ? 'text-red-800'
+                          : 'text-gray-700'
+                      }`}>{option.label}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Submit Button */}
+          <div className="mt-10 pt-6 border-t border-gray-200 text-center">
+            <button
+              onClick={handleSubmit}
+              disabled={isSubmitting || questions.length === 0}
+              className="w-full sm:w-auto inline-flex items-center justify-center bg-red-600 hover:bg-red-700 text-white px-10 py-3 rounded-full font-bold text-lg transition-all duration-300 shadow-lg hover:shadow-xl focus:outline-none focus:ring-4 focus:ring-red-300 disabled:bg-gray-400 disabled:cursor-not-allowed disabled:shadow-none"
+            >
+              {isSubmitting ? (
+                <>
+                  <LoadingSpinner />
+                  <span>Đang xử lý...</span>
+                </>
+              ) : (
+                <>
+                  <span>Xác nhận & Tiếp tục</span>
+                  <ArrowRightIcon />
+                </>
+              )}
+            </button>
+          </div>
         </div>
       </div>
     </div>
