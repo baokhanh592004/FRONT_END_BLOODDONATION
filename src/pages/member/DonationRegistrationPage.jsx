@@ -20,30 +20,24 @@ const formatDateToYYYYMMDD = (date) => {
 
 // --- CẬP NHẬT: StyledCalendar với tông màu đỏ chủ đạo ---
 const StyledCalendar = ({ onChange, value }) => {
-  const isWeekend = (date) => date.getDay() === 0 || date.getDay() === 6;
-
   return (
     <Calendar
       onChange={onChange}
       value={value}
       minDate={new Date()}
-      tileDisabled={({ date, view }) => view === 'month' && isWeekend(date)}
       className="border-0"
       tileClassName={({ date, view }) => {
         const base = 'h-12 w-12 flex items-center justify-center rounded-full transition-colors duration-200';
         if (view === 'month') {
-          if (isWeekend(date)) {
-            return `${base} text-gray-400 bg-gray-50 line-through cursor-not-allowed`;
-          }
-          // Đã chọn: đổi từ xanh sang đỏ
+          // Đã chọn
           if (value && date.toDateString() === value.toDateString()) {
             return `${base} bg-red-600 text-white font-bold`;
           }
-          // Hôm nay: đổi từ xanh sang đỏ nhạt
+          // Hôm nay
           if (date.toDateString() === new Date().toDateString()) {
             return `${base} bg-red-100 text-red-700 font-bold`;
           }
-          // Hover: đổi từ đỏ nhạt sang hồng nhạt
+          // Hover
           return `${base} hover:bg-red-50`;
         }
         return base;
@@ -60,6 +54,7 @@ const StyledCalendar = ({ onChange, value }) => {
     />
   );
 };
+
 
 // --- CẬP NHẬT: InfoRow với icon ---
 const InfoRow = ({ icon, label, value }) => (
