@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 import { useNavigate } from "react-router-dom";
 import heartImage from '../assets/a.jpg';
 
@@ -39,7 +39,7 @@ export default function RegisterPage() {
     }
 
     try {
-      const res = await axios.post("http://localhost:8080/api/auth/register", formData);
+      const res = await axiosClient.post("/auth/register", formData);
       setSuccess(res.data);
       setFormData({
         username: "",
