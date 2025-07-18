@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import axiosClient from '../api/axiosClient';
+import axiosClient from "../../api/axiosClient";
 
 export default function SendDonorNotification() {
   const [title, setTitle] = useState('');
