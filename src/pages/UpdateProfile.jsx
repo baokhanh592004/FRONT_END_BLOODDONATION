@@ -22,7 +22,7 @@ const UpdateProfile = () => {
     }
 
     axiosClient
-      .get("/api/user/profile")
+      .get("user/profile")
       .then((res) => {
         const data = res.data;
         setFormData({
@@ -59,7 +59,7 @@ const UpdateProfile = () => {
     }
 
     try {
-      await axiosClient.patch("/api/user/profile", formData);
+      await axiosClient.patch("user/profile", formData);
       setMessage("✅ Cập nhật thành công!");
       setTimeout(() => navigate("/profile", { state: { updated: true } }), 800);
     } catch (err) {
