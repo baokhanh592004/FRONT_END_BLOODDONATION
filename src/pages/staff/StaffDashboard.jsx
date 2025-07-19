@@ -30,8 +30,8 @@ export default function StaffDashboard() {
       <div style={styles.statGrid}>
         <StatCard title="Tổng đơn vị máu" value={stats?.totalDonatedUnits || 0} color="#3f51b5" />
         <StatCard title="Yêu cầu khẩn cấp" value={stats?.urgentRequestsCount || 0} color="#f44336" />
-        <StatCard title="Người hiến máu hôm nay" value={stats?.donorsTodayCount || 0} color="#4caf50" />
-        <StatCard title="Đơn vị máu sẵn có" value={stats?.availableBloodUnits || 0} color="#9c27b0" />
+        <StatCard title="Yêu cầu bình thường" value={stats?.normalRequestsCount || 0} color="#4caf50" />
+        <StatCard title="Người hiến máu hôm nay" value={stats?.donorsTodayCount || 0} color="#9c27b0" />
       </div>
 
       {/* Bạn có thể thêm phần biểu đồ & danh sách bên dưới đây */}
