@@ -30,7 +30,7 @@ const AuthenticatedImage = ({ src, alt, style, ...props }) => {
         // SỬA LỖI TẠI ĐÂY
         // Chúng ta thêm tường minh "/uploads/" vào giữa tên miền và tên file (src)
         // để tạo ra đường dẫn chính xác.
-        const fullImageUrl = `${serverUrl.origin}/uploads/${src}`;
+        const fullImageUrl = `${serverUrl.origin}/${src}`;
         // =================================================================
 
         const response = await axiosClient.get(fullImageUrl, {
