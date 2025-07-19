@@ -1,7 +1,8 @@
+// src/pages/NewBlogPost.jsx
 import React, { useState, useEffect } from 'react';
 import axiosClient from '../api/axiosClient';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import AuthenticatedImage from '../components/AuthenticatedImage';
+import PublicImage from '../components/PublicImage'; // THAY ĐỔI: Import PublicImage
 
 export default function NewBlogPost() {
   const { postId } = useParams();
@@ -58,7 +59,8 @@ const PostDetail = ({ post, onBack }) => {
       <p style={styles.meta}>
         bởi <strong>{post.authorName}</strong> • {new Date(post.createdAt).toLocaleString('vi-VN')}
       </p>
-      {post.image && <AuthenticatedImage src={post.image} alt={post.title} style={styles.detailImage} />}
+      {/* THAY ĐỔI: Sử dụng PublicImage */}
+      {post.image && <PublicImage src={post.image} alt={post.title} style={styles.detailImage} />}
       <div style={styles.content} dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }} />
     </div>
   );
@@ -72,7 +74,8 @@ const PostList = ({ posts }) => (
         {posts.map(post => (
           <Link to={`/blog/${post.postId}`} key={post.postId} style={styles.link}>
             <div style={styles.postCard}>
-              <AuthenticatedImage src={post.image} alt={post.title} style={styles.postImage} />
+              {/* THAY ĐỔI: Sử dụng PublicImage */}
+              <PublicImage src={post.image} alt={post.title} style={styles.postImage} />
               <div style={styles.postCardContent}>
                 <h3 style={styles.postTitle}>{post.title}</h3>
                 <p style={styles.postMeta}>{new Date(post.createdAt).toLocaleDateString('vi-VN')}</p>
