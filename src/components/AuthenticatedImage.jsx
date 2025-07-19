@@ -10,28 +10,22 @@ const AuthenticatedImage = ({ src, alt, style, ...props }) => {
     let isMounted = true;
 
     const loadImage = async () => {
-      // Nếu không có src (post không có ảnh), thì không làm gì cả
       if (!src) {
-        setError(true); // Đặt là lỗi để hiển thị ảnh placeholder
+        setError(true);
         return;
       }
 
       try {
+        // THÊM LẠI DÒNG KHAI BÁO BỊ THIẾU TẠI ĐÂY
         const apiUrl = import.meta.env.VITE_API_URL;
         if (!apiUrl) {
-            console.error("Lỗi: Biến VITE_API_URL chưa được thiết lập!");
-            setError(true);
-            return;
+          console.error("Lỗi: Biến VITE_API_URL chưa được thiết lập!");
+          setError(true);
+          return;
         }
 
-        const serverUrl = new URL(apiUrl);
-
-        // =================================================================
-        // SỬA LỖI TẠI ĐÂY
-        // Chúng ta thêm tường minh "/uploads/" vào giữa tên miền và tên file (src)
-        // để tạo ra đường dẫn chính xác.
-        const fullImageUrl = `${serverUrl.origin}/${src}`;
-        // =================================================================
+        const cleanedSrc = src.startsWith('/') ? src.substring(1) : src;
+        const fullImageUrl = `${apiUrl}/${cleanedSrc}`;
 
         const response = await axiosClient.get(fullImageUrl, {
           responseType: 'blob',
@@ -46,7 +40,9 @@ const AuthenticatedImage = ({ src, alt, style, ...props }) => {
         if (isMounted) {
           setError(true);
         }
-        console.error("Không thể tải ảnh đã xác thực:", err, `(src: ${src})`);
+        // In ra console để gỡ lỗi tốt hơn
+        const apiUrlForError = import.meta.env.VITE_API_URL || "NOT_SET";
+        console.error("Không thể tải ảnh:", err, `(URL attempted: ${apiUrlForError}/${src})`);
       }
     };
 
@@ -60,17 +56,13 @@ const AuthenticatedImage = ({ src, alt, style, ...props }) => {
     };
   }, [src]);
 
-  // Nếu có lỗi hoặc đang tải, hiển thị placeholder
   if (error || !imageUrl) {
-    // Nếu src không tồn tại, có thể hiển thị một placeholder khác hoặc không hiển thị gì
     if (!src) {
-      return <div style={{ ...style, backgroundColor: '#e0e0e0', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#999', fontSize: '12px' }}>No Image</div>;
+      return <div style={{ ...style, backgroundColor: '#e0e0e0' }}></div>;
     }
-    // Nếu có lỗi khi tải
-    return <img src="https://placehold.co/300x180/ffcdd2/d32f2f?text=Error" alt="Lỗi tải ảnh" style={style} {...props} />;
+    return <img src="https://placehold.co/300x200/ffebee/d32f2f?text=Error" alt="Lỗi tải ảnh" style={style} {...props} />;
   }
   
-  // Khi đã có ảnh thì hiển thị
   return <img src={imageUrl} alt={alt} style={style} {...props} />;
 };
 
