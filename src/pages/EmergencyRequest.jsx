@@ -1,6 +1,8 @@
+// src/pages/EmergencyRequest.jsx (hoặc đường dẫn tương ứng của bạn)
+
 import React, { useState, useEffect } from "react";
-import axiosClient from "../api/axiosClient"; // ✅ Đổi từ axios sang axiosClient
-import AuthenticatedImage from "../components/AuthenticatedImage";
+import axiosClient from "../api/axiosClient";
+import PublicImage from "../components/PublicImage"; // THAY ĐỔI: Import PublicImage thay vì AuthenticatedImage
 
 export default function EmergencyRequest() {
   const [requests, setRequests] = useState([]);
@@ -20,11 +22,7 @@ export default function EmergencyRequest() {
       }
 
       try {
-        // Không cần dùng `${API_URL}` nữa, vì axiosClient đã có base URL
-        const response = await axiosClient.get(`/blog/all`, {
-          //
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const response = await axiosClient.get(`/blog/all`);
 
         const emergencyPosts = response.data.filter(
           (post) => post.type === "EMERGENCY_REQUEST"
@@ -60,7 +58,8 @@ export default function EmergencyRequest() {
         {requests.map((req) => (
           <div key={req.postId} style={styles.card}>
             {req.image && (
-              <AuthenticatedImage
+              // THAY ĐỔI: Sử dụng component PublicImage
+              <PublicImage
                 src={req.image}
                 alt={req.title}
                 style={styles.cardImage}
