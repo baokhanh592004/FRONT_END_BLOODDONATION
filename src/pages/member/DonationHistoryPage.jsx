@@ -5,8 +5,6 @@ import axiosClient from "../../api/axiosClient";
 
 const DonationHistoryPage = () => {
   const [donationHistory, setDonationHistory] = useState([]);
-  // THÊM STATE MỚI ĐỂ LƯU DANH SÁCH THÀNH PHẦN MÁU
-  const [componentTypes, setComponentTypes] = useState([]);
   const [dateRange, setDateRange] = useState({ start: "", end: "" });
   const [componentTypeFilter, setComponentTypeFilter] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
@@ -26,19 +24,6 @@ const DonationHistoryPage = () => {
       .catch((err) => {
         console.error("Error fetching donation history:", err);
       });
-    
-    // =================================================================
-    // THAY ĐỔI 1: GỌI API ĐỂ LẤY DANH SÁCH THÀNH PHẦN MÁU
-    // =================================================================
-    axiosClient
-      .get("/api/component-types") // Endpoint này công khai
-      .then((res) => {
-        setComponentTypes(res.data); // Lưu dữ liệu vào state mới
-      })
-      .catch((err) => {
-        console.error("Error fetching component types:", err);
-      });
-
   }, []);
 
   const filteredData = donationHistory
@@ -57,8 +42,8 @@ const DonationHistoryPage = () => {
     });
 
   const getComponentTypeLabel = (type) => {
-    // Logic này giữ nguyên, không thay đổi
     switch (type) {
+      // Logic này không còn cần thiết nếu API trả về tên đầy đủ, nhưng giữ lại để không ảnh hưởng code cũ
       case "WHOLE":
         return "Máu toàn phần";
       case "PLASMA":
@@ -73,7 +58,6 @@ const DonationHistoryPage = () => {
   };
 
   const getStatusColor = (status) => {
-    // Logic này giữ nguyên, không thay đổi
     switch (status) {
       case "Hoàn thành":
         return "bg-green-100 text-green-800";
@@ -85,7 +69,6 @@ const DonationHistoryPage = () => {
   };
 
   const formatStatus = (donation) => {
-    // Logic này giữ nguyên, không thay đổi
     return donation.donationDate ? "Hoàn thành" : "Đã hủy";
   };
 
@@ -113,7 +96,7 @@ const DonationHistoryPage = () => {
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">Thành phần máu</label>
               {/* ================================================================= */}
-              {/* THAY ĐỔI 2: CẬP NHẬT DROPDOWN ĐỂ DÙNG DỮ LIỆU TỪ API         */}
+              {/* THAY ĐỔI: SỬA LẠI DROPDOWN VỚI DỮ LIỆU CỨNG                  */}
               {/* ================================================================= */}
               <select
                 className="w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
@@ -121,12 +104,10 @@ const DonationHistoryPage = () => {
                 onChange={(e) => setComponentTypeFilter(e.target.value)}
               >
                 <option value="">Tất cả</option>
-                {/* Dùng map để render các option từ state componentTypes */}
-                {componentTypes.map((type) => (
-                  <option key={type.id} value={type.name}>
-                    {type.name}
-                  </option>
-                ))}
+                <option value="Plasma">Plasma</option>
+                <option value="Platelets">Platelets</option>
+                <option value="Red Blood Cells">Red Blood Cells</option>
+                <option value="Whole Blood">Whole Blood</option>
               </select>
             </div>
 
@@ -181,6 +162,7 @@ const DonationHistoryPage = () => {
                   <tr key={donation.donationId} className={index % 2 === 1 ? "bg-gray-100" : ""}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{format(new Date(donation.donationDate), "dd/MM/yyyy")}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{donation.bloodType}</td>
+                    {/* Giữ nguyên logic hiển thị cũ để không ảnh hưởng */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{getComponentTypeLabel(donation.componentType)}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{donation.units}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{donation.centerName}</td>
