@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
+import axiosClient from "../../api/axiosClient";
 
 const BloodInventoryPage = () => {
   const [inventory, setInventory] = useState([]);
@@ -7,12 +8,11 @@ const BloodInventoryPage = () => {
   const [componentTypeMap, setComponentTypeMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [editMode, setEditMode] = useState(false); // Trạng thái xem / cập nhật
+  const [editMode, setEditMode] = useState(false);
 
   useEffect(() => {
     const fetchAllData = async () => {
       const token = localStorage.getItem('token');
-
       if (!token) {
         setError('Bạn cần đăng nhập để xem thông tin kho máu.');
         setLoading(false);
@@ -20,42 +20,31 @@ const BloodInventoryPage = () => {
       }
 
       try {
-        const headers = {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json',
-        };
+        axiosClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
         const [bloodTypesRes, componentTypesRes, inventoryRes] = await Promise.all([
-          fetch('http://localhost:8080/api/blood-types', { headers }),
-          fetch('http://localhost:8080/api/component-types', { headers }),
-          fetch('http://localhost:8080/api/staff/blood-inventory', { headers }),
+          axiosClient.get('/blood-types'),
+          axiosClient.get('/component-types'),
+          axiosClient.get('/staff/blood-inventory'),
         ]);
 
-        if (!bloodTypesRes.ok || !componentTypesRes.ok || !inventoryRes.ok) {
-          throw new Error('Không thể tải toàn bộ dữ liệu cần thiết từ server.');
-        }
-
-        const bloodTypesData = await bloodTypesRes.json();
-        const componentTypesData = await componentTypesRes.json();
-        const inventoryData = await inventoryRes.json();
-
-        const bloodMap = bloodTypesData.reduce((map, item) => {
+        const bloodMap = bloodTypesRes.data.reduce((map, item) => {
           map[item.id] = item.type;
           return map;
         }, {});
 
-        const componentMap = componentTypesData.reduce((map, item) => {
+        const componentMap = componentTypesRes.data.reduce((map, item) => {
           map[item.id] = item.name.split(',')[0].trim();
           return map;
         }, {});
 
         setBloodTypeMap(bloodMap);
         setComponentTypeMap(componentMap);
-        setInventory(inventoryData);
+        setInventory(inventoryRes.data);
 
       } catch (err) {
-        setError(err.message);
-        console.error("Lỗi khi tải dữ liệu:", err);
+        console.error(err);
+        setError(err.response?.data?.message || 'Không thể tải dữ liệu từ server.');
       } finally {
         setLoading(false);
       }
@@ -72,30 +61,18 @@ const BloodInventoryPage = () => {
     }
 
     try {
-      const res = await fetch('http://localhost:8080/api/staff/blood-inventory/update', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          id: {
-            bloodTypeId,
-            componentTypeId,
-          },
-          unitsAvailable: Number(newUnits),
-        }),
+      axiosClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+      const res = await axiosClient.post('/staff/blood-inventory/update', {
+        id: { bloodTypeId, componentTypeId },
+        unitsAvailable: Number(newUnits),
       });
 
-      if (!res.ok) throw new Error('Cập nhật thất bại');
-
-      const updatedItem = await res.json();
+      const updatedItem = res.data;
 
       setInventory((prev) => {
         const exists = prev.some(
-          (inv) =>
-            inv.id.bloodTypeId === bloodTypeId &&
-            inv.id.componentTypeId === componentTypeId
+          (inv) => inv.id.bloodTypeId === bloodTypeId && inv.id.componentTypeId === componentTypeId
         );
 
         if (exists) {
@@ -112,7 +89,7 @@ const BloodInventoryPage = () => {
       alert('Cập nhật thành công!');
     } catch (err) {
       console.error(err);
-      alert('Có lỗi khi cập nhật kho máu.');
+      alert(err.response?.data?.message || 'Có lỗi khi cập nhật kho máu.');
     }
   };
 
@@ -149,7 +126,6 @@ const BloodInventoryPage = () => {
         </button>
       </div>
 
-      {/* FORM THÊM MỚI */}
       {editMode && (
         <div className="mb-6 p-4 border rounded bg-gray-50">
           <h2 className="text-lg font-semibold mb-4">Thêm mới vào kho máu</h2>
@@ -197,7 +173,6 @@ const BloodInventoryPage = () => {
         </div>
       )}
 
-      {/* BẢNG DỮ LIỆU */}
       <div className="overflow-x-auto">
         <table className="min-w-full text-sm">
           <thead className="bg-gray-100">

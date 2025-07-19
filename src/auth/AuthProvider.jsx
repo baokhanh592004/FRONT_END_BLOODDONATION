@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { AuthContext } from './AuthContext';
-import axios from 'axios';
+import axiosClient from '../api/axiosClient';
 
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(JSON.parse(localStorage.getItem('user')));
@@ -11,19 +11,19 @@ export function AuthProvider({ children }) {
     setUser(newUser);
     localStorage.setItem('token', newToken);
     localStorage.setItem('user', JSON.stringify(newUser));
-    axios.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
+    axiosClient.defaults.headers.common['Authorization'] = `Bearer ${newToken}`;
   };
 
   const logout = () => {
     setToken(null);
     setUser(null);
     localStorage.clear();
-    delete axios.defaults.headers.common['Authorization'];
+    delete axiosClient.defaults.headers.common['Authorization'];
   };
 
   useEffect(() => {
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+      axiosClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
     }
   }, [token]);
 

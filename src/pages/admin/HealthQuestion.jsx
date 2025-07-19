@@ -1,6 +1,5 @@
-// Updated HealthQuestion Component with Modern UI and Pagination
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosClient from '../../api/axiosClient';
 
 const PAGE_SIZE = 10;
 
@@ -23,8 +22,8 @@ const HealthQuestion = () => {
     const token = localStorage.getItem('token');
     if (!token) return setError('Token không hợp lệ.');
 
-    axios
-      .get('/api/health/questions', {
+    axiosClient
+      .get('health/questions', {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setQuestions(res.data))
@@ -42,16 +41,16 @@ const HealthQuestion = () => {
     const config = { headers: { Authorization: `Bearer ${token}` } };
 
     if (isEditing) {
-      axios
-        .put('/api/health/questions', { ...data, id: editId }, config)
+      axiosClient
+        .put('health/questions', { ...data, id: editId }, config)
         .then((res) => {
           setQuestions((prev) => prev.map((q) => (q.id === editId ? res.data : q)));
           resetForm();
         })
         .catch(() => setError('Lỗi cập nhật.'));
     } else {
-      axios
-        .post('/api/health/questions', data, config)
+      axiosClient
+        .post('health/questions', data, config)
         .then((res) => {
           setQuestions((prev) => [...prev, res.data]);
           resetForm();
@@ -73,8 +72,8 @@ const HealthQuestion = () => {
   const handleDelete = (id) => {
     if (!window.confirm('Bạn có chắc muốn xóa?')) return;
     const token = localStorage.getItem('token');
-    axios
-      .delete(`/api/health/questions/${id}`, {
+    axiosClient
+      .delete(`health/questions/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then(() => {
@@ -178,7 +177,6 @@ const HealthQuestion = () => {
         ))}
       </ul>
 
-      {/* Pagination */}
       <div className="flex justify-center mt-6 gap-2">
         <button
           onClick={() => setCurrentPage((p) => Math.max(p - 1, 1))}

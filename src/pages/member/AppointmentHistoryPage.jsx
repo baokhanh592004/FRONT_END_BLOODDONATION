@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import axios from 'axios';
-import { Tooltip } from 'recharts';
+import axiosClient from '../../api/axiosClient';
 
 const AppointmentHistoryPage = () => {
   const [appointments, setAppointments] = useState([]);
@@ -9,8 +8,6 @@ const AppointmentHistoryPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
-
-  // Hàm fetch dữ liệu và gán ngày đăng ký tạm
   const fetchAppointments = async () => {
     const token = localStorage.getItem('token');
     if (!token) {
@@ -19,37 +16,33 @@ const AppointmentHistoryPage = () => {
     }
 
     try {
-      const res = await axios.get('http://localhost:8080/api/user/appointments', {
+      const res = await axiosClient.get('user/appointments', {
         headers: { Authorization: `Bearer ${token}` },
       });
 
       const sortedAppointments = res.data
-        .sort((a, b) => new Date(b.scheduledDate) - new Date(a.scheduledDate)) // Sắp xếp theo ngày hẹn
-
-        // Gán ngày đăng ký giả lập (mới nhất → hôm nay, cũ hơn → lùi về trước)
+        .sort((a, b) => new Date(b.scheduledDate) - new Date(a.scheduledDate))
         .map((item, index) => {
           const fakeCreatedDate = new Date();
-          fakeCreatedDate.setMinutes(fakeCreatedDate.getMinutes() - index); // mỗi lịch cách nhau 1 phút
+          fakeCreatedDate.setMinutes(fakeCreatedDate.getMinutes() - index);
           return { ...item, fakeCreatedDate };
         });
-      
-      setAppointments(sortedAppointments);
 
+      setAppointments(sortedAppointments);
     } catch (err) {
       console.error('Lỗi khi lấy lịch hẹn:', err);
       setError('Không thể tải danh sách lịch hẹn. Vui lòng thử lại sau.');
     }
   };
 
-  // Tự động làm mới mỗi 30s
   useEffect(() => {
     fetchAppointments();
 
     const interval = setInterval(() => {
       fetchAppointments();
-    }, 30000); // 30 giây
+    }, 30000);
 
-    return () => clearInterval(interval); // clear interval khi unmount
+    return () => clearInterval(interval);
   }, []);
 
   const formatDate = (dateStr) => {
@@ -63,29 +56,16 @@ const AppointmentHistoryPage = () => {
   const formatStatusBackground = (status) => {
     switch (status) {
       case 'APPROVED':
-        return {
-          className: "bg-yellow-100 text-yellow-800",
-          label: "ĐÃ DUYỆT",
-        };
+        return { className: "bg-yellow-100 text-yellow-800", label: "ĐÃ DUYỆT" };
       case 'REJECTED':
-        return {
-          className: "bg-red-100 text-red-800",
-          label: "BỊ TỪ CHỐI",
-        };
+        return { className: "bg-red-100 text-red-800", label: "BỊ TỪ CHỐI" };
       case 'COMPLETED':
-        return {
-          className: "bg-green-100 text-green-800",
-          label: "HOÀN THÀNH",
-        };
+        return { className: "bg-green-100 text-green-800", label: "HOÀN THÀNH" };
       default:
-        return {
-          className: "text-gray-800",
-          label: "ĐANG CHỜ DUYỆT",
-        };
+        return { className: "text-gray-800", label: "ĐANG CHỜ DUYỆT" };
     }
   };
 
-  // Lọc và phân trang
   const filteredAppointments = appointments.filter(app =>
     filterStatus === 'ALL' || app.status === filterStatus
   );
@@ -100,7 +80,6 @@ const AppointmentHistoryPage = () => {
       <div className="max-w-3xl mx-auto bg-white rounded-lg shadow-md p-6">
         <h2 className="text-2xl font-bold text-gray-800 mb-6 text-center">Danh sách lịch hẹn hiến máu</h2>
 
-        {/* Bộ lọc trạng thái */}
         <div className="mb-6">
           <label htmlFor="status-filter" className="block text-sm font-medium text-gray-700 mb-1">
             Lọc theo trạng thái
@@ -110,7 +89,7 @@ const AppointmentHistoryPage = () => {
             value={filterStatus}
             onChange={(e) => {
               setFilterStatus(e.target.value);
-              setCurrentPage(1); // Reset về trang 1 khi lọc
+              setCurrentPage(1);
             }}
             className="w-full p-2 border border-gray-300 rounded-md"
           >
@@ -147,7 +126,6 @@ const AppointmentHistoryPage = () => {
               })}
             </ul>
 
-            {/* Phân trang */}
             <div className="flex justify-center mt-6 gap-2">
               {Array.from({ length: totalPages }).map((_, i) => (
                 <button

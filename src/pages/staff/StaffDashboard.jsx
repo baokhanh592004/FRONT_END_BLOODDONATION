@@ -1,18 +1,13 @@
 import React, { useEffect, useState } from "react";
-import axios from "axios";
+import axiosClient from "../../api/axiosClient";
 
 export default function StaffDashboard() {
   const [stats, setStats] = useState(null);
 
   useEffect(() => {
     const fetchStats = async () => {
-      const token = localStorage.getItem("token");
       try {
-        const res = await axios.get("http://localhost:8080/api/staff/dashboard/statistics", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+        const res = await axiosClient.get("/staff/dashboard/statistics");
         setStats(res.data);
       } catch (error) {
         console.error("Lỗi khi gọi API:", error);
@@ -26,15 +21,12 @@ export default function StaffDashboard() {
     <div style={styles.container}>
       <h1 style={styles.header}>Bảng điều khiển</h1>
 
-      {/* === 4 Boxes === */}
       <div style={styles.statGrid}>
         <StatCard title="Tổng đơn vị máu" value={stats?.totalDonatedUnits || 0} color="#3f51b5" />
         <StatCard title="Yêu cầu khẩn cấp" value={stats?.urgentRequestsCount || 0} color="#f44336" />
         <StatCard title="Yêu cầu bình thường" value={stats?.normalRequestsCount || 0} color="#4caf50" />
         <StatCard title="Người hiến máu hôm nay" value={stats?.donorsTodayCount || 0} color="#9c27b0" />
       </div>
-
-      {/* Bạn có thể thêm phần biểu đồ & danh sách bên dưới đây */}
     </div>
   );
 }

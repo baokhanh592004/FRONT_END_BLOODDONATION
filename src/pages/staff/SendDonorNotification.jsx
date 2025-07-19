@@ -1,80 +1,50 @@
-// src/components/SendDonorNotification.js
-
 import React, { useState } from 'react';
-import axios from 'axios';
+import axiosClient from "../../api/axiosClient";
 
 export default function SendDonorNotification() {
-  // State để lưu trữ tiêu đề và nội dung thông báo từ form
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
-
-  // State để quản lý trạng thái của việc gửi request
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
   const handleSubmit = async (e) => {
-    e.preventDefault(); // Ngăn form submit và tải lại trang
+    e.preventDefault();
 
-    // Reset các thông báo cũ
     setError(null);
     setSuccess(null);
     setLoading(true);
 
-    // 1. Lấy token từ localStorage
     const token = localStorage.getItem('token');
-
-    // Kiểm tra xem token có tồn tại không
     if (!token) {
-      setError('Bạn chưa đăng nhập hoặc phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
+      setError('Bạn chưa đăng nhập hoặc phiên làm việc đã hết hạn.');
       setLoading(false);
       return;
     }
 
-    // 2. Chuẩn bị dữ liệu và headers cho request
-    // *** THAY ĐỔI Ở ĐÂY: Thêm trường 'type' vào payload ***
-    const notificationData = {
-      title: title,
-      message: message,
-      type: 'DONATION_REQUEST', // Gửi loại thông báo yêu cầu hiến máu
-    };
-
-    const config = {
-      headers: {
-        // Chuẩn 'Bearer' được sử dụng rộng rãi cho việc gửi JWT
-        'Authorization': `Bearer ${token}`,
-        'Content-Type': 'application/json',
-      },
-    };
-
-    // 3. Gửi request đến API bằng axios
     try {
-      // Gọi API POST đến endpoint broadcast
-      await axios.post(
-        'http://localhost:8080/api/staff/notifications/broadcast',
-        notificationData,
-        config
-      );
+      axiosClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-      // Nếu thành công
+      await axiosClient.post('/staff/notifications/broadcast', {
+        title,
+        message,
+        type: 'DONATION_REQUEST',
+      });
+
       setSuccess('Gửi thông báo thành công đến tất cả người dùng!');
-      // Xóa nội dung form sau khi gửi thành công
       setTitle('');
       setMessage('');
-
     } catch (err) {
-      // Nếu có lỗi, lấy thông báo lỗi từ response của server hoặc một thông báo chung
-      const errorMessage = err.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
-      
-      // Xử lý trường hợp token không hợp lệ (thường là lỗi 401 hoặc 403)
-      if (err.response?.status === 401 || err.response?.status === 403) {
-          setError('Token không hợp lệ hoặc bạn không có quyền thực hiện hành động này.');
-      } else {
-          setError(errorMessage);
-      }
+      console.error(err);
+      const errorMessage =
+        err.response?.data?.message || 'Có lỗi xảy ra. Vui lòng thử lại.';
 
+      if (err.response?.status === 401 || err.response?.status === 403) {
+        setError('Token không hợp lệ hoặc bạn không có quyền thực hiện hành động này.');
+      } else {
+        setError(errorMessage);
+      }
     } finally {
-      // Dù thành công hay thất bại, cũng dừng trạng thái loading
       setLoading(false);
     }
   };
@@ -82,9 +52,7 @@ export default function SendDonorNotification() {
   return (
     <div style={styles.container}>
       <h2 style={styles.title}>Gửi thông báo kêu gọi hiến máu</h2>
-      <p style={styles.subtitle}>
-        Gửi một thông báo khẩn đến tất cả người hiến máu trong hệ thống.
-      </p>
+      <p style={styles.subtitle}>Gửi một thông báo khẩn đến tất cả người hiến máu trong hệ thống.</p>
       <form onSubmit={handleSubmit} style={styles.form}>
         <div style={styles.formGroup}>
           <label htmlFor="title" style={styles.label}>Tiêu đề</label>
@@ -111,10 +79,7 @@ export default function SendDonorNotification() {
           />
         </div>
 
-        {/* Hiển thị thông báo lỗi nếu có */}
         {error && <p style={styles.errorText}>{error}</p>}
-
-        {/* Hiển thị thông báo thành công nếu có */}
         {success && <p style={styles.successText}>{success}</p>}
 
         <button type="submit" style={styles.submitBtn} disabled={loading}>
@@ -125,7 +90,6 @@ export default function SendDonorNotification() {
   );
 }
 
-// Styles để giao diện trông gọn gàng, bạn có thể tùy chỉnh
 const styles = {
   container: {
     maxWidth: 600,
@@ -136,29 +100,11 @@ const styles = {
     backgroundColor: '#fff',
     fontFamily: 'Arial, sans-serif',
   },
-  title: {
-    textAlign: 'center',
-    color: '#333',
-    marginBottom: '10px'
-  },
-  subtitle: {
-    textAlign: 'center',
-    color: '#666',
-    marginBottom: '30px'
-  },
-  form: {
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  formGroup: {
-    marginBottom: '20px',
-  },
-  label: {
-    display: 'block',
-    marginBottom: '5px',
-    fontWeight: 'bold',
-    color: '#444',
-  },
+  title: { textAlign: 'center', color: '#333', marginBottom: '10px' },
+  subtitle: { textAlign: 'center', color: '#666', marginBottom: '30px' },
+  form: { display: 'flex', flexDirection: 'column' },
+  formGroup: { marginBottom: '20px' },
+  label: { display: 'block', marginBottom: '5px', fontWeight: 'bold', color: '#444' },
   input: {
     width: '100%',
     padding: '10px',

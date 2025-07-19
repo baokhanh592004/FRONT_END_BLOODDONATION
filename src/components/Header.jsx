@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 import {
   FaFacebookF,
   FaTwitter,
@@ -17,9 +17,6 @@ export default function Header() {
   const [notifications, setNotifications] = useState([]);
   const [hasUnread, setHasUnread] = useState(false);
 
-  // --- SỬA ĐỔI 1: Khởi tạo state từ localStorage ---
-  // Đọc danh sách ID đã chấp nhận từ localStorage khi component tải lần đầu.
-  // `?? '[]'` để đảm bảo nếu không có gì trong localStorage, ta sẽ dùng một mảng rỗng.
   const [acceptedNotifications, setAcceptedNotifications] = useState(() => {
     try {
       const saved = localStorage.getItem("acceptedNotifications");
@@ -30,20 +27,9 @@ export default function Header() {
     }
   });
 
-  // Hàm fetch thông báo từ API
   const fetchNotifications = async () => {
-    const token = localStorage.getItem("token");
-    if (!token) return;
-
     try {
-      const response = await axios.get(
-        "http://localhost:8080/api/user/notification",
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      const response = await axiosClient.get("/user/notification");
 
       const sortedNotifications = response.data.sort(
         (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
@@ -61,37 +47,20 @@ export default function Header() {
   };
 
   const handleAcceptNotification = async (notificationId) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      alert("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.");
-      return;
-    }
-
     try {
-      const response = await axios.post(
-        `http://localhost:8080/api/user/notification/${notificationId}/accept`,
-        {},
-        {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
+      const response = await axiosClient.post(
+        `/user/notification/${notificationId}/accept`
       );
 
       alert(response.data);
 
-      // --- SỬA ĐỔI 2: Lưu state vào localStorage sau khi cập nhật ---
       setAcceptedNotifications((prev) => {
         const newAccepted = [...prev, notificationId];
-        // Lưu mảng ID mới vào localStorage
         localStorage.setItem("acceptedNotifications", JSON.stringify(newAccepted));
         return newAccepted;
       });
-
-      // không cần fetch lại để giữ UI ổn định
     } catch (error) {
-      const errorMessage =
-        error.response?.data || "Có lỗi xảy ra khi xác nhận.";
+      const errorMessage = error.response?.data || "Có lỗi xảy ra khi xác nhận.";
       alert(`Lỗi: ${errorMessage}`);
       console.error("Lỗi khi đồng ý hiến máu:", error);
     }
@@ -108,7 +77,6 @@ export default function Header() {
   const handleLogout = () => {
     localStorage.removeItem("user");
     localStorage.removeItem("token");
-    // --- BỔ SUNG: Xóa luôn trạng thái đã chấp nhận khi đăng xuất ---
     localStorage.removeItem("acceptedNotifications");
     setUser(null);
     window.location.href = "/login";
@@ -164,13 +132,9 @@ export default function Header() {
               menuOpen ? "block" : "hidden"
             } lg:flex lg:items-center lg:gap-6 font-medium mt-4 lg:mt-0 w-full lg:w-auto`}
           >
-            {/* Navigation Links */}
             <Link to="/" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Trang chủ</Link>
             <Link to="/about" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Giới thiệu</Link>
-            
-            {/* === PHẦN ĐƯỢC THÊM VÀO === */}
             <Link to="/forum" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Diễn đàn</Link>
-            {/* ========================== */}
 
             {["MEMBER", "ADMIN"].includes(user?.role) && (
               <Link to="/register-donation" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">
@@ -181,11 +145,10 @@ export default function Header() {
             <Link to="/emergencyRequest" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Yêu cầu máu khẩn cấp</Link>
             <Link to="/blog" className="block py-2 lg:py-0 text-gray-800 hover:text-red-600">Tin tức</Link>
 
-            {/* User Section */}
             <div className="flex items-center gap-4 mt-4 lg:mt-0">
               {user ? (
                 <>
-                  {/* === Bell notification === */}
+                  {/* Bell notification */}
                   <div className="relative group">
                     <button className="relative text-gray-600 hover:text-red-600 focus:outline-none py-2">
                       <FaBell size={24} />
@@ -204,30 +167,17 @@ export default function Header() {
                                 !notif.read ? "bg-red-50" : ""
                               }`}
                             >
-                              <p
-                                className={`text-sm font-bold ${
-                                  !notif.read
-                                    ? "text-red-700"
-                                    : "text-gray-800"
-                                }`}
-                              >
+                              <p className={`text-sm font-bold ${!notif.read ? "text-red-700" : "text-gray-800"}`}>
                                 {notif.title}
                               </p>
-                              <p className="text-xs text-gray-600 mt-1">
-                                {notif.message}
-                              </p>
+                              <p className="text-xs text-gray-600 mt-1">{notif.message}</p>
                               <p className="text-xs text-gray-400 text-right mt-1">
-                                {new Date(
-                                  notif.createdAt
-                                ).toLocaleString("vi-VN")}
+                                {new Date(notif.createdAt).toLocaleString("vi-VN")}
                               </p>
 
-                              {/* Logic nút bấm không thay đổi, nó sẽ hoạt động đúng với state đã được khôi phục */}
                               {notif.type === "DONATION_REQUEST" && (
                                 <div className="mt-2 text-right">
-                                  {acceptedNotifications.includes(
-                                    notif.notificationId
-                                  ) ? (
+                                  {acceptedNotifications.includes(notif.notificationId) ? (
                                     <button
                                       disabled
                                       className="bg-gray-400 text-white text-xs font-bold py-1 px-3 rounded cursor-not-allowed"
@@ -238,9 +188,7 @@ export default function Header() {
                                     <button
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleAcceptNotification(
-                                          notif.notificationId
-                                        );
+                                        handleAcceptNotification(notif.notificationId);
                                       }}
                                       className="bg-green-500 text-white text-xs font-bold py-1 px-3 rounded hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-400"
                                     >
@@ -258,17 +206,14 @@ export default function Header() {
                         )}
                       </div>
                       <div className="p-2 border-t text-center">
-                        <Link
-                          to="/notifications"
-                          className="text-sm text-red-600 hover:underline"
-                        >
+                        <Link to="/notifications" className="text-sm text-red-600 hover:underline">
                           Xem tất cả
                         </Link>
                       </div>
                     </div>
                   </div>
 
-                  {/* === Avatar dropdown === */}
+                  {/* Avatar dropdown */}
                   <div className="relative group">
                     <button className="flex items-center space-x-2 focus:outline-none py-2">
                       <img
@@ -282,47 +227,31 @@ export default function Header() {
                     </button>
                     <div className="absolute right-0 top-full w-48 bg-white rounded-md shadow-xl z-20 hidden group-hover:block ring-1 ring-black ring-opacity-5">
                       <div className="py-1">
-                        <Link
-                          to="/profile"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
-                        >
+                        <Link to="/profile" className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white">
                           Tài Khoản Của Tôi
                         </Link>
 
-                        {user.role === "MEMBER" &&
-                          <Link
-                            to="/member/dashboard"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
-                          >
+                        {user.role === "MEMBER" && (
+                          <Link to="/member/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white">
                             Quản Lý Chung
                           </Link>
-                        }
-
+                        )}
                         {user.role === "STAFF" && (
-                          <Link
-                            to="/staff/dashboard"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
-                          >
+                          <Link to="/staff/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white">
                             Quản Lý Chung
                           </Link>
                         )}
                         {user.role === "ADMIN" && (
-                          <Link
-                            to="/admin/dashboard"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
-                          >
+                          <Link to="/admin/dashboard" className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white">
                             Quản Lý Chung
                           </Link>
                         )}
-
                         {user.role === "TREATMENT_CENTER" && (
-                          <Link
-                            to="/center/createrequest"
-                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white"
-                          >
+                          <Link to="/center/createrequest" className="block px-4 py-2 text-sm text-gray-700 hover:bg-red-500 hover:text-white">
                             Yêu cầu máu
                           </Link>
                         )}
+
                         <div className="border-t border-gray-100 my-1"></div>
                         <button
                           onClick={handleLogout}
@@ -335,10 +264,7 @@ export default function Header() {
                   </div>
                 </>
               ) : (
-                <Link
-                  to="/login"
-                  className="block py-2 lg:py-0 text-red-600 font-bold hover:underline"
-                >
+                <Link to="/login" className="block py-2 lg:py-0 text-red-600 font-bold hover:underline">
                   Đăng nhập
                 </Link>
               )}
@@ -348,5 +274,4 @@ export default function Header() {
       </header>
     </>
   );
-
 }

@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import axios from "axios";
+import axiosClient from "../api/axiosClient";
 // Import thêm useNavigate và Link để xử lý sau khi đăng nhập
 import { Link  } from "react-router-dom";
 import heartImage from '../assets/a.jpg';
@@ -31,7 +31,7 @@ const handleSubmit = async e => {
   e.preventDefault();
   setError(null);
   try {
-    const res = await axios.post("http://localhost:8080/api/auth/login", {
+    const res = await axiosClient.post("/auth/login", {
       login: formData.login,
       password: formData.password,
     });

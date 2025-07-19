@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import axiosClient from "../../api/axiosClient";
 
 const NearbyDonorSearchPage = () => {
   const [radiusKm, setRadiusKm] = useState(5);
@@ -22,24 +23,21 @@ const NearbyDonorSearchPage = () => {
     setError(null);
 
     try {
-      const params = new URLSearchParams({
+      axiosClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+
+      const params = {
         latitude: fixedLatitude,
         longitude: fixedLongitude,
         radiusKm,
-      });
-      if (bloodType) params.append('bloodType', bloodType);
+      };
+      if (bloodType) params.bloodType = bloodType;
 
-      const response = await fetch(`http://localhost:8080/api/blood-search/nearby-donors?${params.toString()}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        },
-      });
+      const response = await axiosClient.get("/blood-search/nearby-donors", { params });
 
-      if (!response.ok) throw new Error('Không thể tìm kiếm người hiến máu.');
-      const data = await response.json();
-      setDonors(data);
+      setDonors(response.data);
     } catch (err) {
-      setError(err.message);
+      console.error(err);
+      setError(err.response?.data?.message || 'Không thể tìm kiếm người hiến máu.');
     } finally {
       setLoading(false);
     }
@@ -59,23 +57,16 @@ const NearbyDonorSearchPage = () => {
     }
 
     try {
-      const response = await fetch('http://localhost:8080/api/blood-search/send-email', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify({
-          userIds: eligibleDonors.map(donor => donor.userId)
-        })
-      });
+      axiosClient.defaults.headers.common['Authorization'] = `Bearer ${token}`;
 
-      if (!response.ok) throw new Error('Không thể gửi email.');
+      await axiosClient.post("/blood-search/send-email", {
+        userIds: eligibleDonors.map(donor => donor.userId),
+      });
 
       alert('✅ Đã gửi email thành công đến tất cả người hiến máu đủ điều kiện!');
     } catch (err) {
       console.error(err);
-      alert('❌ Gửi email thất bại.');
+      alert(err.response?.data?.message || '❌ Gửi email thất bại.');
     }
   };
 

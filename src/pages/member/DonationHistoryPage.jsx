@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { FaSearch } from "react-icons/fa";
 import { format } from "date-fns";
-import axios from "axios";
+import axiosClient from "../../api/axiosClient";
 
 const DonationHistoryPage = () => {
   const [donationHistory, setDonationHistory] = useState([]);
@@ -12,8 +12,8 @@ const DonationHistoryPage = () => {
   useEffect(() => {
     const token = localStorage.getItem("token");
 
-    axios
-      .get("/api/user/donation-history", {
+    axiosClient
+      .get("user/donation-history", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
@@ -27,20 +27,19 @@ const DonationHistoryPage = () => {
   }, []);
 
   const filteredData = donationHistory
-  .slice() // tạo bản sao mảng gốc để tránh thay đổi state gốc
-  .sort((a, b) => new Date(b.donationDate) - new Date(a.donationDate)) // sắp xếp mới nhất trước
-  .filter((donation) => {
-    const matchesSearch = donation.centerName?.toLowerCase().includes(searchQuery.toLowerCase());
-    const matchesComponentType =
-      !componentTypeFilter || donation.componentType === componentTypeFilter;
-    const matchesStartDate =
-      !dateRange.start || new Date(donation.donationDate) >= new Date(dateRange.start);
-    const matchesEndDate =
-      !dateRange.end || new Date(donation.donationDate) <= new Date(dateRange.end);
+    .slice()
+    .sort((a, b) => new Date(b.donationDate) - new Date(a.donationDate))
+    .filter((donation) => {
+      const matchesSearch = donation.centerName?.toLowerCase().includes(searchQuery.toLowerCase());
+      const matchesComponentType =
+        !componentTypeFilter || donation.componentType === componentTypeFilter;
+      const matchesStartDate =
+        !dateRange.start || new Date(donation.donationDate) >= new Date(dateRange.start);
+      const matchesEndDate =
+        !dateRange.end || new Date(donation.donationDate) <= new Date(dateRange.end);
 
-    return matchesSearch && matchesComponentType && matchesStartDate && matchesEndDate;
-  });
-
+      return matchesSearch && matchesComponentType && matchesStartDate && matchesEndDate;
+    });
 
   const getComponentTypeLabel = (type) => {
     switch (type) {
@@ -68,29 +67,19 @@ const DonationHistoryPage = () => {
     }
   };
 
-  // Format status cho từng donation
   const formatStatus = (donation) => {
-    // Nếu có ngày hiến (donationDate != null) thì là hoàn thành
-    if (donation.donationDate) {
-      return "Hoàn thành";
-    } else {
-      return "Đã hủy";
-    }
+    return donation.donationDate ? "Hoàn thành" : "Đã hủy";
   };
-
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 px-4 sm:px-6 lg:px-8 font-inter">
       <div className="max-w-7xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-8">Lịch sử hiến máu</h1>
 
-        {/* Filters */}
         <div className="bg-white p-6 rounded-lg shadow-sm mb-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Tìm kiếm cơ sở y tế
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Tìm kiếm cơ sở y tế</label>
               <div className="relative">
                 <input
                   type="text"
@@ -104,9 +93,7 @@ const DonationHistoryPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Thành phần máu
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Thành phần máu</label>
               <select
                 className="w-full py-2 px-3 border border-gray-300 rounded-md focus:ring-red-500 focus:border-red-500"
                 value={componentTypeFilter}
@@ -121,9 +108,7 @@ const DonationHistoryPage = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Khoảng thời gian
-              </label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Khoảng thời gian</label>
               <div className="flex space-x-2">
                 <input
                   type="date"
@@ -155,50 +140,27 @@ const DonationHistoryPage = () => {
           </div>
         </div>
 
-        {/* Table */}
         <div className="bg-white shadow-sm rounded-lg overflow-hidden">
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Ngày hiến
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Nhóm máu
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Thành phần
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Số đơn vị
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Cơ sở y tế
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Trạng thái
-                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ngày hiến</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Nhóm máu</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Thành phần</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Số đơn vị</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cơ sở y tế</th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Trạng thái</th>
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {filteredData.map((donation, index) => (
                   <tr key={donation.donationId} className={index % 2 === 1 ? "bg-gray-100" : ""}>
-                    <td className= "px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {format(new Date(donation.donationDate), "dd/MM/yyyy")}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {donation.bloodType}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {getComponentTypeLabel(donation.componentType)}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {donation.units}
-                    </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {donation.centerName}
-                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{format(new Date(donation.donationDate), "dd/MM/yyyy")}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{donation.bloodType}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{getComponentTypeLabel(donation.componentType)}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{donation.units}</td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{donation.centerName}</td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${getStatusColor(formatStatus(donation))}`}>
                         {formatStatus(donation)}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { HiUser, HiOutlineUserCircle, HiPhone, HiMail, HiHome } from "react-icons/hi";
 import { useNavigate, useLocation } from "react-router-dom";
-import axios from "axios";
+import axiosClient from "../api/axiosClient"; // ✅ Đổi axios sang axiosClient
 
 const Profile = () => {
   const [formData, setFormData] = useState({
@@ -22,18 +22,16 @@ const Profile = () => {
       return;
     }
 
-    axios
-      .get("http://localhost:8080/api/user/profile", {
-        headers: { Authorization: `Bearer ${token}` }
-      })
+    axiosClient
+      .get("user/profile")
       .then((res) => {
         const data = res.data;
         setFormData({
-          fullName:   data.fullName   || "",
-          gender:     data.gender     || "",
-          email:      data.email      || "",
-          phoneNumber:data.phoneNumber|| "",
-          address:    data.address    || ""
+          fullName:    data.fullName    || "",
+          gender:      data.gender      || "",
+          email:       data.email       || "",
+          phoneNumber: data.phoneNumber || "",
+          address:     data.address     || ""
         });
         setMessage("");
       })

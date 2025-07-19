@@ -1,14 +1,10 @@
-// src/pages/member/DonationRegistrationPage.js
-
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Calendar from 'react-calendar';
-import axios from 'axios';
-// --- THÊM MỚI: Import icons từ thư viện react-icons ---
+import axiosClient from '../../api/axiosClient'; // ✅ Đổi từ axios sang axiosClient
 import { FaUser, FaVenusMars, FaEnvelope, FaPhone, FaMapMarkerAlt, FaRegCalendarAlt, FaChevronRight } from 'react-icons/fa';
 import { GiHeartPlus } from 'react-icons/gi';
 
-// Hàm trợ giúp formatDateToYYYYMMDD (giữ nguyên)
 const formatDateToYYYYMMDD = (date) => {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -16,9 +12,6 @@ const formatDateToYYYYMMDD = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-// --- COMPONENT CON (ĐÃ CẬP NHẬT) ---
-
-// --- CẬP NHẬT: StyledCalendar với tông màu đỏ chủ đạo ---
 const StyledCalendar = ({ onChange, value }) => {
   return (
     <Calendar
@@ -29,15 +22,12 @@ const StyledCalendar = ({ onChange, value }) => {
       tileClassName={({ date, view }) => {
         const base = 'h-12 w-12 flex items-center justify-center rounded-full transition-colors duration-200';
         if (view === 'month') {
-          // Đã chọn
           if (value && date.toDateString() === value.toDateString()) {
             return `${base} bg-red-600 text-white font-bold`;
           }
-          // Hôm nay
           if (date.toDateString() === new Date().toDateString()) {
             return `${base} bg-red-100 text-red-700 font-bold`;
           }
-          // Hover
           return `${base} hover:bg-red-50`;
         }
         return base;
@@ -55,8 +45,6 @@ const StyledCalendar = ({ onChange, value }) => {
   );
 };
 
-
-// --- CẬP NHẬT: InfoRow với icon ---
 const InfoRow = ({ icon, label, value }) => (
   <div className="flex items-center text-sm py-2 border-b border-gray-100">
     <div className="flex-shrink-0 w-8 text-center text-red-500">{icon}</div>
@@ -65,7 +53,6 @@ const InfoRow = ({ icon, label, value }) => (
   </div>
 );
 
-// --- CẬP NHẬT: UserInfoDisplay trực quan hơn ---
 const UserInfoDisplay = ({ user }) => {
   if (!user) {
     return (
@@ -83,15 +70,14 @@ const UserInfoDisplay = ({ user }) => {
         <InfoRow icon={<FaPhone size={16} />} label="Số điện thoại" value={user.phoneNumber} />
         <InfoRow icon={<FaMapMarkerAlt size={16} />} label="Địa chỉ" value={user.address} />
       </div>
-       <div className="mt-6 text-center text-xs text-gray-500 italic">
+      <div className="mt-6 text-center text-xs text-gray-500 italic">
         <p>Vui lòng kiểm tra kỹ thông tin. Bạn có thể cập nhật trong trang cá nhân.</p>
       </div>
     </div>
   );
 };
 
-// --- COMPONENT MỚI: SectionHeader để phân chia bố cục ---
-const SectionHeader = ({ step, title, icon }) => (
+const SectionHeader = ({ step, title }) => (
   <div className="flex items-center gap-4 mb-4">
     <div className="flex items-center justify-center h-12 w-12 rounded-full bg-red-500 text-white font-bold text-xl">
       {step}
@@ -102,7 +88,6 @@ const SectionHeader = ({ step, title, icon }) => (
   </div>
 );
 
-// --- COMPONENT CHÍNH (ĐÃ CẬP NHẬT TOÀN BỘ) ---
 export default function DonationRegistrationPage() {
   const [user, setUser] = useState(null);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -113,7 +98,6 @@ export default function DonationRegistrationPage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Logic fetch data giữ nguyên, không cần thay đổi
     const fetchInitialData = async () => {
       const token = localStorage.getItem('token');
       const storedUserJSON = localStorage.getItem('user');
@@ -125,12 +109,12 @@ export default function DonationRegistrationPage() {
 
       try {
         const storedUser = JSON.parse(storedUserJSON);
-        const userResponse = await axios.get(`http://localhost:8080/api/user/${storedUser.userId}/info`, {
+        const userResponse = await axiosClient.get(`user/${storedUser.userId}/info`, {
           headers: { Authorization: `Bearer ${token}` },
         });
         setUser({ ...storedUser, ...userResponse.data });
 
-        const centersResponse = await axios.get('http://localhost:8080/api/user/donation-center/names', {
+        const centersResponse = await axiosClient.get('user/donation-center/names', {
           headers: { Authorization: `Bearer ${token}` },
         });
         setDonationCenters(centersResponse.data);
@@ -166,7 +150,7 @@ export default function DonationRegistrationPage() {
       centerId: parseInt(selectedCenter, 10),
       scheduledDate: formatDateToYYYYMMDD(selectedDate),
     };
-    
+
     localStorage.setItem('registrationData', JSON.stringify(registrationData));
     navigate('/member/donation-questionnaire', { state: registrationData });
   };
@@ -174,26 +158,22 @@ export default function DonationRegistrationPage() {
   return (
     <div className="bg-red-50 min-h-screen">
       <div className="container mx-auto px-4 py-12">
-        {/* --- THÊM MỚI: Banner truyền cảm hứng --- */}
         <div className="text-center mb-10">
-            <GiHeartPlus className="text-red-500 mx-auto text-5xl mb-2" />
-            <h2 className="text-4xl font-extrabold text-gray-800">Đăng ký Lịch hẹn Hiến máu</h2>
-            <p className="text-lg text-gray-600 mt-2">"Mỗi giọt máu cho đi, một cuộc đời ở lại"</p>
+          <GiHeartPlus className="text-red-500 mx-auto text-5xl mb-2" />
+          <h2 className="text-4xl font-extrabold text-gray-800">Đăng ký Lịch hẹn Hiến máu</h2>
+          <p className="text-lg text-gray-600 mt-2">"Mỗi giọt máu cho đi, một cuộc đời ở lại"</p>
         </div>
-        
+
         {error && <p className="bg-red-100 text-red-700 p-3 rounded-md text-center mb-6 font-medium">{error}</p>}
 
         <div className="grid grid-cols-1 lg:grid-cols-5 gap-8">
-          
-          {/* --- CỘT TRÁI: THÔNG TIN CÁ NHÂN --- */}
           <div className="lg:col-span-2 flex flex-col">
             <SectionHeader step="1" title="Kiểm tra thông tin" />
             <UserInfoDisplay user={user} />
           </div>
 
-          {/* --- CỘT PHẢI: CHỌN LỊCH HẸN --- */}
           <div className="lg:col-span-3 bg-white p-6 rounded-lg shadow-md border border-gray-200 flex flex-col">
-             <SectionHeader step="2" title="Chọn lịch hẹn" />
+            <SectionHeader step="2" title="Chọn lịch hẹn" />
             <div className="mb-6">
               <label htmlFor="donation-center" className="flex items-center gap-2 block text-md font-semibold mb-2 text-gray-700">
                 <FaMapMarkerAlt className="text-red-500" />
@@ -203,7 +183,6 @@ export default function DonationRegistrationPage() {
                 id="donation-center"
                 value={selectedCenter}
                 onChange={(e) => setSelectedCenter(e.target.value)}
-                // --- CẬP NHẬT: focus ring màu đỏ ---
                 className="w-full p-3 border border-gray-300 rounded-lg bg-white focus:outline-none focus:ring-2 focus:ring-red-500"
               >
                 {donationCenters.length === 0 ? (
@@ -220,8 +199,8 @@ export default function DonationRegistrationPage() {
 
             <div className="flex-grow">
               <label className="flex items-center gap-2 block text-md font-semibold mb-4 text-gray-700">
-                  <FaRegCalendarAlt className="text-red-500" />
-                  Ngày bạn có thể đến
+                <FaRegCalendarAlt className="text-red-500" />
+                Ngày bạn có thể đến
               </label>
               <div className="flex justify-center">
                 <StyledCalendar onChange={handleDateChange} value={selectedDate} />
@@ -230,13 +209,12 @@ export default function DonationRegistrationPage() {
 
             {selectedDate && (
               <div className="text-center mt-6">
-                 <p className="text-gray-700 mb-3">
-                    Bạn đã chọn: <span className="font-bold text-red-600">{selectedDate.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
+                <p className="text-gray-700 mb-3">
+                  Bạn đã chọn: <span className="font-bold text-red-600">{selectedDate.toLocaleDateString('vi-VN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</span>
                 </p>
                 <button
                   onClick={handleProceedToQuestionnaire}
                   disabled={!user || !selectedCenter}
-                  // --- CẬP NHẬT: Nút bấm màu đỏ và có icon ---
                   className="w-full flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-12 rounded-lg transition duration-300 disabled:bg-gray-400 disabled:cursor-not-allowed text-lg"
                 >
                   Tiếp tục <FaChevronRight />
@@ -248,4 +226,4 @@ export default function DonationRegistrationPage() {
       </div>
     </div>
   );
-} 
+}

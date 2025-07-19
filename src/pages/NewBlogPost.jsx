@@ -1,84 +1,8 @@
-// src/components/NewBlogPost.js
-
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import axiosClient from '../api/axiosClient';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import AuthenticatedImage from '../components/AuthenticatedImage';
 
-// Cấu hình Axios Instance để tự động gửi Token cho mọi request
-const api = axios.create({
-  baseURL: 'http://localhost:8080/api',
-});
-
-api.interceptors.request.use(
-  (config) => {
-    const token = localStorage.getItem('token');
-    if (token) {
-      config.headers['Authorization'] = `Bearer ${token}`;
-    }
-    return config;
-  },
-  (error) => Promise.reject(error)
-);
-
-// Component con để hiển thị chi tiết một bài viết
-const PostDetail = ({ post, onBack }) => {
-  if (!post) return <div style={styles.centered}>Không tìm thấy bài viết.</div>;
-
-  return (
-    <div style={styles.detailContainer}>
-      <button onClick={onBack} style={styles.backButton}>
-        ← Quay lại danh sách tin tức
-      </button>
-      <h1 style={styles.detailTitle}>{post.title}</h1>
-      <p style={styles.meta}>
-        bởi <strong>{post.authorName}</strong> • Đăng lúc: {new Date(post.createdAt).toLocaleString('vi-VN')}
-      </p>
-      {post.image && (
-        <AuthenticatedImage
-          src={post.image}
-          alt={post.title}
-          style={styles.detailImage}
-        />
-      )}
-      <div style={styles.content} dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }} />
-    </div>
-  );
-};
-
-// Component con để hiển thị danh sách các bài viết
-const PostList = ({ posts }) => {
-  return (
-    <div style={styles.listContainer}>
-      <h1 style={styles.listTitle}>Tin Tức & Sự Kiện</h1>
-      {posts.length > 0 ? (
-        <div style={styles.postsGrid}>
-          {posts.map((post) => (
-            <Link to={`/blog/${post.postId}`} key={post.postId} style={styles.link}>
-              <div style={styles.postCard}>
-                <AuthenticatedImage
-                  src={post.image}
-                  alt={post.title}
-                  style={styles.postImage}
-                />
-                <div style={styles.postCardContent}>
-                  <h3 style={styles.postTitle}>{post.title}</h3>
-                  <p style={styles.postMeta}>
-                    {new Date(post.createdAt).toLocaleDateString('vi-VN')}
-                  </p>
-                </div>
-              </div>
-            </Link>
-          ))}
-        </div>
-      ) : (
-        <p style={styles.centered}>Chưa có bài viết nào để hiển thị.</p>
-      )}
-    </div>
-  );
-};
-
-// Component chính
 export default function NewBlogPost() {
   const { postId } = useParams();
   const navigate = useNavigate();
@@ -92,33 +16,22 @@ export default function NewBlogPost() {
     const fetchData = async () => {
       setLoading(true);
       setError(null);
-      const token = localStorage.getItem("token");
-      if (!token) {
-          setError("Vui lòng đăng nhập để xem nội dung.");
-          setLoading(false);
-          // Optional: redirect to login page after a short delay
-          // setTimeout(() => navigate('/login'), 2000);
-          return;
-      }
 
       try {
         if (postId) {
-          const response = await api.get(`/blog/${postId}`);
+          const response = await axiosClient.get(`/blog/${postId}`);
           setPost(response.data);
         } else {
-          const response = await api.get('/blog/all');
-
+          const response = await axiosClient.get('/blog/all');
           const allowedTypes = ['BLOG', 'NEWS', 'GUIDE'];
           const filteredPosts = response.data.filter(p => allowedTypes.includes(p.type));
-
           const sortedPosts = filteredPosts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
           setPosts(sortedPosts);
         }
       } catch (err) {
-        const errorMessage = err.response?.status === 401 
-          ? "Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại."
-          : "Không thể tải dữ liệu. Vui lòng thử lại sau.";
-        setError(errorMessage);
+        setError(err.response?.status === 401
+          ? 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.'
+          : 'Không thể tải dữ liệu. Vui lòng thử lại sau.');
         console.error('API Error:', err);
       } finally {
         setLoading(false);
@@ -128,27 +41,57 @@ export default function NewBlogPost() {
     fetchData();
   }, [postId, navigate]);
 
-  if (loading) {
-    return <div style={styles.centered}>Đang tải dữ liệu...</div>;
-  }
+  if (loading) return <div style={styles.centered}>Đang tải dữ liệu...</div>;
+  if (error) return <div style={{ ...styles.centered, color: '#d32f2f' }}>{error}</div>;
 
-  if (error) {
-    return <div style={{ ...styles.centered, color: '#d32f2f' }}>{error}</div>;
-  }
-
-  if (postId) {
-    return <PostDetail post={post} onBack={() => navigate('/blog')} />;
-  } else {
-    return <PostList posts={posts} />;
-  }
+  if (postId) return <PostDetail post={post} onBack={() => navigate('/blog')} />;
+  return <PostList posts={posts} />;
 }
 
-// Toàn bộ CSS cho trang
+const PostDetail = ({ post, onBack }) => {
+  if (!post) return <div style={styles.centered}>Không tìm thấy bài viết.</div>;
+
+  return (
+    <div style={styles.detailContainer}>
+      <button onClick={onBack} style={styles.backButton}>← Quay lại danh sách tin tức</button>
+      <h1 style={styles.detailTitle}>{post.title}</h1>
+      <p style={styles.meta}>
+        bởi <strong>{post.authorName}</strong> • {new Date(post.createdAt).toLocaleString('vi-VN')}
+      </p>
+      {post.image && <AuthenticatedImage src={post.image} alt={post.title} style={styles.detailImage} />}
+      <div style={styles.content} dangerouslySetInnerHTML={{ __html: post.content.replace(/\n/g, '<br />') }} />
+    </div>
+  );
+};
+
+const PostList = ({ posts }) => (
+  <div style={styles.listContainer}>
+    <h1 style={styles.listTitle}>Tin Tức & Sự Kiện</h1>
+    {posts.length > 0 ? (
+      <div style={styles.postsGrid}>
+        {posts.map(post => (
+          <Link to={`/blog/${post.postId}`} key={post.postId} style={styles.link}>
+            <div style={styles.postCard}>
+              <AuthenticatedImage src={post.image} alt={post.title} style={styles.postImage} />
+              <div style={styles.postCardContent}>
+                <h3 style={styles.postTitle}>{post.title}</h3>
+                <p style={styles.postMeta}>{new Date(post.createdAt).toLocaleDateString('vi-VN')}</p>
+              </div>
+            </div>
+          </Link>
+        ))}
+      </div>
+    ) : (
+      <p style={styles.centered}>Chưa có bài viết nào để hiển thị.</p>
+    )}
+  </div>
+);
+
 const colors = {
-    primary: '#d32f2f',
-    background: '#f7f7f7',
-    text: '#333',
-    border: '#e0e0e0',
+  primary: '#d32f2f',
+  background: '#f7f7f7',
+  text: '#333',
+  border: '#e0e0e0',
 };
 
 const styles = {
@@ -193,8 +136,7 @@ const styles = {
   postImage: {
     width: '100%',
     height: '200px',
-    // GIẢI PHÁP CHO VẤN ĐỀ KÍCH THƯỚC ẢNH (DANH SÁCH)
-    objectFit: 'cover', 
+    objectFit: 'cover',
     backgroundColor: '#f0f0f0',
   },
   postCardContent: {
@@ -261,7 +203,6 @@ const styles = {
     maxHeight: '450px',
     borderRadius: '8px',
     marginBottom: '30px',
-    // GIẢI PHÁP CHO VẤN ĐỀ KÍCH THƯỚC ẢNH (CHI TIẾT)
     objectFit: 'cover',
     backgroundColor: '#f0f0f0',
   },
@@ -269,6 +210,6 @@ const styles = {
     fontSize: '1.1rem',
     lineHeight: 1.7,
     color: '#444',
-    whiteSpace: 'pre-wrap', // Giữ nguyên các khoảng trắng và xuống dòng từ database
+    whiteSpace: 'pre-wrap',
   },
 };
