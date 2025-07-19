@@ -28,6 +28,11 @@ export default function UserManagement() {
     status: 'Active',
   });
 
+  // =================================================================
+  // THAY ĐỔI 2: Tạo mảng chứa các vai trò hợp lệ
+  // =================================================================
+  const validRoles = ['ADMIN', 'STAFF', 'MEMBER', 'TREATMENT_CENTER'];
+
   const loadUsers = async () => {
     try {
       const res = await fetchAllUsers();
@@ -55,7 +60,7 @@ export default function UserManagement() {
     setIsCreating(false);
     setFormData({
       username: user.username,
-      password: 'Password@123',
+      password: '', // Để trống khi chỉnh sửa
       fullName: user.fullName,
       email: user.email,
       phoneNumber: user.phoneNumber,
@@ -237,7 +242,18 @@ export default function UserManagement() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <input name="username" value={formData.username} onChange={handleInputChange} placeholder="Tên tài khoản" className="border p-2 rounded" />
-              <input name="password" value={formData.password} onChange={handleInputChange} placeholder="Mật khẩu" className="border p-2 rounded" />
+              
+              {/* === THAY ĐỔI 1: KHÓA Ô MẬT KHẨU KHI CHỈNH SỬA === */}
+              <input 
+                name="password" 
+                type="password"
+                value={formData.password} 
+                onChange={handleInputChange} 
+                placeholder={isCreating ? "Mật khẩu" : "Không được phép thay đổi"}
+                className="border p-2 rounded disabled:bg-gray-200 disabled:cursor-not-allowed" 
+                disabled={!isCreating}
+              />
+              
               <input name="fullName" value={formData.fullName} onChange={handleInputChange} placeholder="Họ và tên" className="border p-2 rounded" />
               <input name="email" value={formData.email} onChange={handleInputChange} placeholder="Email" className="border p-2 rounded" />
               <input name="phoneNumber" value={formData.phoneNumber} onChange={handleInputChange} placeholder="Số điện thoại" className="border p-2 rounded" />
@@ -247,13 +263,13 @@ export default function UserManagement() {
                 <option value="Nữ">Nữ</option>
               </select>
               <input name="address" value={formData.address} onChange={handleInputChange} placeholder="Địa chỉ" className="border p-2 rounded" />
+              
+              {/* === THAY ĐỔI 2 (tiếp): LỌC DANH SÁCH VAI TRÒ === */}
               <select name="role" value={formData.role} onChange={handleInputChange} className="border p-2 rounded">
                 <option value="">-- Chọn vai trò --</option>
-                <option value="ADMIN">ADMIN</option>
-                <option value="STAFF">STAFF</option>
-                <option value="MEMBER">MEMBER</option>
-                <option value="GUEST">GUEST</option>
-                <option value="TREATMENT_CENTER">TREATMENT_CENTER</option>
+                {validRoles.map(role => (
+                  <option key={role} value={role}>{role}</option>
+                ))}
               </select>
             </div>
 
