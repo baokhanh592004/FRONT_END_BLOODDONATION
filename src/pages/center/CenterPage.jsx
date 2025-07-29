@@ -142,10 +142,10 @@ const CenterPage = () => {
             className="border border-gray-300 px-4 py-2 rounded-lg shadow-sm"
           >
             <option value="">-- Chọn thành phần máu --</option>
-            <option value="1">WHOLE - Máu toàn phần</option>
-            <option value="2">PLASMA - Huyết tương</option>
-            <option value="3">PLATELET - Tiểu cầu</option>
-            <option value="4">RBC - Hồng cầu</option>
+            <option value="1">Plasma</option>
+            <option value="2">Platelets</option>
+            <option value="3">Red Blood Cells</option>
+            <option value="4">Whole Blood</option>
           </select>
           <input
             type="number"
