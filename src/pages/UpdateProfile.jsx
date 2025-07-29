@@ -1,6 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axiosClient from "../api/axiosClient"; // ✅ Sử dụng axiosClient
+import axiosClient from "../api/axiosClient";
+import {
+  HiUser,
+  HiOutlineUserCircle,
+  HiMail,
+  HiPhone,
+  HiHome,
+} from "react-icons/hi";
 
 const UpdateProfile = () => {
   const [formData, setFormData] = useState({
@@ -8,7 +15,7 @@ const UpdateProfile = () => {
     gender: "",
     email: "",
     phoneNumber: "",
-    address: ""
+    address: "",
   });
   const [message, setMessage] = useState("");
   const navigate = useNavigate();
@@ -26,11 +33,11 @@ const UpdateProfile = () => {
       .then((res) => {
         const data = res.data;
         setFormData({
-          fullName:    data.fullName    || "",
-          gender:      data.gender      || "",
-          email:       data.email       || "",
+          fullName: data.fullName || "",
+          gender: data.gender || "",
+          email: data.email || "",
           phoneNumber: data.phoneNumber || "",
-          address:     data.address     || ""
+          address: data.address || "",
         });
         setMessage("");
       })
@@ -47,10 +54,13 @@ const UpdateProfile = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmit = async () => {
+    const confirm = window.confirm("Bạn có chắc muốn lưu thay đổi?");
+    if (!confirm) return;
+
     const token = localStorage.getItem("token");
     if (!token) {
       setMessage("Token không tồn tại. Vui lòng đăng nhập lại.");
@@ -74,64 +84,111 @@ const UpdateProfile = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-      <div className="bg-white rounded-2xl shadow-lg w-full max-w-md p-6">
-        <h2 className="text-2xl font-semibold text-center mb-6">Cập nhật hồ sơ</h2>
+    <div className="bg-[#fff5f5] flex justify-center px-4 py-10 min-h-screen">
+      <div className="bg-white rounded-xl shadow-md w-full max-w-md p-6">
+        <h2 className="text-2xl font-semibold text-center text-red-600 mb-6">
+          Cập nhật Hồ Sơ Cá Nhân
+        </h2>
 
         <div className="space-y-4">
-          <input
+          <Field
+            label="Họ và tên"
             name="fullName"
             value={formData.fullName}
             onChange={handleChange}
-            className="w-full bg-gray-100 rounded-lg py-2 px-3"
-            placeholder="Họ và tên"
+            icon={<HiUser />}
           />
-          <select
+          <Field
+            label="Giới tính"
             name="gender"
             value={formData.gender}
             onChange={handleChange}
-            className="w-full bg-gray-100 rounded-lg py-2 px-3"
-          >
-            <option value="">-- Giới tính --</option>
-            <option value="Nam">Nam</option>
-            <option value="Nữ">Nữ</option>
-            <option value="Khác">Khác</option>
-          </select>
-          <input
+            icon={<HiOutlineUserCircle />}
+            type="select"
+          />
+          <Field
+            label="Email"
             name="email"
             value={formData.email}
             onChange={handleChange}
-            className="w-full bg-gray-100 rounded-lg py-2 px-3"
-            placeholder="Email"
+            icon={<HiMail />}
           />
-          <input
+          <Field
+            label="Số điện thoại"
             name="phoneNumber"
             value={formData.phoneNumber}
             onChange={handleChange}
-            className="w-full bg-gray-100 rounded-lg py-2 px-3"
-            placeholder="Số điện thoại"
+            icon={<HiPhone />}
           />
-          <textarea
+          <Field
+            label="Địa chỉ"
             name="address"
             value={formData.address}
             onChange={handleChange}
-            rows={2}
-            className="w-full bg-gray-100 rounded-lg py-2 px-3 resize-none"
-            placeholder="Địa chỉ"
+            icon={<HiHome />}
+            type="textarea"
           />
         </div>
 
         <button
           onClick={handleSubmit}
-          className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-2 rounded-lg mt-4"
+          className="w-full bg-red-500 hover:bg-red-600 text-white font-medium py-2 rounded-lg mt-6"
         >
           Lưu thay đổi
         </button>
 
-        {message && <p className="text-center text-sm mt-4 text-red-600">{message}</p>}
+        <button
+          onClick={() => navigate("/profile")}
+          className="w-full text-red-600 border border-red-500 hover:bg-red-100 font-medium py-2 rounded-lg mt-3"
+        >
+          Quay lại trang hồ sơ
+        </button>
+
+        {message && (
+          <p className="text-center text-sm mt-4 text-red-600">{message}</p>
+        )}
       </div>
     </div>
   );
 };
+
+const Field = ({ label, name, value, onChange, icon, type = "text" }) => (
+  <div className="flex flex-col">
+    <label className="text-sm font-medium text-gray-700 flex items-center mb-1">
+      <span className="text-red-500 mr-2">{icon}</span>
+      {label}
+    </label>
+    {type === "select" ? (
+      <select
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="bg-gray-100 rounded-lg py-2 px-3 focus:outline-none border border-gray-200"
+      >
+        <option value="">-- Giới tính --</option>
+        <option value="Nam">Nam</option>
+        <option value="Nữ">Nữ</option>
+        <option value="Khác">Khác</option>
+      </select>
+    ) : type === "textarea" ? (
+      <textarea
+        name={name}
+        value={value}
+        onChange={onChange}
+        rows={2}
+        className="bg-gray-100 rounded-lg py-2 px-3 resize-none focus:outline-none border border-gray-200"
+        placeholder={label}
+      />
+    ) : (
+      <input
+        name={name}
+        value={value}
+        onChange={onChange}
+        className="bg-gray-100 rounded-lg py-2 px-3 focus:outline-none border border-gray-200"
+        placeholder={label}
+      />
+    )}
+  </div>
+);
 
 export default UpdateProfile;
