@@ -44,8 +44,17 @@ const AdminPage = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (!apiUrl) {
+      console.error("❌ Biến môi trường VITE_API_URL chưa được thiết lập.");
+      return;
+    }
+    
+    const url = new URL(apiUrl);
+    const host = url.host; 
+    
     const client = new Client({
-      brokerURL: `ws://localhost:8080/ws?token=${token}`,
+      brokerURL: `ws://${host}/ws?token=${token}`,
       reconnectDelay: 5000,
       debug: (str) => console.log("🐛 [STOMP DEBUG]", str),
       onConnect: () => {
@@ -197,23 +206,25 @@ const AdminPage = () => {
                       }`}>{req.status}</span>
                     </p>
                   </div>
+                  
+                  {/* Thay đổi ở đây: Chỉ hiển thị các nút nếu trạng thái là PENDING */}
+                  {req.status === "PENDING" && (
+                    <div className="flex gap-3 mt-2 md:mt-0">
+                      <button
+                        onClick={() => openModal(req.id, "ACCEPTED", "chấp nhận")}
+                        className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium shadow"
+                      >
+                        ✅ Chấp nhận
+                      </button>
+                      <button
+                        onClick={() => openModal(req.id, "REJECTED", "từ chối")}
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium shadow"
+                      >
+                        ❌ Từ chối
+                      </button>
+                    </div>
+                  )}
 
-                  <div className="flex gap-3 mt-2 md:mt-0">
-                    <button
-                      onClick={() => openModal(req.id, "ACCEPTED", "chấp nhận")}
-                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-medium shadow"
-                      disabled={req.status !== "PENDING"}
-                    >
-                      ✅ Chấp nhận
-                    </button>
-                    <button
-                      onClick={() => openModal(req.id, "REJECTED", "từ chối")}
-                      className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-lg font-medium shadow"
-                      disabled={req.status !== "PENDING"}
-                    >
-                      ❌ Từ chối
-                    </button>
-                  </div>
                 </div>
 
                 {req.status === "ACCEPTED" && (
