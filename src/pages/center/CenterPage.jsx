@@ -52,9 +52,10 @@ const CenterPage = () => {
 
     const url = new URL(apiUrl);
     const host = url.host; 
+    const wsProtocol = window.location.protocol === 'https:' ? 'wss' : 'ws';
 
     const client = new Client({
-      brokerURL: `ws://${host}/ws?token=${token}`,
+      brokerURL: `${wsProtocol}://${host}/ws?token=${token}`,
       reconnectDelay: 5000,
       debug: (str) => console.log("🐛 [STOMP DEBUG]", str),
 
