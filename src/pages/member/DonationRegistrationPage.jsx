@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Calendar from 'react-calendar';
-import axiosClient from '../../api/axiosClient'; // ✅ Đổi từ axios sang axiosClient
+import axiosClient from '../../api/axiosClient';
 import { FaUser, FaVenusMars, FaEnvelope, FaPhone, FaMapMarkerAlt, FaRegCalendarAlt, FaChevronRight } from 'react-icons/fa';
 import { GiHeartPlus } from 'react-icons/gi';
 
@@ -12,12 +12,15 @@ const formatDateToYYYYMMDD = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-const StyledCalendar = ({ onChange, value }) => {
+// ✅ CHỈNH SỬA: Thêm prop `maxDate`
+const StyledCalendar = ({ onChange, value, maxDate }) => {
   return (
     <Calendar
       onChange={onChange}
       value={value}
       minDate={new Date()}
+      // ✅ SỬ DỤNG: Áp dụng ngày tối đa vào lịch
+      maxDate={maxDate} 
       className="border-0"
       tileClassName={({ date, view }) => {
         const base = 'h-12 w-12 flex items-center justify-center rounded-full transition-colors duration-200';
@@ -97,6 +100,10 @@ export default function DonationRegistrationPage() {
 
   const navigate = useNavigate();
 
+  // ✅ THÊM MỚI: Tính toán ngày tối đa có thể đăng ký
+  const maxDonationDate = new Date();
+  maxDonationDate.setDate(maxDonationDate.getDate() + 7);
+
   useEffect(() => {
     const fetchInitialData = async () => {
       const token = localStorage.getItem('token');
@@ -131,8 +138,14 @@ export default function DonationRegistrationPage() {
   }, [navigate]);
 
   const handleDateChange = (date) => {
-    setSelectedDate(date);
-    setError('');
+    // ✅ THÊM MỚI: Kiểm tra lại nếu người dùng có thể chọn ngày vượt quá giới hạn (dù đã disable)
+    if (date > maxDonationDate) {
+      setSelectedDate(null); // Reset nếu chọn ngày không hợp lệ
+      setError('Bạn chỉ có thể đăng ký lịch hẹn trong vòng 7 ngày tới.');
+    } else {
+      setSelectedDate(date);
+      setError('');
+    }
   };
 
   const handleProceedToQuestionnaire = () => {
@@ -198,12 +211,21 @@ export default function DonationRegistrationPage() {
             </div>
 
             <div className="flex-grow">
-              <label className="flex items-center gap-2 block text-md font-semibold mb-4 text-gray-700">
+              <label className="flex items-center gap-2 block text-md font-semibold mb-2 text-gray-700">
                 <FaRegCalendarAlt className="text-red-500" />
                 Ngày bạn có thể đến
               </label>
+              {/* ✅ THÊM MỚI: Dòng chữ thông báo cho người dùng */}
+              <p className="text-xs text-gray-500 mb-3 ml-1 italic">
+                Lưu ý: Bạn chỉ có thể đăng ký lịch hẹn trong vòng 7 ngày tới.
+              </p>
               <div className="flex justify-center">
-                <StyledCalendar onChange={handleDateChange} value={selectedDate} />
+                {/* ✅ CHỈNH SỬA: Truyền prop maxDate vào component lịch */}
+                <StyledCalendar 
+                  onChange={handleDateChange} 
+                  value={selectedDate} 
+                  maxDate={maxDonationDate}
+                />
               </div>
             </div>
 
