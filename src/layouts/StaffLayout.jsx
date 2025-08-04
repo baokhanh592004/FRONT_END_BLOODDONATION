@@ -30,7 +30,7 @@ const StaffLayout = () => {
         <nav className="space-y-2">
           <div className="flex items-center p-2 text-gray-700 rounded-md">
             <FaUser className="mr-3" />
-            <span>Hồ sơ cá nhân</span>
+            <span>Quản Lý Chung</span>
           </div>
           <hr className="my-4" />
 
