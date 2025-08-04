@@ -42,8 +42,18 @@ const StaffPage = () => {
     const token = localStorage.getItem("token");
     if (!token) return;
 
+    // Sửa lại brokerURL để sử dụng biến môi trường VITE_API_URL
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (!apiUrl) {
+      console.error("❌ Biến môi trường VITE_API_URL chưa được thiết lập.");
+      return;
+    }
+
+    const url = new URL(apiUrl);
+    const host = url.host; 
+
     const client = new Client({
-      brokerURL: `ws://localhost:8080/ws?token=${token}`,
+      brokerURL: `ws://${host}/ws?token=${token}`,
       reconnectDelay: 5000,
       debug: (msg) => console.log("🐛 [WS DEBUG]", msg),
       onConnect: () => {
@@ -82,10 +92,10 @@ const StaffPage = () => {
               className="border border-gray-300 p-5 bg-white rounded-lg shadow"
             >
               <p className="font-semibold">🆔 Mã yêu cầu: {req.id}</p>
-               <p className="text-gray-700">
-                      🚨 Loại yêu cầu:{" "}
-                      {typeLabels[req.type] || "Không xác định"}
-                    </p>
+                 <p className="text-gray-700">
+                     🚨 Loại yêu cầu:{" "}
+                     {typeLabels[req.type] || "Không xác định"}
+                   </p>
               <p>📦 Số lượng: {req.quantity} đơn vị</p>
               <p>💉 Nhóm máu: {req.bloodType?.type}</p>
               <p>🔬 Thành phần: {req.componentType?.name}</p>

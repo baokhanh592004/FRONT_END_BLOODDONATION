@@ -14,7 +14,7 @@ const CenterPage = () => {
 
   const [status, setStatus] = useState("");
   const [myRequests, setMyRequests] = useState([]);
-  const clientRef = useRef(null); // ✅ Giữ kết nối WebSocket không bị mất
+  const clientRef = useRef(null); 
   const typeLabels = {
     NORMAL: "Bình thường",
     URGENT: "Khẩn cấp",
@@ -43,8 +43,18 @@ const CenterPage = () => {
       return;
     }
 
+    // Sửa lại brokerURL để sử dụng biến môi trường VITE_API_URL
+    const apiUrl = import.meta.env.VITE_API_URL;
+    if (!apiUrl) {
+      console.error("❌ Biến môi trường VITE_API_URL chưa được thiết lập.");
+      return;
+    }
+
+    const url = new URL(apiUrl);
+    const host = url.host; 
+
     const client = new Client({
-      brokerURL: `ws://localhost:8080/ws?token=${token}`,
+      brokerURL: `ws://${host}/ws?token=${token}`,
       reconnectDelay: 5000,
       debug: (str) => console.log("🐛 [STOMP DEBUG]", str),
 
